@@ -9,11 +9,12 @@
  * @class Kartographer.Box.MapClass
  * @extends L.Map
  */
-module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager ) {
+module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager, LayerDataLoader, controls ) {
 
-	var scale, urlFormat,
-		mapServer = mw.config.get( 'wgKartographerMapServer' ),
-		worldLatLng = new L.LatLngBounds( [ -90, -180 ], [ 90, 180 ] ),
+	// Skip unused variables, some have become unused because of RS Map
+	var scale, /* urlFormat,
+		mapServer = mw.config.get( 'wgKartographerMapServer' ), */
+		worldLatLng = new L.LatLngBounds( [ 0, 0 ], [ 128000, 128000 ] ),
 		KartographerMap,
 		precisionPerZoom = [ 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5 ],
 		inlineDataLayerKey = 'kartographer-inline-data-layer',
@@ -40,6 +41,10 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 	scale = ( scale === 1 ) ? '' : ( '@' + scale + 'x' );
 	urlFormat = '/{z}/{x}/{y}' + scale + '.png';
 
+	// Don't make the map infinite (it is not round anymore)
+	L.CRS.Simple.infinite = false;
+	L.CRS.Simple.projection.bounds = new L.Bounds( [ [ 0, 0 ], [ 128000, 128000 ] ] );
+
 	L.Map.mergeOptions( {
 		sleepTime: 250,
 		wakeTime: 500,
@@ -47,7 +52,12 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		sleepOpacity: 1,
 		// the default zoom applied when `longitude` and `latitude` were
 		// specified, but zoom was not.å
-		fallbackZoom: 13
+		// Change the Map to a flat map for RS
+		fallbackZoom: 1,
+		crs: L.CRS.Simple,
+		maxBounds: [ [ 0, 0 ], [ 128000, 128000 ] ],
+		attributionControl: false,
+		fullscreen: false
 	} );
 
 	L.Popup.mergeOptions( {
@@ -170,6 +180,9 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				map._kartographer_ready = true;
 			} );
 
+			// Add the OSRS Init function
+			this.rsMapInitialize( options, controls );
+
 			/**
 			 * @property {Kartographer.Box.MapClass} [parentMap=null] Reference
 			 *   to the parent map.
@@ -234,13 +247,16 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			 *   tile layer.
 			 * @protected
 			 */
+			/*
+      // RS Map uses it own layer provider inside the MapSelector
 			this.wikimediaLayer = L.tileLayer(
 				mapServer + '/' + style + urlFormat + '?' + $.param( { lang: this.lang } ),
 				{
-					maxZoom: 19,
-					attribution: mw.message( 'kartographer-attribution' ).parse()
+  				maxZoom: 19,
+  				attribution: mw.message( 'kartographer-attribution' ).parse()
 				}
 			).addTo( this );
+      */
 
 			/* Add map controls */
 
@@ -248,13 +264,15 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			 * @property {L.Control.Attribution} attributionControl Reference
 			 *   to attribution control.
 			 */
-			this.attributionControl.setPrefix( '' );
+			// RS Map has it own variation of the attribution constroller
+			// this.attributionControl.setPrefix( '' );
 
 			/**
 			 * @property {Kartographer.Box.ScaleControl} scaleControl Reference
 			 *   to scale control.
-			 */
-			this.scaleControl = new ScaleControl( { position: 'bottomright' } ).addTo( this );
+       */
+			// On RS Map we don't need the scale bar
+			// this.scaleControl = new ScaleControl( { position: 'bottomright' } ).addTo( this );
 
 			if ( options.allowFullScreen ) {
 				// embed maps, and full screen is allowed
@@ -373,6 +391,10 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				center: center,
 				zoom: zoom
 			};
+			// Set the view inside the mapSelector
+			if ( 'mapSelect' in this._controlers ) {
+				this._controlers.mapSelect.setView( center, zoom );
+			}
 			if ( setView ) {
 				this.setView( center, zoom, null, true );
 			}
@@ -843,13 +865,73 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		}
 	} );
 
+	/*
+   * Extend the map with RS changes
+   * Most of this code below is adopted from: https://gitlab.com/weirdgloop/doogle-maps
+   */
+	KartographerMap = KartographerMap.extend( {
+		// Setup map
+		rsMapInitialize: function ( options, controls ) {
+			this._controlers = {};
+			this.config = mw.config.get( 'wgKartographerDataConfig' );
+
+			this.fullscreen = options.fullscreen;
+
+			this.setupControls( controls );
+
+			this.layerDataLoader = new LayerDataLoader();
+			this.layerDataLoader.setControlers( this._controlers );
+			this.layerDataLoader.setConfig( this.config );
+			this.on( 'load', function () {
+				this.layerDataLoader.load();
+				// labels.init();
+				// pathfind.init();
+			} );
+		},
+
+		setupControls: function ( controls ) {
+			var controler;
+			// this._map.fullscreenControl.setPosition('topright');
+			// top left
+
+			// top right
+			if ( this.fullscreen ) {
+				this._controlers.zoom = new controls.CustomZoom();
+				this._controlers.help = new controls.Help();
+				// this._controlers.icons = new controls.Icons();
+				// this._controlers.options = new controls.Options();
+			}
+
+			// bottom left
+			this._controlers.mapSelect = new controls.MapSelect(
+				{ visible: !this.fullscreen } );
+
+			// bottom right
+			this._controlers.attribution = L.control.attribution(
+				{ prefix: this.config.attribution } );
+			if ( this.fullscreen ) {
+				this._controlers.planes = new controls.Plane();
+			}
+
+			// add controlers to map
+			for ( controler in this._controlers ) {
+				this._controlers[ controler ].addTo( this );
+			}
+
+			// add class to bottom-right to make vertical
+			this._container.querySelector( '.leaflet-control-container > .leaflet-bottom.leaflet-right' ).className += ' vertical';
+		}
+	} );
+
 	return KartographerMap;
 }(
 	mediaWiki,
 	module.OpenFullScreenControl,
 	module.dataLayerOpts,
 	module.ScaleControl,
-	module.Data
+	module.Data,
+	require( 'ext.kartographer.layers' ).LayerDataLoader,
+	require( 'ext.kartographer.controls' )
 ) );
 
 module.map = ( function ( KartographerMap ) {
