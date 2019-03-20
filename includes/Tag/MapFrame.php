@@ -148,8 +148,25 @@ class MapFrame extends TagHandler {
 					$staticLat = $this->lat;
 					$staticLon = $this->lon;
 				} else {
-					$staticLat = 30;
-					$staticLon = 0;
+					// For RS, default is Lumbridge
+					$staticLat = 3200;
+					$staticLon = 3200;
+				}
+
+				// RS attributes
+				if ( $this->mapid !== null ) {
+					$staticMapID = $this->mapid;
+					$attrs['data-mapid'] = $this->mapid;
+				} else {
+					$staticMapID = 0;
+				}
+
+				// RS attributes
+				if ( $this->plane !== null ) {
+					$staticPlane = $this->plane;
+					$attrs['data-plane'] = $this->plane;
+				} else {
+					$staticPlane = 0;
 				}
 
 				if ( $this->showGroups ) {
@@ -171,8 +188,9 @@ class MapFrame extends TagHandler {
 		$params = [
 			'lang' => $this->langCode,
 		];
-		$bgUrl = "{$wgKartographerMapServer}/img/{$this->mapStyle},{$staticZoom},{$staticLat}," .
-			"{$staticLon},{$staticWidth}x{$this->height}.png";
+		// This will not work correctly for RS Map as this is we don't use a dynamic map tile creator server
+		$bgUrl = "{$wgKartographerMapServer}/{$staticMapID}/{$staticZoom}/{$staticPlane}_{$staticLat}_" .
+			"{$staticLon}.png";
 		if ( $this->showGroups ) {
 			$params += [
 				'domain' => $wgServerName,

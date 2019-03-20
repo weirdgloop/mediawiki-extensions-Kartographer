@@ -18,6 +18,11 @@ L.Control.extend({
     L.setOptions(this, options);
     this._map = null;
     this._plane = this.options.planeMin || 0;
+    if('visible' in options){
+      this._visible = options.visible;
+    }else{
+      this._visible = true;
+    }
   },
 
   onAdd: function(map) {
@@ -31,9 +36,11 @@ L.Control.extend({
     let listenerDown = () => this.setPlane(this._plane - 1);
     let listenerLabel = () => this.setPlane(this.options.planeMin || 0); // Reset plane
 
-    this._buttonUp = this._createButton(this, '+', 'Move up', containerName + '-up ' + (this._plane + 1 > this.options.planeMax ? className : ''), container, listenerUp);
-    this._buttonPlane = this._createButton(this, this._plane, 'Current plane', containerName + '-plane', container, listenerLabel);
-    this._buttonDown = this._createButton(this, '-', 'Move down', containerName + '-down ' + (this._plane - 1 < this.options.planeMin ? className : ''), container, listenerDown);
+    if(this._visible){
+      this._buttonUp = this._createButton(this, '+', 'Move up', containerName + '-up ' + (this._plane + 1 > this.options.planeMax ? className : ''), container, listenerUp);
+      this._buttonPlane = this._createButton(this, this._plane, 'Current plane', containerName + '-plane', container, listenerLabel);
+      this._buttonDown = this._createButton(this, '-', 'Move down', containerName + '-down ' + (this._plane - 1 < this.options.planeMin ? className : ''), container, listenerDown);
+    }
 
     map.on('planechange', this._planeChange, this);
 
@@ -43,17 +50,19 @@ L.Control.extend({
   _planeChange: function(e) {
     let className = 'leaflet-disabled';
 
-    this._buttonPlane.textContent = e.plane;
+    if(this._visible){
+      this._buttonPlane.textContent = e.plane;
 
-    // Disable buttons
-    L.DomUtil.removeClass(this._buttonUp, className);
-    L.DomUtil.removeClass(this._buttonDown, className);
+      // Disable buttons
+      L.DomUtil.removeClass(this._buttonUp, className);
+      L.DomUtil.removeClass(this._buttonDown, className);
 
-    if(this._plane - 1 < this.options.planeMin){
-      L.DomUtil.addClass(this._buttonDown, className);
-    }
-    if(this._plane + 1 > this.options.planeMax){
-      L.DomUtil.addClass(this._buttonUp, className);
+      if(this._plane - 1 < this.options.planeMin){
+        L.DomUtil.addClass(this._buttonDown, className);
+      }
+      if(this._plane + 1 > this.options.planeMax){
+        L.DomUtil.addClass(this._buttonUp, className);
+      }
     }
   },
 

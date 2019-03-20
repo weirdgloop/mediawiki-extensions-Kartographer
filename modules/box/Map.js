@@ -39,7 +39,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 	scale = bracketDevicePixelRatio();
 	scale = ( scale === 1 ) ? '' : ( '@' + scale + 'x' );
-	urlFormat = '/{z}/{x}/{y}' + scale + '.png';
+	// urlFormat = '/{z}/{x}/{y}' + scale + '.png';
 
 	// Don't make the map infinite (it is not round anymore)
 	L.CRS.Simple.infinite = false;
@@ -149,6 +149,13 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				style = options.style || mw.config.get( 'wgKartographerDfltStyle' ) || 'osm-intl',
 				map = this;
 
+      // Set properties from arguments
+      if ( options.mapID === 'auto' ) {
+        options.mapID = 0;
+      }
+			if ( options.plane === 'auto' ) {
+				options.plane = 0;
+			}
 			if ( options.center === 'auto' ) {
 				options.center = undefined;
 			}
@@ -308,7 +315,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			}
 
 			function ready() {
-				map.initView( options.center, options.zoom );
+				map.initView( options.mapID, options.plane, options.center, options.zoom );
 				map.fire(
 					/**
 					 * @event
@@ -375,7 +382,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @param {boolean} [setView=true]
 		 * @chainable
 		 */
-		initView: function ( center, zoom, setView ) {
+		initView: function ( mapID, plane, center, zoom, setView ) {
 			setView = setView !== false;
 
 			if ( Array.isArray( center ) ) {
@@ -388,12 +395,15 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 			zoom = isNaN( zoom ) ? undefined : zoom;
 			this._initialPosition = {
+        mapID: mapID,
+        plane: plane,
 				center: center,
 				zoom: zoom
 			};
 			// Set the view inside the mapSelector
 			if ( 'mapSelect' in this._controlers ) {
-				this._controlers.mapSelect.setView( center, zoom );
+				this._controlers.mapSelect.setView( mapID, plane, center, zoom );
+				this._controlers.plane.setPlane( plane );
 			}
 			if ( setView ) {
 				this.setView( center, zoom, null, true );
@@ -520,6 +530,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				} else {
 					map = this.fullScreenMap = new KartographerMap( {
 						container: L.DomUtil.create( 'div', 'mw-kartographer-mapDialog-map' ),
+            mapID: position.mapID,
+            plane: position.plane,
 						center: position.center,
 						zoom: position.zoom,
 						lang: this.lang,
@@ -531,6 +543,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 					} );
 					// resets the right initial position silently afterwards.
 					map.initView(
+            this._initialPosition.mapID,
+            this._initialPosition.plane,
 						this._initialPosition.center,
 						this._initialPosition.zoom,
 						false
@@ -578,7 +592,9 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @return {number} return.zoom
 		 */
 		getMapPosition: function ( options ) {
-			var center = this.getCenter().wrap(),
+			var mapID = this.getMapID(),
+        plane = this.getPlane(),
+        center = this.getCenter().wrap(),
 				zoom = this.getZoom();
 
 			options = options || {};
@@ -587,6 +603,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				center = L.latLng( this.getScaleLatLng( center.lat, center.lng, zoom ) );
 			}
 			return {
+        mapID: mapID,
+        plane: plane,
 				center: center,
 				zoom: zoom
 			};
@@ -686,10 +704,12 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 				if ( save ) {
 					// Updates map data.
-					this.initView( this.getCenter(), this.getZoom(), false );
+					this.initView( this.getMapID(), this.getPlane(), this.getCenter(), this.getZoom(), false );
 					// Updates container's data attributes to avoid `NaN` errors
 					if ( !this.fullscreen ) {
 						this.$container.closest( '.mw-kartographer-interactive' ).data( {
+              mapID: this.getMapID(),
+              plane: this.getPlane(),
 							zoom: this.getZoom(),
 							longitude: this.getCenter().lng,
 							latitude: this.getCenter().lat
@@ -717,6 +737,14 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				lng.toFixed( precisionPerZoom[ zoom ] )
 			];
 		},
+
+    getMapID: function(){
+      return this._mapID;
+    },
+
+    getPlane: function(){
+      return this._plane;
+    },
 
 		/**
 		 * @localdoc Extended to also destroy the {@link #fullScreenMap} when
@@ -904,14 +932,13 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 			// bottom left
 			this._controlers.mapSelect = new controls.MapSelect(
-				{ visible: !this.fullscreen } );
+				{ visible: true } );
 
 			// bottom right
 			this._controlers.attribution = L.control.attribution(
 				{ prefix: this.config.attribution } );
-			if ( this.fullscreen ) {
-				this._controlers.planes = new controls.Plane();
-			}
+			this._controlers.plane = new controls.Plane(
+        { visible: true });
 
 			// add controlers to map
 			for ( controler in this._controlers ) {

@@ -45,8 +45,16 @@ class MapLink extends TagHandler {
 		if ( $this->lat !== null && $this->lon !== null ) {
 			$attrs['data-lat'] = $this->lat;
 			$attrs['data-lon'] = $this->lon;
-
 		}
+		// RS attributes
+		if ( $this->mapid !== null ) {
+			$attrs['data-mapid'] = $this->mapid;
+		}
+		// RS attributes
+		if ( $this->plane !== null ) {
+			$attrs['data-plane'] = $this->plane;
+		}
+
 		$style = $this->extractMarkerCss();
 		if ( $style ) {
 			$attrs['class'] .= ' mw-kartographer-autostyled';

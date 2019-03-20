@@ -21,6 +21,8 @@ L.Control.extend({
     this._baseMaps = {};
     this._overlayMaps = {};
     this._visibleOverlayMaps = [];
+    this._mapID = 0;
+    this._plane = 0;
     this._location = null;
     this._zoom = 2;
     this._selectedPlane = 0;
@@ -32,7 +34,7 @@ L.Control.extend({
       this._visible = true;
     }
     if('baseMaps' in options){
-      this._loadMapID(0);
+      this._loadMapID(this._mapID, this._plane);
     }
     this._map = null;
   },
@@ -48,15 +50,33 @@ L.Control.extend({
     this._selectedMapID = null;
     this._resetSelect();
 
-    this._loadMapID(0);
+    this._loadMapID(this._mapID, this._plane);
+    this._changeSelectedOption(this._mapID);
+  },
+
+  _changeSelectedOption: function(mapID){
+    if(!this._visible){
+      return;
+    }
+    var options = this._optionsSelect.options;
+    var option;
+    for (var i = 0; i < options.length; i++) {
+      option = options[i];
+      if (option.value === mapID.toString()) {
+        options.selectedIndex = i;
+        break;
+      }
+    }
   },
 
   setOverlayMaps: function(overlayMaps){
     this._overlayMaps = overlayMaps;
-    this._loadMapID(0);
+    this._loadMapID(this._mapID, this._plane);
   },
 
-  setView: function(loc, zoom){
+  setView: function(mapID, plane, loc, zoom){
+    this._mapID = mapID;
+    this._plane = plane;
     this._location = [ loc.lat, loc.lng ];
     this._zoom = zoom;
   },
@@ -95,7 +115,7 @@ L.Control.extend({
     }
   },
 
-  _loadMapID: function(mapId){
+  _loadMapID: function(mapId, plane){
     if(!(mapId in this._baseMaps)){
       console.error('Selected MapID does not exists: ', mapId);
       return;
@@ -118,6 +138,7 @@ L.Control.extend({
   },
 
   _loadPlane: function(plane){
+    this._map._plane = Number(plane);
     this._selectedPlane = Number(plane);
     this._loadOverlays();
   },
@@ -146,6 +167,7 @@ L.Control.extend({
       // reset location so map moves to new positions.
       this._location = null;
     }
+    this._map._mapID = this._selectedMapID;
   },
 
   _loadOverlays: function(){
@@ -173,7 +195,7 @@ L.Control.extend({
   },
 
   _mapChange: function(event){
-    this._loadMapID(Number(event.target.value));
+    this._loadMapID(Number(event.target.value), this._selectedPlane);
     this._map.fire('mapIDChanged', {
       previous: this._selectedZoom,
       plane: Number(event.target.value),
