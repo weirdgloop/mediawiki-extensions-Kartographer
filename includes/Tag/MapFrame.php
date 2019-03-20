@@ -149,6 +149,8 @@ class MapFrame extends TagHandler {
 					$staticLon = $this->lon;
 				} else {
 					// For RS, default is Lumbridge
+					$attrs['data-lat'] = 3200;
+					$attrs['data-lon'] = 3200;
 					$staticLat = 3200;
 					$staticLon = 3200;
 				}

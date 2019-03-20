@@ -159,8 +159,8 @@ abstract class TagHandler {
 		$this->plane = $this->getInt( 'plane', 0 );
 
 		// For RS coordinates are changed to Int
-		$this->lat = $this->getInt( 'latitude', null );
-		$this->lon = $this->getInt( 'longitude', null );
+		$this->lat = $this->getInt( 'y', null );
+		$this->lon = $this->getInt( 'x', null );
 		if ( ( $this->lat === null ) ^ ( $this->lon === null ) ) {
 			$this->status->fatal( 'kartographer-error-latlon' );
 		}
