@@ -16,6 +16,7 @@ module.LayerDataLoader = (function(BaseLayerBuilder, IconLayerBuilder, IconProvi
       this.dataProviders = {};
       this.baseMaps = {};
       this.overlayMaps = {};
+      this.addedOverlayMapsGeoJson = [];
       this.iconStore = null;
       this.loader = null;
       this.controlers = controlers;
@@ -28,6 +29,10 @@ module.LayerDataLoader = (function(BaseLayerBuilder, IconLayerBuilder, IconProvi
 
     setControlers(controlers){
       this.controlers = controlers;
+    }
+
+    setAddedOverlayMaps(addedOverlayMaps){
+      this.addedOverlayMapsGeoJson = addedOverlayMaps;
     }
 
     async load(){
@@ -98,6 +103,17 @@ module.LayerDataLoader = (function(BaseLayerBuilder, IconLayerBuilder, IconProvi
         data.overlayMaps[i].layerBuilder = this.loadOverlayLayer(data.overlayMaps[i]);
         this.overlayMaps[data.overlayMaps[i].id] = data.overlayMaps[i];
       }
+      // load addedOverlayMaps
+      for(let i in this.addedOverlayMapsGeoJson){
+        this.overlayMaps[i+'-added'] = {
+          id: i+'-added',
+          name: 'Inline content',
+          dataSource: 'Inline',
+          parentLayer: 'icons',
+          displayOnLoad: true,
+          layerBuilder: this.loadOverlayLayerFromData(this.addedOverlayMapsGeoJson[i][0], false),
+        };
+      }
       // Add layers to controler (menu)
       this.controlers.mapSelect.setOverlayMaps(this.overlayMaps);
     }
@@ -111,6 +127,13 @@ module.LayerDataLoader = (function(BaseLayerBuilder, IconLayerBuilder, IconProvi
     loadOverlayLayer(layerData){
       var lb = new IconLayerBuilder(this.iconStore, layerData.dataSource);
       lb.loadLayer();
+      return lb;
+    }
+
+    loadOverlayLayerFromData(data, drawOnCanvas = true){
+      var lb = new IconLayerBuilder(this.iconStore, 'inline');
+      lb.loadLayerFromData(data);
+      lb.setDrawOnCanvas(drawOnCanvas);
       return lb;
     }
   };

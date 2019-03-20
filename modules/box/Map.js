@@ -57,13 +57,13 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		crs: L.CRS.Simple,
 		maxBounds: [ [ 0, 0 ], [ 128000, 128000 ] ],
 		attributionControl: false,
-		fullscreen: false
+		fullscreen: false,
 	} );
 
 	L.Popup.mergeOptions( {
 		minWidth: 160,
 		maxWidth: 300,
-		autoPanPadding: [ 12, 12 ]
+		autoPanPadding: [ 12, 12 ],
 	} );
 
 	/* eslint-disable no-underscore-dangle */
@@ -170,7 +170,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				// setView now. setView is called later when the data is
 				// loaded.
 				center: undefined,
-				zoom: undefined
+				zoom: undefined,
 			} );
 
 			L.Map.prototype.initialize.call( this, options.container, args );
@@ -289,7 +289,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 					mw.track( 'mediawiki.kartographer', {
 						action: 'open',
 						isFullScreen: true,
-						feature: map
+						feature: map,
 					} );
 					map.openFullScreen();
 				} );
@@ -326,15 +326,20 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				mw.track( 'mediawiki.kartographer', {
 					action: 'initialize',
 					isFullScreen: !!map.options.fullscreen,
-					feature: map
+					feature: map,
 				} );
 			}
 
 			if ( this.parentMap ) {
+        // Add addedOverlayMaps from parent (on page version) to fullscreen map
+        this._addedOverlayMaps = this.parentMap._addedOverlayMaps;
+        /*
+        // Not needed because of RS addedOverlay capture
 				$.each( this.parentMap.dataLayers, function ( groupId, layer ) {
 					var newLayer = map.addGeoJSONLayer( groupId, layer.getGeoJSON(), layer.options );
 					newLayer.dataGroup = layer.group;
 				} );
+        */
 				ready();
 				return;
 			}
@@ -377,12 +382,14 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * Sets the initial center and zoom of the map, and optionally calls
 		 * {@link #setView} to reposition the map.
 		 *
+		 * @param {number} [mapID]
+		 * @param {number} [plane]
 		 * @param {L.LatLng|number[]} [center]
 		 * @param {number} [zoom]
 		 * @param {boolean} [setView=true]
 		 * @chainable
 		 */
-		initView: function ( mapID, plane, center, zoom, setView ) {
+		initView: function( mapID, plane, center, zoom, setView ) {
 			setView = setView !== false;
 
 			if ( Array.isArray( center ) ) {
@@ -398,7 +405,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
         mapID: mapID,
         plane: plane,
 				center: center,
-				zoom: zoom
+				zoom: zoom,
 			};
 			// Set the view inside the mapSelector
 			if ( 'mapSelect' in this._controlers ) {
@@ -419,6 +426,9 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @param {string[]} dataGroups
 		 * @return {jQuery.Promise}
 		 */
+    /*
+    // This function is overwritten with a RS function below
+    // this is for capturing inline GeoJSON for passing it to the LayerDataLoader
 		addDataGroups: function ( dataGroups ) {
 			var map = this;
 
@@ -444,6 +454,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				} );
 			} );
 		},
+    */
 
 		/**
 		 * Creates a new GeoJSON layer and adds it to the map.
@@ -452,6 +463,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @param {Object} [options] Layer options
 		 * @return {jQuery.Promise} Promise which resolves when the layer has been added
 		 */
+    /*
+    // This function is never used in RS version
 		addDataLayer: function ( groupData, options ) {
 			var map = this;
 			options = options || {};
@@ -460,7 +473,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				$.each( dataGroups, function ( key, group ) {
 					var groupId = inlineDataLayerKey + inlineDataLayerId++,
 						layerOptions = {
-							attribution: group.attribution || options.attribution
+							attribution: group.attribution || options.attribution,
 						},
 						layer;
 					if ( group.isExternal ) {
@@ -475,6 +488,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				} );
 			} );
 		},
+    */
 
 		/**
 		 * Creates a new GeoJSON layer and adds it to the map.
@@ -485,6 +499,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @param {Object} [options] Layer options
 		 * @return {L.mapbox.FeatureLayer} Added layer
 		 */
+    /*
+    // This function is never used in RS version
 		addGeoJSONLayer: function ( groupName, geoJson, options ) {
 			var layer;
 			try {
@@ -499,6 +515,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				mw.log( e );
 			}
 		},
+    */
 
 		/**
 		 * Opens the map in a full screen dialog.
@@ -539,7 +556,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 						fullscreen: true,
 						captionText: this.captionText,
 						fullScreenRoute: this.fullScreenRoute,
-						parentMap: this
+						parentMap: this,
 					} );
 					// resets the right initial position silently afterwards.
 					map.initView(
@@ -712,7 +729,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
               plane: this.getPlane(),
 							zoom: this.getZoom(),
 							longitude: this.getCenter().lng,
-							latitude: this.getCenter().lat
+							latitude: this.getCenter().lat,
 						} );
 					}
 				}
@@ -734,7 +751,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 			return [
 				lat.toFixed( precisionPerZoom[ zoom ] ),
-				lng.toFixed( precisionPerZoom[ zoom ] )
+				lng.toFixed( precisionPerZoom[ zoom ] ),
 			];
 		},
 
@@ -765,7 +782,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				mw.track( 'mediawiki.kartographer', {
 					action: 'close',
 					isFullScreen: true,
-					feature: parent
+					feature: parent,
 				} );
 				parent.clicked = false;
 			}
@@ -890,7 +907,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			}
 			this.$container.toggleClass( 'mw-kartographer-static', staticMap );
 			return this;
-		}
+		},
 	} );
 
 	/*
@@ -901,6 +918,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		// Setup map
 		rsMapInitialize: function ( options, controls ) {
 			this._controlers = {};
+      this._addedOverlayMaps = [];
 			this.config = mw.config.get( 'wgKartographerDataConfig' );
 
 			this.fullscreen = options.fullscreen;
@@ -910,12 +928,35 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			this.layerDataLoader = new LayerDataLoader();
 			this.layerDataLoader.setControlers( this._controlers );
 			this.layerDataLoader.setConfig( this.config );
-			this.on( 'load', function () {
+			this.on( 'load', async function() {
+        this.layerDataLoader.setAddedOverlayMaps(this._addedOverlayMaps);
 				this.layerDataLoader.load();
 				// labels.init();
 				// pathfind.init();
 			} );
 		},
+
+    /*
+     * Overwrite the addDataGroups function to intercept geojson data
+     * using the LayerDataLoader
+     */
+    addDataGroups: function ( dataGroups ) {
+      var map = this;
+
+      if ( !dataGroups || !dataGroups.length ) {
+        return $.Deferred().resolve().promise();
+      }
+
+      return DataManager.loadGroups( dataGroups ).then( function ( dataGroups ) {
+        $.each( dataGroups, function ( key, group ) {
+          if ( !$.isEmptyObject( group.getGeoJSON() ) ) {
+            map._addedOverlayMaps.push(group.getGeoJSON());
+          } else {
+            mw.log.warn( 'Layer not found or contains no data: "' + group.id + '"' );
+          }
+        } );
+      } );
+    },
 
 		setupControls: function ( controls ) {
 			var controler;
@@ -932,13 +973,13 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 			// bottom left
 			this._controlers.mapSelect = new controls.MapSelect(
-				{ visible: true } );
+				{ visible: this.fullscreen } );
 
 			// bottom right
 			this._controlers.attribution = L.control.attribution(
 				{ prefix: this.config.attribution } );
 			this._controlers.plane = new controls.Plane(
-        { visible: true });
+        { visible: this.fullscreen });
 
 			// add controlers to map
 			for ( controler in this._controlers ) {

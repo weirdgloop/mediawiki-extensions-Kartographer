@@ -178,7 +178,7 @@ L.Control.extend({
     this._visibleOverlayMaps.length = 0;
     for(let i in this._overlayMaps){
       if(this._overlayMaps[i].displayOnLoad){
-        // console.log("added Layer: ",  this._overlayMaps[i]);
+        // console.log('added Layer: ', this._overlayMaps[i]);
         // Load overlay async and non blocking
         this._addOverlayMap(this._overlayMaps[i]);
       }

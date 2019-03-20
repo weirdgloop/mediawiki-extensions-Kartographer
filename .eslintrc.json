@@ -31,12 +31,10 @@
       "warn",
       "always-multiline"
     ],
-		"space-before-function-paren": ["warn", "never"],
+		"space-before-function-paren": ["off", "never"],
 		"space-in-parens": ["off", "always"],
 		"space-before-blocks": ["off", "always"],
-    "no-unused-vars": [
-      "warn"
-    ],
+    "no-unused-vars": ["warn"],
 		"no-underscore-dangle": ["off"],
 		"vars-on-top": ["off"],
 		"one-var": ["off"],

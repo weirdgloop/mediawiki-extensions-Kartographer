@@ -20,6 +20,7 @@ module.IconLayerBuilder = (function(){
       this.layerData = null;
       this.dataLoader = null;
       this.canvasLayer = null;
+      this.drawOnCanvas = true;
     }
 
     async loadLayer(){
@@ -34,6 +35,16 @@ module.IconLayerBuilder = (function(){
       return this.dataLoader;
     }
 
+    setDrawOnCanvas(drawOnCanvas){
+      this.drawOnCanvas = drawOnCanvas;
+    }
+
+    loadLayerFromData(data){
+      this.layerData = data;
+      this.canvasLayer = new L.CanvasLayer();
+      return null;
+    }
+
     createLayer(mapID, plane, zoom){
       let layer = L.layerGroup();
       let visLayer = L.visibilityLayer({ visible: true });
@@ -43,8 +54,8 @@ module.IconLayerBuilder = (function(){
         pointToLayer: function (feature, latlng) {
           // return L.circleMarker(latlng, geojsonMarkerOptions);
 
-          // var icon = layerBuilder.addIcon(latlng, feature.properties);
-          // return icon;
+          var icon = layerBuilder.addIcon(latlng, feature.properties);
+          return icon;
         },
 
         filter: function (geoJsonFeature) {
@@ -81,7 +92,8 @@ module.IconLayerBuilder = (function(){
           }
 
           // Do not draw points, these are drawn on canvas
-          if(geoJsonFeature.geometry.type === 'Point'){
+          if(geoJsonFeature.geometry.type === 'Point' &&
+              layerBuilder.drawOnCanvas){
             // Add to canvas
             layerBuilder._addToCanvasLayer(visLayer, geoJsonFeature);
             return false;
@@ -136,6 +148,17 @@ module.IconLayerBuilder = (function(){
       }
 
       var marker = new L.Marker(latlng, { icon: icon });
+      // Popup
+      if(!this.drawOnCanvas && ('title' in icondata || 'description' in icondata)){
+        var popuphtml = '';
+        if('title' in icondata){
+          popuphtml += '<div class="marker-title">' + icondata.title + '</div>';
+        }
+        if('description' in icondata){
+          popuphtml += '<div class="marker-description">' + icondata.description + '</div>';
+        }
+        marker.bindPopup(popuphtml);
+      }
       return marker;
     }
   };
