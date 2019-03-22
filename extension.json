@@ -548,11 +548,12 @@
 		"KartographerEnableMapFrame": true,
 		"KartographerDataConfig": {
 		  "basePathURL": "https://chisel.weirdgloop.org/",
-		  "baseTileURL": "http://127.0.0.1/RSMap/",
-		  "baseTileURL2": "https://osrsmap.ralphbisschops.com/",
+			"baseTileURL": "https://osrsmap.ralphbisschops.com/",
+		  "baseTileURL2": "http://127.0.0.1/RSMap/",
 		  "tileURLFormat": "maps/{mapID}/{z}/{p}_{x}_{-y}.png",
 		  "attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
-		  "dataloaderFile": "http://127.0.0.1/RSMap/data/dataloader.json",
+		  "dataloaderFile": "https://osrsmap.ralphbisschops.com/data/dataloader.json",
+			"dataloaderFile2": "http://127.0.0.1/RSMap/data/dataloader.json",
 		  "wikiImageURL": "https://oldschool.runescape.wiki/images/"
 		}
 	},

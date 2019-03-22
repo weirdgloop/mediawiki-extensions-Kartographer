@@ -1,6 +1,6 @@
 // import MapTileLayer from '../components/mapTileLayer';
 /**
- * Creates an BaseLayer for the map
+ * Creates a BaseLayer for the map
  *
  */
 module.BaseLayerBuilder = (function(MapTileLayer){
