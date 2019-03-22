@@ -154,8 +154,13 @@ abstract class TagHandler {
 	protected function parseArgs() {
 		global $wgKartographerStyles, $wgKartographerDfltStyle;
 
-		$this->lat = $this->getFloat( 'latitude', null );
-		$this->lon = $this->getFloat( 'longitude', null );
+		// RS attributes
+		$this->mapid = $this->getInt( 'mapid', 0 );
+		$this->plane = $this->getInt( 'plane', 0 );
+
+		// For RS coordinates are changed to Int
+		$this->lat = $this->getInt( 'y', null );
+		$this->lon = $this->getInt( 'x', null );
 		if ( ( $this->lat === null ) ^ ( $this->lon === null ) ) {
 			$this->status->fatal( 'kartographer-error-latlon' );
 		}

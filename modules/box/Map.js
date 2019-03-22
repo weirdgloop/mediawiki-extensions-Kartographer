@@ -9,11 +9,12 @@
  * @class Kartographer.Box.MapClass
  * @extends L.Map
  */
-module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager ) {
+module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager, LayerDataLoader, controls ) {
 
-	var scale, urlFormat,
-		mapServer = mw.config.get( 'wgKartographerMapServer' ),
-		worldLatLng = new L.LatLngBounds( [ -90, -180 ], [ 90, 180 ] ),
+	// Skip unused variables, some have become unused because of RS Map
+	var scale, /* urlFormat,
+		mapServer = mw.config.get( 'wgKartographerMapServer' ), */
+		worldLatLng = new L.LatLngBounds( [ 0, 0 ], [ 128000, 128000 ] ),
 		KartographerMap,
 		precisionPerZoom = [ 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5 ],
 		inlineDataLayerKey = 'kartographer-inline-data-layer',
@@ -38,7 +39,11 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 	scale = bracketDevicePixelRatio();
 	scale = ( scale === 1 ) ? '' : ( '@' + scale + 'x' );
-	urlFormat = '/{z}/{x}/{y}' + scale + '.png';
+	// urlFormat = '/{z}/{x}/{y}' + scale + '.png';
+
+	// Don't make the map infinite (it is not round anymore)
+	L.CRS.Simple.infinite = false;
+	L.CRS.Simple.projection.bounds = new L.Bounds( [ [ 0, 0 ], [ 128000, 128000 ] ] );
 
 	L.Map.mergeOptions( {
 		sleepTime: 250,
@@ -47,13 +52,19 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		sleepOpacity: 1,
 		// the default zoom applied when `longitude` and `latitude` were
 		// specified, but zoom was not.å
-		fallbackZoom: 13
+		// Change the Map to a flat map for RS
+		fallbackZoom: 1,
+		crs: L.CRS.Simple,
+		maxBounds: [ [ 0, 0 ], [ 128000, 128000 ] ],
+		attributionControl: false,
+		fullscreen: false,
+    zoomControl: false, // Replace default zoom controls with our own
 	} );
 
 	L.Popup.mergeOptions( {
 		minWidth: 160,
 		maxWidth: 300,
-		autoPanPadding: [ 12, 12 ]
+		autoPanPadding: [ 12, 12 ],
 	} );
 
 	/* eslint-disable no-underscore-dangle */
@@ -139,6 +150,13 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				style = options.style || mw.config.get( 'wgKartographerDfltStyle' ) || 'osm-intl',
 				map = this;
 
+      // Set properties from arguments
+      if ( options.mapID === 'auto' ) {
+        options.mapID = 0;
+      }
+			if ( options.plane === 'auto' ) {
+				options.plane = 0;
+			}
 			if ( options.center === 'auto' ) {
 				options.center = undefined;
 			}
@@ -153,7 +171,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				// setView now. setView is called later when the data is
 				// loaded.
 				center: undefined,
-				zoom: undefined
+				zoom: undefined,
 			} );
 
 			L.Map.prototype.initialize.call( this, options.container, args );
@@ -169,6 +187,9 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				// eslint-disable-next-line camelcase
 				map._kartographer_ready = true;
 			} );
+
+			// Add the OSRS Init function
+			this.rsMapInitialize( options, controls );
 
 			/**
 			 * @property {Kartographer.Box.MapClass} [parentMap=null] Reference
@@ -234,13 +255,16 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			 *   tile layer.
 			 * @protected
 			 */
+			/*
+      // RS Map uses it own layer provider inside the MapSelector
 			this.wikimediaLayer = L.tileLayer(
 				mapServer + '/' + style + urlFormat + '?' + $.param( { lang: this.lang } ),
 				{
-					maxZoom: 19,
-					attribution: mw.message( 'kartographer-attribution' ).parse()
+  				maxZoom: 19,
+  				attribution: mw.message( 'kartographer-attribution' ).parse()
 				}
 			).addTo( this );
+      */
 
 			/* Add map controls */
 
@@ -248,13 +272,15 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			 * @property {L.Control.Attribution} attributionControl Reference
 			 *   to attribution control.
 			 */
-			this.attributionControl.setPrefix( '' );
+			// RS Map has it own variation of the attribution constroller
+			// this.attributionControl.setPrefix( '' );
 
 			/**
 			 * @property {Kartographer.Box.ScaleControl} scaleControl Reference
 			 *   to scale control.
-			 */
-			this.scaleControl = new ScaleControl( { position: 'bottomright' } ).addTo( this );
+       */
+			// On RS Map we don't need the scale bar
+			// this.scaleControl = new ScaleControl( { position: 'bottomright' } ).addTo( this );
 
 			if ( options.allowFullScreen ) {
 				// embed maps, and full screen is allowed
@@ -264,7 +290,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 					mw.track( 'mediawiki.kartographer', {
 						action: 'open',
 						isFullScreen: true,
-						feature: map
+						feature: map,
 					} );
 					map.openFullScreen();
 				} );
@@ -290,7 +316,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			}
 
 			function ready() {
-				map.initView( options.center, options.zoom );
+				map.initView( options.mapID, options.plane, options.center, options.zoom );
 				map.fire(
 					/**
 					 * @event
@@ -301,15 +327,20 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				mw.track( 'mediawiki.kartographer', {
 					action: 'initialize',
 					isFullScreen: !!map.options.fullscreen,
-					feature: map
+					feature: map,
 				} );
 			}
 
 			if ( this.parentMap ) {
+        // Add addedOverlayMaps from parent (on page version) to fullscreen map
+        this._addedOverlayMaps = this.parentMap._addedOverlayMaps;
+        /*
+        // Not needed because of RS addedOverlay capture
 				$.each( this.parentMap.dataLayers, function ( groupId, layer ) {
 					var newLayer = map.addGeoJSONLayer( groupId, layer.getGeoJSON(), layer.options );
 					newLayer.dataGroup = layer.group;
 				} );
+        */
 				ready();
 				return;
 			}
@@ -352,12 +383,14 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * Sets the initial center and zoom of the map, and optionally calls
 		 * {@link #setView} to reposition the map.
 		 *
+		 * @param {number} [mapID]
+		 * @param {number} [plane]
 		 * @param {L.LatLng|number[]} [center]
 		 * @param {number} [zoom]
 		 * @param {boolean} [setView=true]
 		 * @chainable
 		 */
-		initView: function ( center, zoom, setView ) {
+		initView: function( mapID, plane, center, zoom, setView ) {
 			setView = setView !== false;
 
 			if ( Array.isArray( center ) ) {
@@ -370,9 +403,16 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 			zoom = isNaN( zoom ) ? undefined : zoom;
 			this._initialPosition = {
+        mapID: mapID,
+        plane: plane,
 				center: center,
-				zoom: zoom
+				zoom: zoom,
 			};
+			// Set the view inside the mapSelector
+			if ( 'mapSelect' in this._controlers ) {
+				this._controlers.mapSelect.setView( mapID, plane, center, zoom );
+				this._controlers.plane.setPlane( plane );
+			}
 			if ( setView ) {
 				this.setView( center, zoom, null, true );
 			}
@@ -387,6 +427,9 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @param {string[]} dataGroups
 		 * @return {jQuery.Promise}
 		 */
+    /*
+    // This function is overwritten with a RS function below
+    // this is for capturing inline GeoJSON for passing it to the LayerDataLoader
 		addDataGroups: function ( dataGroups ) {
 			var map = this;
 
@@ -412,6 +455,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				} );
 			} );
 		},
+    */
 
 		/**
 		 * Creates a new GeoJSON layer and adds it to the map.
@@ -420,6 +464,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @param {Object} [options] Layer options
 		 * @return {jQuery.Promise} Promise which resolves when the layer has been added
 		 */
+    /*
+    // This function is never used in RS version
 		addDataLayer: function ( groupData, options ) {
 			var map = this;
 			options = options || {};
@@ -428,7 +474,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				$.each( dataGroups, function ( key, group ) {
 					var groupId = inlineDataLayerKey + inlineDataLayerId++,
 						layerOptions = {
-							attribution: group.attribution || options.attribution
+							attribution: group.attribution || options.attribution,
 						},
 						layer;
 					if ( group.isExternal ) {
@@ -443,6 +489,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				} );
 			} );
 		},
+    */
 
 		/**
 		 * Creates a new GeoJSON layer and adds it to the map.
@@ -453,6 +500,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @param {Object} [options] Layer options
 		 * @return {L.mapbox.FeatureLayer} Added layer
 		 */
+    /*
+    // This function is never used in RS version
 		addGeoJSONLayer: function ( groupName, geoJson, options ) {
 			var layer;
 			try {
@@ -467,6 +516,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				mw.log( e );
 			}
 		},
+    */
 
 		/**
 		 * Opens the map in a full screen dialog.
@@ -498,6 +548,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				} else {
 					map = this.fullScreenMap = new KartographerMap( {
 						container: L.DomUtil.create( 'div', 'mw-kartographer-mapDialog-map' ),
+            mapID: position.mapID,
+            plane: position.plane,
 						center: position.center,
 						zoom: position.zoom,
 						lang: this.lang,
@@ -505,10 +557,13 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 						fullscreen: true,
 						captionText: this.captionText,
 						fullScreenRoute: this.fullScreenRoute,
-						parentMap: this
+						parentMap: this,
+            zoomControl: false, // Replace default zoom controls with our own
 					} );
 					// resets the right initial position silently afterwards.
 					map.initView(
+            this._initialPosition.mapID,
+            this._initialPosition.plane,
 						this._initialPosition.center,
 						this._initialPosition.zoom,
 						false
@@ -556,7 +611,9 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		 * @return {number} return.zoom
 		 */
 		getMapPosition: function ( options ) {
-			var center = this.getCenter().wrap(),
+			var mapID = this.getMapID(),
+        plane = this.getPlane(),
+        center = this.getCenter().wrap(),
 				zoom = this.getZoom();
 
 			options = options || {};
@@ -565,6 +622,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				center = L.latLng( this.getScaleLatLng( center.lat, center.lng, zoom ) );
 			}
 			return {
+        mapID: mapID,
+        plane: plane,
 				center: center,
 				zoom: zoom
 			};
@@ -664,13 +723,15 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 				if ( save ) {
 					// Updates map data.
-					this.initView( this.getCenter(), this.getZoom(), false );
+					this.initView( this.getMapID(), this.getPlane(), this.getCenter(), this.getZoom(), false );
 					// Updates container's data attributes to avoid `NaN` errors
 					if ( !this.fullscreen ) {
 						this.$container.closest( '.mw-kartographer-interactive' ).data( {
+              mapID: this.getMapID(),
+              plane: this.getPlane(),
 							zoom: this.getZoom(),
 							longitude: this.getCenter().lng,
-							latitude: this.getCenter().lat
+							latitude: this.getCenter().lat,
 						} );
 					}
 				}
@@ -692,9 +753,17 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 			return [
 				lat.toFixed( precisionPerZoom[ zoom ] ),
-				lng.toFixed( precisionPerZoom[ zoom ] )
+				lng.toFixed( precisionPerZoom[ zoom ] ),
 			];
 		},
+
+    getMapID: function(){
+      return this._mapID;
+    },
+
+    getPlane: function(){
+      return this._plane;
+    },
 
 		/**
 		 * @localdoc Extended to also destroy the {@link #fullScreenMap} when
@@ -715,7 +784,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				mw.track( 'mediawiki.kartographer', {
 					action: 'close',
 					isFullScreen: true,
-					feature: parent
+					feature: parent,
 				} );
 				parent.clicked = false;
 			}
@@ -840,6 +909,90 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			}
 			this.$container.toggleClass( 'mw-kartographer-static', staticMap );
 			return this;
+		},
+	} );
+
+	/*
+   * Extend the map with RS changes
+   * Most of this code below is adopted from: https://gitlab.com/weirdgloop/doogle-maps
+   */
+	KartographerMap = KartographerMap.extend( {
+		// Setup map
+		rsMapInitialize: function ( options, controls ) {
+			this._controlers = {};
+      this._addedOverlayMaps = [];
+			this.config = mw.config.get( 'wgKartographerDataConfig' );
+
+			this.fullscreen = options.fullscreen;
+
+			this.setupControls( controls );
+
+			this.layerDataLoader = new LayerDataLoader();
+			this.layerDataLoader.setControlers( this._controlers );
+			this.layerDataLoader.setConfig( this.config );
+			this.on( 'load', async function() {
+        this.layerDataLoader.setAddedOverlayMaps(this._addedOverlayMaps);
+				this.layerDataLoader.load();
+				// labels.init();
+				// pathfind.init();
+			} );
+		},
+
+    /*
+     * Overwrite the addDataGroups function to intercept geojson data
+     * using the LayerDataLoader
+     */
+    addDataGroups: function ( dataGroups ) {
+      var map = this;
+
+      if ( !dataGroups || !dataGroups.length ) {
+        return $.Deferred().resolve().promise();
+      }
+
+      return DataManager.loadGroups( dataGroups ).then( function ( dataGroups ) {
+        $.each( dataGroups, function ( key, group ) {
+          if ( !$.isEmptyObject( group.getGeoJSON() ) ) {
+            map._addedOverlayMaps.push(group.getGeoJSON());
+          } else {
+            mw.log.warn( 'Layer not found or contains no data: "' + group.id + '"' );
+          }
+        } );
+      } );
+    },
+
+		setupControls: function ( controls ) {
+			var controler;
+			// this._map.fullscreenControl.setPosition('topright');
+			// top left
+      if ( !this.fullscreen ) {
+        this._controlers.zoom = new controls.CustomZoom({ position: 'topleft', displayZoomLevel: false });
+      }
+
+			// top right
+			if ( this.fullscreen ) {
+        this._controlers.zoom = new controls.CustomZoom({ position: 'topright', displayZoomLevel: true });
+				this._controlers.help = new controls.Help();
+				// this._controlers.icons = new controls.Icons();
+				// this._controlers.options = new controls.Options();
+			}
+
+			// bottom left
+			this._controlers.mapSelect = new controls.MapSelect(
+				{ visible: this.fullscreen } );
+
+			// bottom right
+			this._controlers.attribution = L.control.attribution(
+				{ prefix: this.config.attribution } );
+			this._controlers.plane = new controls.Plane(
+        { visible: this.fullscreen });
+
+			// add controlers to map
+			for ( controler in this._controlers ) {
+				this._controlers[ controler ].addTo( this );
+			}
+
+			// add class to bottom-right to make vertical
+			this._container.querySelector( '.leaflet-control-container > .leaflet-bottom.leaflet-right' ).className += ' vertical';
 		}
 	} );
 
@@ -849,7 +1002,9 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 	module.OpenFullScreenControl,
 	module.dataLayerOpts,
 	module.ScaleControl,
-	module.Data
+	module.Data,
+	require( 'ext.kartographer.layers' ).LayerDataLoader,
+	require( 'ext.kartographer.controls' )
 ) );
 
 module.map = ( function ( KartographerMap ) {

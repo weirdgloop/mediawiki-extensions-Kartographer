@@ -29,6 +29,8 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 	 *
 	 * @param {HTMLElement} element Element
 	 * @return {Object|null} Map properties
+	 * @return {number} return.mapID MapID in RuneScape
+	 * @return {number} return.plane Plane in RuneScape
 	 * @return {number} return.latitude
 	 * @return {number} return.longitude
 	 * @return {number} return.zoom
@@ -43,6 +45,8 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 		}
 
 		return {
+      mapID: +$el.data( 'mapid' ),
+      plane: +$el.data( 'plane' ),
 			latitude: +$el.data( 'lat' ),
 			longitude: +$el.data( 'lon' ),
 			zoom: +$el.data( 'zoom' ),
@@ -74,6 +78,8 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 			link = maplinks[ index ] = kartolink.link( {
 				featureType: 'maplink',
 				container: this,
+        mapID: data.mapID,
+        plane: data.plane,
 				center: [ data.latitude, data.longitude ],
 				zoom: data.zoom,
 				dataGroups: data.overlays,
