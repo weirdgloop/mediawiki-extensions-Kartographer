@@ -58,6 +58,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		maxBounds: [ [ 0, 0 ], [ 128000, 128000 ] ],
 		attributionControl: false,
 		fullscreen: false,
+    zoomControl: false, // Replace default zoom controls with our own
 	} );
 
 	L.Popup.mergeOptions( {
@@ -557,6 +558,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 						captionText: this.captionText,
 						fullScreenRoute: this.fullScreenRoute,
 						parentMap: this,
+            zoomControl: false, // Replace default zoom controls with our own
 					} );
 					// resets the right initial position silently afterwards.
 					map.initView(
@@ -962,10 +964,13 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			var controler;
 			// this._map.fullscreenControl.setPosition('topright');
 			// top left
+      if ( !this.fullscreen ) {
+        this._controlers.zoom = new controls.CustomZoom({ position: 'topleft', displayZoomLevel: false });
+      }
 
 			// top right
 			if ( this.fullscreen ) {
-				this._controlers.zoom = new controls.CustomZoom();
+        this._controlers.zoom = new controls.CustomZoom({ position: 'topright', displayZoomLevel: true });
 				this._controlers.help = new controls.Help();
 				// this._controlers.icons = new controls.Icons();
 				// this._controlers.options = new controls.Options();

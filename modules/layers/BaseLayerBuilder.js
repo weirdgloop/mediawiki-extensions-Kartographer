@@ -14,7 +14,7 @@ module.BaseLayerBuilder = (function(MapTileLayer){
 
     loadLayer(){
       this.layer = new MapTileLayer(this.config.baseTileURL + this.config.tileURLFormat, {
-        bounds: this.layerData.bounds,
+        bounds: this._translateBounds(this.layerData.bounds),
         minZoom: this.layerData.zoomLimits[0],
         maxZoom: this.layerData.zoomLimits[1],
         maxNativeZoom: this.layerData.maxNativeZoom,
@@ -22,6 +22,23 @@ module.BaseLayerBuilder = (function(MapTileLayer){
         attribution: this.layerData.attribution || '',
       });
       return null;
+    }
+
+    _translateBounds(bounds){
+      var newbounds = [ [ 0, 0 ], [ 12000, 12000 ] ];
+      if(Array.isArray(bounds) && bounds.length === 2){
+        // South-West
+        if(Array.isArray(bounds[0]) && bounds[0].length === 2){
+          newbounds[0][0] = bounds[0][1];
+          newbounds[0][1] = bounds[0][0];
+        }
+        // North-East
+        if(Array.isArray(bounds[1]) && bounds[1].length === 2){
+          newbounds[1][0] = bounds[1][1];
+          newbounds[1][1] = bounds[1][0];
+        }
+      }
+      return newbounds;
     }
 
     createLayer(){

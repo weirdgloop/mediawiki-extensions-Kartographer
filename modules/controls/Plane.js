@@ -12,6 +12,9 @@ L.Control.extend({
 
     planeMin: 0,
     planeMax: 3,
+
+    upicon: '<svg viewBox="0 0 64 64" height="24px" width="24px"><g style="display:inline" transform="translate(0,-233)"> <path d="m 27,238 -19,-0 7,7 -11,11 5,5 11,-11 7,7 z" style="fill:#000000;fill-opacity:1" /><path d="M 4,61 V 47 H 19 V 33 H 33 V 18 H 47 V 4 H 61 V 12 L 12,61 Z" style="display:inline;fill:#000000" transform="translate(0,233)"/></g></svg>',
+    downicon: '<svg viewBox="0 0 64 64" height="24px" width="24px"><g style="display:inline" transform="translate(0,-233)"> <path d="m 4,261 19,0 -7,-7 11,-11 -5,-5 -11,11 -7,-7 z" style="fill:#000000;fill-opacity:1" /><path d="M 4,61 V 47 H 19 V 33 H 33 V 18 H 47 V 4 H 61 V 12 L 12,61 Z" style="display:inline;fill:#000000" transform="translate(0,233)"/></g></svg>',
   },
 
   initialize: function(options) {
@@ -37,9 +40,9 @@ L.Control.extend({
     let listenerLabel = () => this.setPlane(this.options.planeMin || 0); // Reset plane
 
     if(this._visible){
-      this._buttonUp = this._createButton(this, '+', 'Move up', containerName + '-up ' + (this._plane + 1 > this.options.planeMax ? className : ''), container, listenerUp);
+      this._buttonUp = this._createButton(this, this.options.upicon, 'Move up', containerName + '-up ' + (this._plane + 1 > this.options.planeMax ? className : ''), container, listenerUp);
       this._buttonPlane = this._createButton(this, this._plane, 'Current plane', containerName + '-plane', container, listenerLabel);
-      this._buttonDown = this._createButton(this, '-', 'Move down', containerName + '-down ' + (this._plane - 1 < this.options.planeMin ? className : ''), container, listenerDown);
+      this._buttonDown = this._createButton(this, this.options.downicon, 'Move down', containerName + '-down ' + (this._plane - 1 < this.options.planeMin ? className : ''), container, listenerDown);
     }
 
     map.on('planechange', this._planeChange, this);

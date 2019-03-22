@@ -158,16 +158,35 @@ L.Control.extend({
     // Check if map changed
     if(this._selectedMapID === null){
       this._map.addLayer(this._baseMaps[mapId].layerBuilder.layer);
+      this._map.setMaxBounds(this._translateBounds(this._baseMaps[mapId].bounds));
       this._selectedMapID = Number(mapId);
     }else if(this._selectedMapID !== mapId){
       console.log('map Changed to :', mapId);
       this._map.removeLayer(this._baseMaps[this._selectedMapID].layerBuilder.layer);
       this._map.addLayer(this._baseMaps[mapId].layerBuilder.layer);
+      this._map.setMaxBounds(this._translateBounds(this._baseMaps[mapId].bounds));
       this._selectedMapID = Number(mapId);
       // reset location so map moves to new positions.
       this._location = null;
     }
     this._map._mapID = this._selectedMapID;
+  },
+
+  _translateBounds: function(bounds){
+    var newbounds = [ [ 0, 0 ], [ 12000, 12000 ] ];
+    if(Array.isArray(bounds) && bounds.length === 2){
+      // South-West
+      if(Array.isArray(bounds[0]) && bounds[0].length === 2){
+        newbounds[0][0] = bounds[0][1];
+        newbounds[0][1] = bounds[0][0];
+      }
+      // North-East
+      if(Array.isArray(bounds[1]) && bounds[1].length === 2){
+        newbounds[1][0] = bounds[1][1];
+        newbounds[1][1] = bounds[1][0];
+      }
+    }
+    return newbounds;
   },
 
   _loadOverlays: function(){

@@ -16,11 +16,13 @@ L.Control.Zoom.extend({
     zoomOutTitle: 'Zoom out', // The title set on the 'zoom out' button.
 
     defaultZoom: 2,
+    displayZoomLevel: true,
   },
 
   initialize: function(options) {
     L.setOptions(this, options);
     this._map = null;
+    this._displayZoomLevel = options.displayZoomLevel;
   },
 
   onAdd: function(map) {
@@ -31,7 +33,9 @@ L.Control.Zoom.extend({
     var options = this.options;
 
     this._zoomInButton = L.Control.prototype._createButton(this, options.zoomInText, options.zoomInTitle, containerName + '-in', container, this._zoomIn);
-    this._zoomLevel = L.Control.prototype._createButton(this, '', 'Zoom level', containerName + '-level', container, this._resetZoom);
+    if(this._displayZoomLevel){
+      this._zoomLevel = L.Control.prototype._createButton(this, '', 'Zoom level', containerName + '-level', container, this._resetZoom);
+    }
     this._zoomOutButton = L.Control.prototype._createButton(this, options.zoomOutText, options.zoomOutTitle, containerName + '-out', container, this._zoomOut);
 
     this._updateDisabled();
@@ -43,8 +47,10 @@ L.Control.Zoom.extend({
   _updateDisabled: function() {
     L.Control.Zoom.prototype._updateDisabled.call(this);
 
-    // Update displayed zoom level
-    this._zoomLevel.textContent = (this.getZoomPercentage() * 100) + '%';
+    if(this._displayZoomLevel){
+      // Update displayed zoom level
+      this._zoomLevel.textContent = (this.getZoomPercentage() * 100) + '%';
+    }
   },
 
   getZoomPercentage: function(zoom) {
