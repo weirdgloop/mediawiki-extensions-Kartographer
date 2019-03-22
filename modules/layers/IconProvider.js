@@ -19,7 +19,7 @@ module.IconProvider = (function(){
     getIcon(id){
       if(!(id in this.iconlist)){
         return new this.DefaultIconClass({
-          iconUrl: 'http://127.0.0.1/RSMap/images/pin_grey.svg',
+          iconUrl: 'https://osrsmap.ralphbisschops.com/images/pin_grey.svg',
           iconSize: [ 26, 42 ],
           iconAnchor: [ 13, 42 ],
         });
