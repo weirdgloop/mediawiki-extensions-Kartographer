@@ -10,7 +10,7 @@
 			"links": [
 				{
 					"type": "map",
-					"url": "https://osrsmap.ralphbisschops.com/#{zoom}/{latitude}/{longitude}"
+					"url": "https://maps.runescape.wiki/osrs/#{zoom}/{latitude}/{longitude}"
 				}
 			]
 		},{
@@ -19,7 +19,7 @@
 			"links": [
 				{
 					"type": "map",
-					"url": "https://osrsmap.ralphbisschops.com/#{zoom}/{latitude}/{longitude}"
+					"url": "https://maps.runescape.wiki/osrs/#{zoom}/{latitude}/{longitude}"
 				}
 			]
 		}
