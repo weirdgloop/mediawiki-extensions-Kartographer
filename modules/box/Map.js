@@ -154,9 +154,11 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
       if ( options.mapID === 'auto' ) {
         options.mapID = 0;
       }
+      this._mapID = options.mapID;
 			if ( options.plane === 'auto' ) {
 				options.plane = 0;
 			}
+      this._plane = options.plane;
 			if ( options.center === 'auto' ) {
 				options.center = undefined;
 			}
@@ -632,6 +634,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		/**
 		 * Formats the full screen route of the map, such as:
 		 *   `/map/:maptagId(/:zoom/:longitude/:latitude)`
+		 *  RS: `/map/:maptagId(/:zoom/:mapID/:plane/:x/:y)`
 		 *
 		 * The hash will contain the portion between parenthesis if and only if
 		 * one of these 3 values differs from the initial setting.
@@ -647,13 +650,17 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			var hash = this.fullScreenRoute,
 				currentPosition = this.getMapPosition(),
 				initialPosition = this._initialPosition,
-				newHash = currentPosition.zoom + '/' + this.getScaleLatLng(
+				newHash = currentPosition.zoom + '/' +
+          currentPosition.mapID + '/' +
+          currentPosition.plane + '/' + this.getScaleLatLng(
 					currentPosition.center.lat,
 					currentPosition.center.lng,
 					currentPosition.zoom
 				).join( '/' ),
 				initialHash = initialPosition.center && (
 					initialPosition.zoom + '/' +
+          initialPosition.mapID + '/' +
+          initialPosition.plane + '/' +
 					this.getScaleLatLng(
 						initialPosition.center.lat,
 						initialPosition.center.lng,
