@@ -187,6 +187,7 @@ class MapFrame extends TagHandler {
 			$containerClass .= ' mw-kartographer-full';
 		}
 
+		/*
 		$params = [
 			'lang' => $this->langCode,
 		];
@@ -203,6 +204,8 @@ class MapFrame extends TagHandler {
 		$bgUrl .= '?' . wfArrayToCgi( $params );
 
 		$attrs['style'] = "background-image: url({$bgUrl});";
+		*/
+		$attrs['style'] = "";
 		$attrs['href'] = SpecialMap::link( $staticLat, $staticLon, $staticZoom )->getLocalURL();
 
 		if ( !$framed ) {
