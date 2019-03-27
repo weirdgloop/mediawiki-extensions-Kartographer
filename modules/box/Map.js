@@ -544,10 +544,19 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				} else if ( map ) {
 
 					this.doWhenReady( function () {
+            /*
 						map.setView(
 							position.center,
 							position.zoom
 						);
+            */
+            map.initView(
+              position.mapID,
+              position.plane,
+              position.center,
+              position.zoom,
+              true
+            );
 					} );
 				} else {
 					map = this.fullScreenMap = new KartographerMap( {

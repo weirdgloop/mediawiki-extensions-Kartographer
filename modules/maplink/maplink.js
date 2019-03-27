@@ -126,7 +126,9 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 			if ( zoom !== undefined && latitude !== undefined && longitude !== undefined ) {
 				position = {
 					center: [ +latitude, +longitude ],
-					zoom: +zoom
+					zoom: +zoom,
+          mapID: 0, // TODO
+          plane: 0, // TODO
 				};
 			}
 
