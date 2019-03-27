@@ -284,7 +284,8 @@
 			"dependencies": [
 				"oojs-ui.styles.icons-content",
 				"oojs-ui-windows",
-				"mediawiki.router"
+				"mediawiki.router",
+				"ext.kartographer.extlinks"
 			],
 			"scripts": [
 				"modules/dialog/closefullscreen_control.js",

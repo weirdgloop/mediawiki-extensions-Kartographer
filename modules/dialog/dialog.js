@@ -74,10 +74,46 @@ module.Dialog = ( function ( $, mw, CloseFullScreenControl, router ) {
 				// Add the button to the footer
 				dialog.$foot.append( $inlineContainer );
 
-				button.on( 'change', dialog.toggleSideBar, null, dialog );
+				// button.on( 'change', dialog.toggleSideBar, null, dialog );
+        button.on( 'change', dialog.openURL, null, dialog );
 			} );
 		} );
 	};
+
+  MapDialog.prototype.openURL = function ( ) {
+    var url = this.createURL();
+    window.open(url, '_blank');
+  };
+
+  /*
+   * Added for direct link creation, no sidebar needed.
+   */
+  MapDialog.prototype.createURL = function ( ) {
+    var externalLinks = mw.config.get( 'wgKartographerExternalLinks' );
+    // select first url in list
+    var url = externalLinks.services[0].links[0].url;
+    // Replace parts
+    var view; // = this.map.getInitialMapPosition();
+    view = {
+      center: this.map.getCenter(),
+      zoom: this.map.getZoom(),
+      mapID: this.map.getMapID(),
+      plane: this.map.getPlane(),
+    };
+    var scale = Math.round( Math.pow( 2, Math.min( 3, Math.max( 0, 18 - view.zoom ) ) ) * 1000 );
+    url = url.replace( new RegExp( '{latitude}', 'g' ), view.center.lat );
+    url = url.replace( new RegExp( '{longitude}', 'g' ), view.center.lng );
+    url = url.replace( new RegExp( '{x}', 'g' ), Math.floor(view.center.lat) );
+    url = url.replace( new RegExp( '{y}', 'g' ), Math.floor(view.center.lng) );
+    url = url.replace( new RegExp( '{zoom}', 'g' ), view.zoom );
+    url = url.replace( new RegExp( '{title}', 'g' ), mw.config.get( 'wgTitle' ) );
+    url = url.replace( new RegExp( '{language}', 'g' ), this.map.lang );
+    url = url.replace( new RegExp( '{scale}', 'g' ), scale );
+    url = url.replace( new RegExp( '{mapID}', 'g' ), view.mapID );
+    url = url.replace( new RegExp( '{plane}', 'g' ), view.plane );
+
+    return url;
+  };
 
 	MapDialog.prototype.toggleSideBar = function ( open ) {
 		var dialog = this;
