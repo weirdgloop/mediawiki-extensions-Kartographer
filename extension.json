@@ -241,6 +241,7 @@
 				"modules/controls/Help.js",
 				"modules/controls/Icons.js",
 				"modules/controls/CustomZoom.js",
+				"modules/controls/MapControler.js",
 				"modules/controls/MapSelect.js",
 				"modules/controls/Options.js",
 				"modules/controls/Plane.js",
@@ -550,7 +551,7 @@
 		"KartographerDataConfig": {
 		  "basePathURL": "https://chisel.weirdgloop.org/",
 			"baseTileURL": "https://maps.runescape.wiki/osrs/",
-		  "tileURLFormat": "tiles/{mapID}/{z}/{p}_{x}_{-y}.png",
+		  "tileURLFormat": "tiles/{mapID}-{cacheVersion}/{z}/{p}_{x}_{-y}.png",
 		  "attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
 		  "dataloaderFile": "https://maps.runescape.wiki/osrs/data/dataloader.json",
 		  "wikiImageURL": "https://oldschool.runescape.wiki/images/"

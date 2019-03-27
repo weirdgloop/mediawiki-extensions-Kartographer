@@ -7,5 +7,6 @@ module.exports = {
 	Icons: module.Icons,
 	Options: module.Options,
 	Plane: module.Plane,
-	MapSelect: module.MapSelect
+	MapSelect: module.MapSelect,
+	MapControler: module.MapControler
 };

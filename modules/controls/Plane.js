@@ -45,13 +45,18 @@ L.Control.extend({
       this._buttonDown = this._createButton(this, this.options.downicon, 'Move down', containerName + '-down ' + (this._plane - 1 < this.options.planeMin ? className : ''), container, listenerDown);
     }
 
-    map.on('planechange', this._planeChange, this);
+    map.on('planechanging', this._planeChanging, this);
 
     return container;
   },
 
-  _planeChange: function(e) {
+  onRemove: function(map) {
+    map.off('planechanging', this._planeChanging, this);
+  },
+
+  _planeChanging: function(e) {
     let className = 'leaflet-disabled';
+    this._plane = e.plane;
 
     if(this._visible){
       this._buttonPlane.textContent = e.plane;
@@ -70,7 +75,8 @@ L.Control.extend({
   },
 
   setPlane: function(plane) {
-    if(plane === this._plane){
+    var old = this._plane;
+    if(plane === old){
       // Plane didn't change
       return;
     }
@@ -80,12 +86,10 @@ L.Control.extend({
       return;
     }
 
-    var old = this._plane;
-    this._plane = plane;
-
-    this._map.fire('planechange', {
-      previous: old,
-      plane: plane,
+    this._map.fire('planechanging', {
+      current: old,
+      plane: Number(plane),
+      userChanged: true,
     });
   },
 
