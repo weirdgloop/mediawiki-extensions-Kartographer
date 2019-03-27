@@ -37,6 +37,8 @@ L.CanvasLayer = L.GridLayer.extend({
 
     this.options.maxNativeZoom = map.options.maxNativeZoom;
     this.options.maxZoom = map.options.maxZoom;
+    // Do not show icons when on a layer above 0 (-1,-2,-3,.. )
+    this.options.minZoom = 0;
 
     this._currentZoom = map.getZoom();
   },
