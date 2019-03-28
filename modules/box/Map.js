@@ -43,7 +43,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 
 	// Don't make the map infinite (it is not round anymore)
 	L.CRS.Simple.infinite = false;
-	L.CRS.Simple.projection.bounds = new L.Bounds( [ [ 0, 0 ], [ 128000, 128000 ] ] );
+	L.CRS.Simple.projection.bounds = new L.Bounds( [ [ 0, 0 ], [ 12800, 12800 ] ] );
 
 	L.Map.mergeOptions( {
 		sleepTime: 250,
@@ -58,6 +58,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		maxBounds: [ [ 0, 0 ], [ 128000, 128000 ] ],
 		attributionControl: false,
 		fullscreen: false,
+    maxZoom: 5,
+    minZoom: -3,
     zoomControl: false, // Replace default zoom controls with our own
 	} );
 
@@ -154,9 +156,11 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
       if ( options.mapID === 'auto' ) {
         options.mapID = 0;
       }
+      this._mapID = options.mapID;
 			if ( options.plane === 'auto' ) {
 				options.plane = 0;
 			}
+      this._plane = options.plane;
 			if ( options.center === 'auto' ) {
 				options.center = undefined;
 			}
@@ -393,6 +397,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		initView: function( mapID, plane, center, zoom, setView ) {
 			setView = setView !== false;
 
+      // Convert array to obj
 			if ( Array.isArray( center ) ) {
 				if ( !isNaN( center[ 0 ] ) && !isNaN( center[ 1 ] ) ) {
 					center = L.latLng( center );
@@ -409,9 +414,8 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				zoom: zoom,
 			};
 			// Set the view inside the mapSelector
-			if ( 'mapSelect' in this._controlers ) {
-				this._controlers.mapSelect.setView( mapID, plane, center, zoom );
-				this._controlers.plane.setPlane( plane );
+			if ( 'mapControler' in this._controlers ) {
+				this._controlers.mapControler.setView( mapID, plane, center, zoom );
 			}
 			if ( setView ) {
 				this.setView( center, zoom, null, true );
@@ -540,10 +544,19 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				} else if ( map ) {
 
 					this.doWhenReady( function () {
+            /*
 						map.setView(
 							position.center,
 							position.zoom
 						);
+            */
+            map.initView(
+              position.mapID,
+              position.plane,
+              position.center,
+              position.zoom,
+              true
+            );
 					} );
 				} else {
 					map = this.fullScreenMap = new KartographerMap( {
@@ -632,6 +645,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		/**
 		 * Formats the full screen route of the map, such as:
 		 *   `/map/:maptagId(/:zoom/:longitude/:latitude)`
+		 *  RS: `/map/:maptagId(/:zoom/:mapID/:plane/:x/:y)`
 		 *
 		 * The hash will contain the portion between parenthesis if and only if
 		 * one of these 3 values differs from the initial setting.
@@ -647,13 +661,18 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			var hash = this.fullScreenRoute,
 				currentPosition = this.getMapPosition(),
 				initialPosition = this._initialPosition,
-				newHash = currentPosition.zoom + '/' + this.getScaleLatLng(
-					currentPosition.center.lat,
-					currentPosition.center.lng,
-					currentPosition.zoom
-				).join( '/' ),
+				newHash = currentPosition.zoom + '/' +
+          currentPosition.mapID + '/' +
+          currentPosition.plane + '/' +
+          this.getScaleLatLng(
+            currentPosition.center.lat,
+            currentPosition.center.lng,
+            currentPosition.zoom
+          ).join( '/' ),
 				initialHash = initialPosition.center && (
 					initialPosition.zoom + '/' +
+          initialPosition.mapID + '/' +
+          initialPosition.plane + '/' +
 					this.getScaleLatLng(
 						initialPosition.center.lat,
 						initialPosition.center.lng,
@@ -756,14 +775,6 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 				lng.toFixed( precisionPerZoom[ zoom ] ),
 			];
 		},
-
-    getMapID: function(){
-      return this._mapID;
-    },
-
-    getPlane: function(){
-      return this._plane;
-    },
 
 		/**
 		 * @localdoc Extended to also destroy the {@link #fullScreenMap} when
@@ -930,13 +941,47 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			this.layerDataLoader = new LayerDataLoader();
 			this.layerDataLoader.setControlers( this._controlers );
 			this.layerDataLoader.setConfig( this.config );
+      this.layerDataLoader.load();
+
 			this.on( 'load', async function() {
         this.layerDataLoader.setAddedOverlayMaps(this._addedOverlayMaps);
-				this.layerDataLoader.load();
 				// labels.init();
 				// pathfind.init();
 			} );
+
+      this.on('planechanging', this._planeChanging, this);
+      this.on('mapidchanging', this._mapIDChanging, this);
+      this._plane = 0;
+      this._mapID = 0;
 		},
+
+    _planeChanging: function(e){
+      this._plane = e.plane;
+
+      this.fire('planechanged', {
+        previous: e.current,
+        plane: e.plane,
+        userChanged: e.userChanged,
+      });
+    },
+
+    _mapIDChanging: function(e){
+      this._mapID = e.mapID;
+
+      this.fire('mapidchanged', {
+        previous: e.current,
+        mapID: e.mapID,
+        userChanged: e.userChanged,
+      });
+    },
+
+    getMapID: function(){
+      return this._mapID;
+    },
+
+    getPlane: function(){
+      return this._plane;
+    },
 
     /*
      * Overwrite the addDataGroups function to intercept geojson data
@@ -990,6 +1035,9 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			for ( controler in this._controlers ) {
 				this._controlers[ controler ].addTo( this );
 			}
+
+      // Don't add this to map
+      this._controlers.mapControler = new controls.MapControler(this);
 
 			// add class to bottom-right to make vertical
 			this._container.querySelector( '.leaflet-control-container > .leaflet-bottom.leaflet-right' ).className += ' vertical';

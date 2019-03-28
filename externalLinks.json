@@ -10,7 +10,7 @@
 			"links": [
 				{
 					"type": "map",
-					"url": "https://maps.runescape.wiki/osrs/#{zoom}/{latitude}/{longitude}"
+					"url": "https://maps.runescape.wiki/osrs/#{zoom}/{mapID}/{plane}/{x}/{y}"
 				}
 			]
 		},{
@@ -19,7 +19,7 @@
 			"links": [
 				{
 					"type": "map",
-					"url": "https://maps.runescape.wiki/osrs/#{zoom}/{latitude}/{longitude}"
+					"url": "https://maps.runescape.wiki/osrs/#{zoom}/{mapID}/{plane}/{x}/{y}"
 				}
 			]
 		}

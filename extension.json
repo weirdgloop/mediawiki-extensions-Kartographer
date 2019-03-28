@@ -241,6 +241,7 @@
 				"modules/controls/Help.js",
 				"modules/controls/Icons.js",
 				"modules/controls/CustomZoom.js",
+				"modules/controls/MapControler.js",
 				"modules/controls/MapSelect.js",
 				"modules/controls/Options.js",
 				"modules/controls/Plane.js",
@@ -284,7 +285,8 @@
 			"dependencies": [
 				"oojs-ui.styles.icons-content",
 				"oojs-ui-windows",
-				"mediawiki.router"
+				"mediawiki.router",
+				"ext.kartographer.extlinks"
 			],
 			"scripts": [
 				"modules/dialog/closefullscreen_control.js",
@@ -547,12 +549,12 @@
 		"KartographerUseMarkerStyle": false,
 		"KartographerEnableMapFrame": true,
 		"KartographerDataConfig": {
-		  "basePathURL": "https://chisel.weirdgloop.org/",
+			"basePathURL": "https://chisel.weirdgloop.org/",
 			"baseTileURL": "https://maps.runescape.wiki/osrs/",
-		  "tileURLFormat": "tiles/{mapID}/{z}/{p}_{x}_{-y}.png",
-		  "attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
-		  "dataloaderFile": "https://maps.runescape.wiki/osrs/data/dataloader.json",
-		  "wikiImageURL": "https://oldschool.runescape.wiki/images/"
+			"tileURLFormat": "tiles/{mapID}_{cacheVersion}/{z}/{p}_{x}_{-y}.png",
+			"attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
+			"dataloaderFile": "https://maps.runescape.wiki/osrs/data/dataloader.json",
+			"wikiImageURL": "https://oldschool.runescape.wiki/images/"
 		}
 	},
 	"TrackingCategories": [

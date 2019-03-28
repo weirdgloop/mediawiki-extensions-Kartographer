@@ -32,7 +32,7 @@ L.Control.include( {
     /*
     * Will force screen readers like VoiceOver to read this as "Zoom in - button"
     */
-    select.setAttribute( 'role', 'select' );
+    select.setAttribute( 'role', 'option' );
     select.setAttribute( 'aria-label', title );
 
     L.DomEvent.disableClickPropagation( select );

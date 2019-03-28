@@ -4,7 +4,7 @@
 module.MapTileLayer =
 // @endif
 // @if KARTOGRAPHER=false
-module.exports.MapTileLayer =
+// module.exports =
 // @endif
 L.TileLayer.extend({
   initialize: function(url, options) {
@@ -13,12 +13,19 @@ L.TileLayer.extend({
 
     this._plane = this.options.plane || 0;
     this._mapID = this.options.mapID || 0;
+    this._cacheVersion = this.options.cacheVersion;
   },
 
   onAdd: function(map) {
     L.TileLayer.prototype.onAdd.call(this, map);
 
-    map.on('planechange', this._planeChange, this);
+    map.on('planechanging', this._planeChanging, this);
+  },
+
+  onRemove: function(map) {
+    L.TileLayer.prototype.onRemove.call(this, map);
+
+    map.off('planechanging', this._planeChanging, this);
   },
 
   // Inject plane into URL
@@ -31,6 +38,7 @@ L.TileLayer.extend({
       z: this._getZoomForUrl(),
       p: this._plane,
       mapID: this._mapID,
+      cacheVersion: this._cacheVersion,
     };
 
     if (this._map && !this._map.options.crs.infinite) {
@@ -44,7 +52,7 @@ L.TileLayer.extend({
     return L.Util.template(this._url, L.Util.extend(data, this.options));
   },
 
-  _planeChange: function(e) {
+  _planeChanging: function(e) {
     this._plane = e.plane;
     this.redraw();
   },
