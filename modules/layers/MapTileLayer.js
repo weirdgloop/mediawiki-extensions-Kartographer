@@ -11,21 +11,20 @@ L.TileLayer.extend({
     L.TileLayer.prototype.initialize.call(this, url, options);
     // L.setOptions(this, options);
 
-    this._plane = this.options.plane || 0;
-    this._mapID = this.options.mapID || 0;
+    this._mapID = this.options.mapID;
     this._cacheVersion = this.options.cacheVersion;
   },
 
   onAdd: function(map) {
     L.TileLayer.prototype.onAdd.call(this, map);
 
-    map.on('planechanging', this._planeChanging, this);
+    map.on('planechanged', this._planeChanged, this);
   },
 
   onRemove: function(map) {
     L.TileLayer.prototype.onRemove.call(this, map);
 
-    map.off('planechanging', this._planeChanging, this);
+    map.off('planechanged', this._planeChanged, this);
   },
 
   // Inject plane into URL
@@ -36,7 +35,7 @@ L.TileLayer.extend({
       x: coords.x,
       y: coords.y,
       z: this._getZoomForUrl(),
-      p: this._plane,
+      p: this._map.getPlane(),
       mapID: this._mapID,
       cacheVersion: this._cacheVersion,
     };
@@ -52,8 +51,7 @@ L.TileLayer.extend({
     return L.Util.template(this._url, L.Util.extend(data, this.options));
   },
 
-  _planeChanging: function(e) {
-    this._plane = e.plane;
+  _planeChanged: function(e) {
     this.redraw();
   },
 });
