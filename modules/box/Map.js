@@ -415,7 +415,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			};
 			// Set the view inside the mapSelector
 			if ( 'mapControler' in this._controlers ) {
-				this._controlers.mapControler.setView( mapID, plane, center, zoom );
+				this._controlers.mapControler.setInitView( mapID, plane, center, zoom );
 			}
 			if ( setView ) {
 				this.setView( center, zoom, null, true );

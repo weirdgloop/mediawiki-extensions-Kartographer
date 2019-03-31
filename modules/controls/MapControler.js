@@ -28,6 +28,13 @@ L.Control.extend({
       zoom: 0,
       location: [ 0, 0 ],
     };
+    this._defaultView = {
+      viewSet: false,
+      mapID: 0,
+      plane: 0,
+      zoom: 0,
+      location: [ 0, 0 ],
+    };
     this._map = map;
 
     this._map.on('mapidchanged', this._mapIDChanged, this);
@@ -42,16 +49,17 @@ L.Control.extend({
   },
 
   _mapIDChanged: function(event){
+    this._changeMapID(Number(event.mapID));
     if(event.userChanged){
       this._initialView.viewSet = false;
+      this._switchMapView(this._defaultView);
     }
-    this._changeMapID(Number(event.mapID), true);
   },
 
   _planeChanged: function(event){
+    this._changePlane(Number(event.plane));
     if(event.userChanged){
       this._initialView.viewSet = false;
-      this._changePlane(Number(event.plane));
     }
   },
 
@@ -77,7 +85,8 @@ L.Control.extend({
       baseMaps: baseMaps,
     });
 
-    this._changeMapID(this._selectedView.mapID, false);
+    this._changeMapID(this._selectedView.mapID, true);
+    this._switchMapView(this._defaultView);
   },
 
   setOverlayMaps: function(overlayMaps){
@@ -93,10 +102,10 @@ L.Control.extend({
       overlayMaps: overlayMaps,
     });
 
-    this._changeMapID(this._selectedView.mapID, false);
+    this._loadOverlays();
   },
 
-  setView: function(mapID, plane, loc, zoom){
+  setInitView: function(mapID, plane, loc, zoom){
     this._initialView = {
       viewSet: true,
       mapID: mapID,
@@ -104,69 +113,82 @@ L.Control.extend({
       zoom: zoom,
       location: [ loc.lat, loc.lng ],
     };
-    var current = this._selectedView;
-    var changed = this._initialView;
-
-    // Check if MapID is changed and trigger changes
-    if(current.mapID !== changed.mapID){
-      this._map.fire('mapidchanging', {
-        current: current.mapID,
-        mapID: changed.mapID,
-        userChanged: false,
-      });
-    }
-
-    // Check if Plane is changed and trigger changes
-    if(current.plane !== changed.plane){
-      this._map.fire('planechanging', {
-        current: current.plane,
-        plane: changed.plane,
-        userChanged: false,
-      });
-    }
-
-    // If update not triggered from above, trigger it here
-    if(current.mapID === changed.mapID && current.plane === changed.plane){
-      this._changeView(this._initialView);
-    }
+    this._switchMapView(this._initialView);
   },
 
-  _changeView: function(view){
-    // Quick set
-    var changed;
+  /*
+   * Switch to map to particular view
+   * load a different basemap, plane or move the map
+   */
+  _switchMapView: function(view){
+    // check if there is a view buffered in _initialView
     if(this._initialView.viewSet){
-      changed = {
+      view = {
         mapID: this._initialView.mapID,
         plane: this._initialView.plane,
         zoom: this._initialView.zoom,
         location: this._initialView.location,
       };
-    }else{
-      changed = view;
     }
-    this._map.setView(changed.location, changed.zoom);
+    var current = this._selectedView;
+    var changed = view;
+
+    // Did we set a new mapID to switch to?
+    if('mapID' in changed){
+      // check if maps are loaded
+      if(!(changed.mapID in this._baseMaps)){
+        // console.error('Selected MapID does not exists: ', changed.mapID);
+        return;
+      }
+      // Check if MapID is changed and trigger changes
+      if(current.mapID !== changed.mapID){
+        this._map.fire('mapidchanging', {
+          current: current.mapID,
+          mapID: changed.mapID,
+          userChanged: false,
+        });
+      }
+    }
+
+    // Did we set a new plane to switch to?
+    if('plane' in changed){
+      // Check if Plane is changed and trigger changes
+      if(current.plane !== changed.plane){
+        this._map.fire('planechanging', {
+          current: current.plane,
+          plane: changed.plane,
+          userChanged: false,
+        });
+      }
+    }
+
+    if('zoom' in changed || 'location' in changed){
+      // if zoom not changed
+      if(!('zoom' in changed)){
+        this._map.setView(changed.location, current.zoom);
+      }
+      this._map.setView(changed.location, changed.zoom);
+    }
   },
 
-  _changeMapID: function(mapId, changeView){
-    if(!(mapId in this._baseMaps)){
-      console.error('Selected MapID does not exists: ', mapId);
+  _changeMapID: function(mapID){
+    if(!(mapID in this._baseMaps)){
+      console.error('Selected MapID does not exists: ', mapID);
       return;
     }
 
-    this._loadBaseMaps(mapId);
+    this._loadBaseMaps(mapID);
     this._loadOverlays();
 
-    if(changeView){
-      var defaultView = {
-        mapID: mapId,
-        plane: 0,
-        zoom: this._baseMaps[mapId].defaultZoom,
-        location: [ this._baseMaps[mapId].center[1],
-          this._baseMaps[mapId].center[0] ],
-      };
-
-      this._changeView(defaultView);
-    }
+    // Set default view for this map
+    this._defaultView = {
+      viewSet: true,
+      mapID: mapID,
+      plane: 0,
+      zoom: this._baseMaps[mapID].defaultZoom,
+      location: [ this._baseMaps[mapID].center[1],
+        this._baseMaps[mapID].center[0] ],
+    };
   },
 
   _changePlane: function(plane){

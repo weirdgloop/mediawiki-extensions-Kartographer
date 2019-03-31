@@ -45,57 +45,64 @@ return class IconLayerBuilder{
     return null;
   }
 
-  filterGeoJson(geoJsonData, options){
-    if(!('features' in geoJsonData)){
-      console.error('File is not a proper geoJSON file. Expected a FeatureCollection.');
-      return geoJsonData;
+  /*
+   * This is a function used with the .filter() function
+   */
+  filterFeature(options, geoJsonFeature){
+    // if mapID is number
+    if(Number.isInteger(geoJsonFeature.properties.mapID) &&
+        geoJsonFeature.properties.mapID !== options.mapID){
+      return false;
     }
-    var layerBuilder = this;
+    // if mapID is array
+    if(Array.isArray(geoJsonFeature.properties.mapID) &&
+        !geoJsonFeature.properties.mapID.includes(options.mapID)){
+      return false;
+    }
+    // Zoom level
+    if(Array.isArray(geoJsonFeature.properties.zoom) &&
+        (geoJsonFeature.properties.zoom[0] > options.zoom ||
+        geoJsonFeature.properties.zoom[1] < options.zoom)){
+      return false;
+    }
+
+    // Check if on plane
+    if(geoJsonFeature.geometry.type === 'Point' &&
+        geoJsonFeature.geometry.coordinates.length >= 3 &&
+        geoJsonFeature.geometry.coordinates[2] !== options.plane ){
+      return false;
+    }
+
+    // For lines allow them to be drawn using path finding
+    if(geoJsonFeature.geometry.type === 'LineString' &&
+        geoJsonFeature.properties.navigation){
+      this.drawNavigationPath(geoJsonFeature);
+      return false;
+    }
+
+    // Do not draw points, these are drawn on canvas
+    if(geoJsonFeature.geometry.type === 'Point' &&
+        this.drawOnCanvas){
+      // Add to canvas
+      this._addToCanvasLayer(options.visLayer, geoJsonFeature);
+      return false;
+    }
+
+    return true;
+  }
+
+  filterGeoJson(geoJsonData, options){
     var outputGeoJson = {
       features: [],
     };
-    outputGeoJson.features = geoJsonData.features.filter(function (geoJsonFeature){
-      // if mapID is number
-      if(Number.isInteger(geoJsonFeature.properties.mapID) &&
-          geoJsonFeature.properties.mapID !== options.mapID){
-        return false;
-      }
-      // if mapID is array
-      if(Array.isArray(geoJsonFeature.properties.mapID) &&
-          !geoJsonFeature.properties.mapID.includes(options.mapID)){
-        return false;
-      }
-      // Zoom level
-      if(Array.isArray(geoJsonFeature.properties.zoom) &&
-          (geoJsonFeature.properties.zoom[0] > options.zoom ||
-          geoJsonFeature.properties.zoom[1] < options.zoom)){
-        return false;
-      }
-
-      // Check if on plane
-      if(geoJsonFeature.geometry.type === 'Point' &&
-          geoJsonFeature.geometry.coordinates.length >= 3 &&
-          geoJsonFeature.geometry.coordinates[2] !== options.plane ){
-        return false;
-      }
-
-      // For lines allow them to be drawn using path finding
-      if(geoJsonFeature.geometry.type === 'LineString' &&
-          geoJsonFeature.properties.navigation){
-        layerBuilder.drawNavigationPath(geoJsonFeature);
-        return false;
-      }
-
-      // Do not draw points, these are drawn on canvas
-      if(geoJsonFeature.geometry.type === 'Point' &&
-          layerBuilder.drawOnCanvas){
-        // Add to canvas
-        layerBuilder._addToCanvasLayer(options.visLayer, geoJsonFeature);
-        return false;
-      }
-
-      return true;
-    });
+    if('type' in geoJsonData && geoJsonData.type === 'FeatureCollection'){
+      outputGeoJson.features = geoJsonData.features.filter(this.filterFeature.bind(this, options));
+    }else if('type' in geoJsonData && geoJsonData.type === 'Feature'){
+      var makelist = [ geoJsonData ];
+      outputGeoJson.features = makelist.filter(this.filterFeature.bind(this, options));
+    }else{
+      return geoJsonData;
+    }
     return outputGeoJson;
   }
 
