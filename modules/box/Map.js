@@ -943,7 +943,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 			this.layerDataLoader.setConfig( this.config );
       this.layerDataLoader.load();
 
-			this.on( 'load', async function() {
+			this.on( 'kartographerisready', async function() {
         this.layerDataLoader.setAddedOverlayMaps(this._addedOverlayMaps);
 				// labels.init();
 				// pathfind.init();
