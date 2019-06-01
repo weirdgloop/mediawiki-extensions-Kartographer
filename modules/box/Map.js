@@ -626,7 +626,7 @@ module.Map = ( function ( mw, OpenFullScreenControl, dataLayerOpts, ScaleControl
 		getMapPosition: function ( options ) {
 			var mapID = this.getMapID(),
         plane = this.getPlane(),
-        center = this.getCenter().wrap(),
+        center = this.getCenter(),
 				zoom = this.getZoom();
 
 			options = options || {};
