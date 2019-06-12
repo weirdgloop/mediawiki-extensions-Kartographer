@@ -123,7 +123,7 @@ return class LayerDataLoader{
         dataSource: 'Inline',
         parentLayer: 'icons',
         displayOnLoad: true,
-        layerBuilder: this.loadOverlayLayerFromData(this.addedOverlayMapsGeoJson[i][0], false),
+        layerBuilder: this.loadOverlayLayerFromData(Array.prototype.concat.apply([], this.addedOverlayMapsGeoJson[i]), false),
       };
     }
     if(addToControler){
