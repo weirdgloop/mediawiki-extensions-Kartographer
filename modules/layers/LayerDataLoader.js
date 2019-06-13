@@ -117,14 +117,16 @@ return class LayerDataLoader{
 
   loadAddedOverlayMaps(addToControler){
     for(let i in this.addedOverlayMapsGeoJson){
-      this.overlayMaps[i+'-added'] = {
-        id: i+'-added',
-        name: 'Inline content',
-        dataSource: 'Inline',
-        parentLayer: 'icons',
-        displayOnLoad: true,
-        layerBuilder: this.loadOverlayLayerFromData(this.addedOverlayMapsGeoJson[i][0], false),
-      };
+      for(let j in this.addedOverlayMapsGeoJson[i]) {
+        this.overlayMaps[i+'-'+j+'-added'] = {
+          id: i+'-added',
+          name: 'Inline content',
+          dataSource: 'Inline',
+          parentLayer: 'icons',
+          displayOnLoad: true,
+          layerBuilder: this.loadOverlayLayerFromData(this.addedOverlayMapsGeoJson[i][j], false),
+        };
+      }
     }
     if(addToControler){
       this.controlers.mapControler.setOverlayMaps(this.overlayMaps);
