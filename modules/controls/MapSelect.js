@@ -42,7 +42,8 @@ L.Control.extend({
   _resetSelect: function(baseMaps){
     // build innerHTML
     var innerHTML = '';
-    for(var layerInfo of baseMaps){
+    for(var i in baseMaps){
+      var layerInfo = baseMaps[i];
       innerHTML += '<option value="'+layerInfo.mapId+'">'+layerInfo.name+'</option>';
     }
       this._optionsSelect.innerHTML = innerHTML;
