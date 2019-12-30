@@ -18,11 +18,6 @@ L.Control.extend({
     if(!options){
       options = {};
     }
-    if('visible' in options){
-      this._visible = options.visible;
-    }else{
-      this._visible = true;
-    }
     this._map = null;
   },
 
@@ -31,65 +26,29 @@ L.Control.extend({
       container = L.DomUtil.create('div', containerName + ' leaflet-bar');
     this._map = map;
 
-    // build innerHTML
-    var innerHTML = '';
-    for(var i in this._baseMaps){
-      var layerInfo = this._baseMaps[i];
-      innerHTML += '<option value="'+layerInfo.mapId+'">'+layerInfo.name+'</option>';
-    }
+    let listener = (event) => this._map.setMapID(Number(event.target.value));
 
-    if(this._visible){
-      this._optionsSelect = this._createSelect(this, innerHTML, this.options.buttonTitle,
-        containerName + '-select', container, this._mapIDChanging.bind(this));
-    }
-    this._map.on('newbasemaps', this._resetSelect, this);
+    this._optionsSelect = this._createSelect(this, "", this.options.buttonTitle,
+      containerName + '-select', container, listener);
     // this._map.on('newoverlaymaps', this._resetSelect, this);
-    this._map.on('mapidchanged', this._mapIDChanged, this);
 
     return container;
   },
 
   onRemove: function(map) {
-    this._map.off('newbasemaps', this._resetSelect, this);
     // this._map.off('newoverlaymaps', this._resetSelect, this);
-    this._map.off('mapidchanged', this._mapIDChanged, this);
   },
 
-  _resetSelect: function(e){
+  _resetSelect: function(baseMaps){
     // build innerHTML
     var innerHTML = '';
-    for(var i in e.baseMaps){
-      var layerInfo = e.baseMaps[i];
+    for(var layerInfo of baseMaps){
       innerHTML += '<option value="'+layerInfo.mapId+'">'+layerInfo.name+'</option>';
     }
-    if(this._visible){
       this._optionsSelect.innerHTML = innerHTML;
-    }
-  },
-
-  _mapIDChanging: function(event){
-    var mapID = Number(event.target.value);
-    var current = this._selectedMapID;
-    if(mapID === current){
-      // mapID did not change
-      return;
-    }
-
-    this._map.fire('mapidchanging', {
-      current: current,
-      mapID: mapID,
-      userChanged: true,
-    });
-  },
-
-  _mapIDChanged: function(event){
-    this._changeSelectedOption(event.mapID);
   },
 
   _changeSelectedOption: function(mapID){
-    if(!this._visible){
-      return;
-    }
     var options = this._optionsSelect.options;
     var option;
     for (var i = 0; i < options.length; i++) {

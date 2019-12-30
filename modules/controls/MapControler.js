@@ -1,262 +1,234 @@
 // import L from 'leaflet';
 
 // @if KARTOGRAPHER=true
-module.MapControler =
+
+class MD5{
+    static md5cycle(x, k) {
+      var a = x[0], b = x[1], c = x[2], d = x[3];
+
+      a = this.ff(a, b, c, d, k[0], 7, -680876936);
+      d = this.ff(d, a, b, c, k[1], 12, -389564586);
+      c = this.ff(c, d, a, b, k[2], 17, 606105819);
+      b = this.ff(b, c, d, a, k[3], 22, -1044525330);
+      a = this.ff(a, b, c, d, k[4], 7, -176418897);
+      d = this.ff(d, a, b, c, k[5], 12, 1200080426);
+      c = this.ff(c, d, a, b, k[6], 17, -1473231341);
+      b = this.ff(b, c, d, a, k[7], 22, -45705983);
+      a = this.ff(a, b, c, d, k[8], 7, 1770035416);
+      d = this.ff(d, a, b, c, k[9], 12, -1958414417);
+      c = this.ff(c, d, a, b, k[10], 17, -42063);
+      b = this.ff(b, c, d, a, k[11], 22, -1990404162);
+      a = this.ff(a, b, c, d, k[12], 7, 1804603682);
+      d = this.ff(d, a, b, c, k[13], 12, -40341101);
+      c = this.ff(c, d, a, b, k[14], 17, -1502002290);
+      b = this.ff(b, c, d, a, k[15], 22, 1236535329);
+
+      a = this.gg(a, b, c, d, k[1], 5, -165796510);
+      d = this.gg(d, a, b, c, k[6], 9, -1069501632);
+      c = this.gg(c, d, a, b, k[11], 14, 643717713);
+      b = this.gg(b, c, d, a, k[0], 20, -373897302);
+      a = this.gg(a, b, c, d, k[5], 5, -701558691);
+      d = this.gg(d, a, b, c, k[10], 9, 38016083);
+      c = this.gg(c, d, a, b, k[15], 14, -660478335);
+      b = this.gg(b, c, d, a, k[4], 20, -405537848);
+      a = this.gg(a, b, c, d, k[9], 5, 568446438);
+      d = this.gg(d, a, b, c, k[14], 9, -1019803690);
+      c = this.gg(c, d, a, b, k[3], 14, -187363961);
+      b = this.gg(b, c, d, a, k[8], 20, 1163531501);
+      a = this.gg(a, b, c, d, k[13], 5, -1444681467);
+      d = this.gg(d, a, b, c, k[2], 9, -51403784);
+      c = this.gg(c, d, a, b, k[7], 14, 1735328473);
+      b = this.gg(b, c, d, a, k[12], 20, -1926607734);
+
+      a = this.hh(a, b, c, d, k[5], 4, -378558);
+      d = this.hh(d, a, b, c, k[8], 11, -2022574463);
+      c = this.hh(c, d, a, b, k[11], 16, 1839030562);
+      b = this.hh(b, c, d, a, k[14], 23, -35309556);
+      a = this.hh(a, b, c, d, k[1], 4, -1530992060);
+      d = this.hh(d, a, b, c, k[4], 11, 1272893353);
+      c = this.hh(c, d, a, b, k[7], 16, -155497632);
+      b = this.hh(b, c, d, a, k[10], 23, -1094730640);
+      a = this.hh(a, b, c, d, k[13], 4, 681279174);
+      d = this.hh(d, a, b, c, k[0], 11, -358537222);
+      c = this.hh(c, d, a, b, k[3], 16, -722521979);
+      b = this.hh(b, c, d, a, k[6], 23, 76029189);
+      a = this.hh(a, b, c, d, k[9], 4, -640364487);
+      d = this.hh(d, a, b, c, k[12], 11, -421815835);
+      c = this.hh(c, d, a, b, k[15], 16, 530742520);
+      b = this.hh(b, c, d, a, k[2], 23, -995338651);
+
+      a = this.ii(a, b, c, d, k[0], 6, -198630844);
+      d = this.ii(d, a, b, c, k[7], 10, 1126891415);
+      c = this.ii(c, d, a, b, k[14], 15, -1416354905);
+      b = this.ii(b, c, d, a, k[5], 21, -57434055);
+      a = this.ii(a, b, c, d, k[12], 6, 1700485571);
+      d = this.ii(d, a, b, c, k[3], 10, -1894986606);
+      c = this.ii(c, d, a, b, k[10], 15, -1051523);
+      b = this.ii(b, c, d, a, k[1], 21, -2054922799);
+      a = this.ii(a, b, c, d, k[8], 6, 1873313359);
+      d = this.ii(d, a, b, c, k[15], 10, -30611744);
+      c = this.ii(c, d, a, b, k[6], 15, -1560198380);
+      b = this.ii(b, c, d, a, k[13], 21, 1309151649);
+      a = this.ii(a, b, c, d, k[4], 6, -145523070);
+      d = this.ii(d, a, b, c, k[11], 10, -1120210379);
+      c = this.ii(c, d, a, b, k[2], 15, 718787259);
+      b = this.ii(b, c, d, a, k[9], 21, -343485551);
+
+      x[0] = this.add32(a, x[0]);
+      x[1] = this.add32(b, x[1]);
+      x[2] = this.add32(c, x[2]);
+      x[3] = this.add32(d, x[3]);
+    }
+
+    static cmn(q, a, b, x, s, t) {
+      a = this.add32(this.add32(a, q), this.add32(x, t));
+      return this.add32((a << s) | (a >>> (32 - s)), b);
+    }
+
+    static ff(a, b, c, d, x, s, t) {
+      return this.cmn((b & c) | ((~b) & d), a, b, x, s, t);
+    }
+
+    static gg(a, b, c, d, x, s, t) {
+      return this.cmn((b & d) | (c & (~d)), a, b, x, s, t);
+    }
+
+    static hh(a, b, c, d, x, s, t) {
+      return this.cmn(b ^ c ^ d, a, b, x, s, t);
+    }
+
+    static ii(a, b, c, d, x, s, t) {
+      return this.cmn(c ^ (b | (~d)), a, b, x, s, t);
+    }
+
+    static md51(s) {
+      var txt = '';
+      var n = s.length,
+        state = [ 1732584193, -271733879, -1732584194, 271733878 ], i;
+      for (i=64; i<=s.length; i+=64) {
+        this.md5cycle(state, this.md5blk(s.substring(i-64, i)));
+      }
+      s = s.substring(i-64);
+      // eslint-disable-next-line comma-spacing
+      var tail = [ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 ];
+      for (i=0; i<s.length; i++){
+        tail[i>>2] |= s.charCodeAt(i) << ((i%4) << 3);
+      }
+      tail[i>>2] |= 0x80 << ((i%4) << 3);
+      if (i > 55) {
+        this.md5cycle(state, tail);
+        for (i=0; i<16; i++){
+          tail[i] = 0;
+        }
+      }
+      tail[14] = n*8;
+      this.md5cycle(state, tail);
+      return state;
+    }
+
+    /* there needs to be support for Unicode here,
+    * unless we pretend that we can redefine the MD-5
+    * algorithm for multi-byte characters (perhaps
+    * by adding every four 16-bit characters and
+    * shortening the sum to 32 bits). Otherwise
+    * I suggest performing MD-5 as if every character
+    * was two bytes--e.g., 0040 0025 = @%--but then
+    * how will an ordinary MD-5 sum be matched?
+    * There is no way to standardize text to something
+    * like UTF-8 before transformation; speed cost is
+    * utterly prohibitive. The JavaScript standard
+    * itself needs to look at this: it should start
+    * providing access to strings as preformed UTF-8
+    * 8-bit unsigned value arrays.
+    */
+    static md5blk(s) { /* I figured global was faster.   */
+      var md5blks = [], i; /* Andy King said do it this way. */
+      for (i=0; i<64; i+=4) {
+        md5blks[i>>2] = s.charCodeAt(i) +
+          (s.charCodeAt(i+1) << 8) +
+          (s.charCodeAt(i+2) << 16) +
+          (s.charCodeAt(i+3) << 24);
+      }
+      return md5blks;
+    }
+
+    static rhex(n){
+      var s='', j=0;
+      for(; j<4; j++){
+        s += this.hex_chr[ (n >> (j * 8 + 4)) & 0x0F ] +
+          this.hex_chr[ (n >> (j * 8)) & 0x0F ];
+      }
+      return s;
+    }
+
+    static hex(x) {
+      // eslint-disable-next-line camelcase
+      this.hex_chr = '0123456789abcdef'.split('');
+      for (var i=0; i<x.length; i++){
+        x[i] = this.rhex(x[i]);
+      }
+      return x.join('');
+    }
+
+    static md5(s) {
+      return this.hex(this.md51(s));
+    }
+
+    static add32(a, b) {
+      return (a + b) & 0xFFFFFFFF;
+    }
+};
+
+module.MapControler = 
 // @endif
 // @if KARTOGRAPHER=false
 // module.exports.MapControler =
 // @endif
-L.Control.extend({
-  options: {
 
+MapTileLayer =
+// @endif
+// @if KARTOGRAPHER=false
+// module.exports =
+// @endif
+[L.TileLayer.extend({
+  initialize: function(url, options) {
+    L.TileLayer.prototype.initialize.call(this, url, options);
+    // L.setOptions(this, options);
+
+    this._mapID = this.options.mapID;
+    this._cacheVersion = this.options.cacheVersion;
   },
 
-  initialize: function(map){
-    this._baseMaps = {};
-    this._overlayMaps = {};
-    this._visibleOverlayMaps = [];
-    this._selectedView = {
-      mapID: 0,
-      plane: 0,
-      zoom: 0,
-      location: [ 0, 0 ],
+  onAdd: function(map) {
+    L.TileLayer.prototype.onAdd.call(this, map);
+  },
+
+  onRemove: function(map) {
+    L.TileLayer.prototype.onRemove.call(this, map);
+  },
+
+  // Inject plane into URL
+  getTileUrl: function(coords) {
+    var data = {
+      r: L.Browser.retina ? '@2x' : '',
+      s: this._getSubdomain(coords),
+      x: coords.x,
+      y: coords.y,
+      z: this._getZoomForUrl(),
+      p: this._map.getPlane(),
+      mapID: this._mapID,
+      cacheVersion: this._cacheVersion,
     };
-    this._initialView = {
-      viewSet: false,
-      mapID: 0,
-      plane: 0,
-      zoom: 0,
-      location: [ 0, 0 ],
-    };
-    this._defaultView = {
-      viewSet: false,
-      mapID: 0,
-      plane: 0,
-      zoom: 0,
-      location: [ 0, 0 ],
-    };
-    this._map = map;
 
-    this._map.on('mapidchanged', this._mapIDChanged, this);
-    this._map.on('planechanged', this._planeChanged, this);
-    this._map.on('zoomend', this._zoomChanged, this);
-  },
-
-  onRemove: function() {
-    this._map.off('mapidchanged', this._mapIDChanged, this);
-    this._map.off('planechanged', this._planeChanged, this);
-    this._map.off('zoomend', this._zoomChanged, this);
-  },
-
-  _mapIDChanged: function(event){
-    this._changeMapID(Number(event.mapID));
-    if(event.userChanged){
-      this._initialView.viewSet = false;
-      this._switchMapView(this._defaultView);
-    }
-  },
-
-  _planeChanged: function(event){
-    this._changePlane(Number(event.plane));
-    if(event.userChanged){
-      this._initialView.viewSet = false;
-    }
-  },
-
-  _zoomChanged: function(event){
-    this._changeZoom(Number(event.target.getZoom()));
-  },
-
-  /*
-   * Replace the current basemaps with new
-   */
-  setBaseMaps: function(baseMaps){
-    // Remove loaded baseMaps
-    if(this._selectedView.mapID !== null &&
-        this._selectedView.mapID in this._baseMaps &&
-        this._map !== null){
-      var selectedBaseMap = this._baseMaps[this._selectedView.mapID];
-      this._map.removeLayer(selectedBaseMap.layerBuilder.layer);
-    }
-    // Set new BaseMaps
-    this._baseMaps = baseMaps;
-
-    this._map.fire('newbasemaps', {
-      baseMaps: baseMaps,
-    });
-
-    this._changeMapID(this._selectedView.mapID, true);
-    this._switchMapView(this._defaultView);
-  },
-
-  setOverlayMaps: function(overlayMaps){
-    // Clear previous overlayMaps
-    for(let i in this._visibleOverlayMaps){
-      this._map.removeLayer(this._visibleOverlayMaps[i]);
-    }
-    this._visibleOverlayMaps.length = 0;
-    // Set new OverlayMaps
-    this._overlayMaps = overlayMaps;
-
-    this._map.fire('newoverlaymaps', {
-      overlayMaps: overlayMaps,
-    });
-
-    this._loadOverlays();
-  },
-
-  setInitView: function(mapID, plane, loc, zoom){
-    this._initialView = {
-      viewSet: true,
-      mapID: mapID,
-      plane: plane,
-      zoom: zoom,
-      location: [ loc.lat, loc.lng ],
-    };
-    this._switchMapView(this._initialView);
-  },
-
-  /*
-   * Switch to map to particular view
-   * load a different basemap, plane or move the map
-   */
-  _switchMapView: function(view){
-    // check if there is a view buffered in _initialView
-    if(this._initialView.viewSet){
-      view = {
-        mapID: this._initialView.mapID,
-        plane: this._initialView.plane,
-        zoom: this._initialView.zoom,
-        location: this._initialView.location,
-      };
-    }
-    var current = this._selectedView;
-    var changed = view;
-
-    // Did we set a new mapID to switch to?
-    if('mapID' in changed){
-      // check if maps are loaded
-      if(!(changed.mapID in this._baseMaps)){
-        // console.error('Selected MapID does not exists: ', changed.mapID);
-        return;
+    if (this._map && !this._map.options.crs.infinite) {
+      var invertedY = this._globalTileRange.max.y - coords.y;
+      if (this.options.tms) {
+        data['y'] = invertedY;
       }
-      // Check if MapID is changed and trigger changes
-      if(current.mapID !== changed.mapID){
-        this._map.fire('mapidchanging', {
-          current: current.mapID,
-          mapID: changed.mapID,
-          userChanged: false,
-        });
-      }
+      data['-y'] = invertedY;
     }
 
-    // Did we set a new plane to switch to?
-    if('plane' in changed){
-      // Check if Plane is changed and trigger changes
-      if(current.plane !== changed.plane){
-        this._map.fire('planechanging', {
-          current: current.plane,
-          plane: changed.plane,
-          userChanged: false,
-        });
-      }
-    }
-
-    if('zoom' in changed || 'location' in changed){
-      // if zoom not changed
-      if(!('zoom' in changed)){
-        this._map.setView(changed.location, current.zoom);
-      }
-      this._map.setView(changed.location, changed.zoom);
-    }
+    return L.Util.template(this._url, L.Util.extend(data, this.options));
   },
-
-  _changeMapID: function(mapID){
-    if(!(mapID in this._baseMaps)){
-      console.error('Selected MapID does not exists: ', mapID);
-      return;
-    }
-
-    this._loadBaseMaps(mapID);
-    this._loadOverlays();
-
-    // Set default view for this map
-    this._defaultView = {
-      viewSet: true,
-      mapID: mapID,
-      plane: 0,
-      zoom: this._baseMaps[mapID].defaultZoom,
-      location: [ this._baseMaps[mapID].center[1],
-        this._baseMaps[mapID].center[0] ],
-    };
-  },
-
-  _changePlane: function(plane){
-    this._selectedView.plane = Number(plane);
-    this._loadOverlays();
-  },
-
-  _changeZoom: function(zoom){
-    this._selectedView.zoom = Number(zoom);
-    this._loadOverlays();
-  },
-
-  /*
-   * == Loading new layers code below ==
-   */
-
-  _loadBaseMaps: function(mapId){
-    // Check if there is a BaseMap displayed
-    if(this._selectedView.mapID !== null){
-      this._map.removeLayer(this._baseMaps[this._selectedView.mapID].layerBuilder.layer);
-    }
-
-    this._map.addLayer(this._baseMaps[mapId].layerBuilder.layer);
-    this._map.setMaxBounds(this._translateBounds(this._baseMaps[mapId].bounds));
-    this._selectedView.mapID = Number(mapId);
-  },
-
-  _loadOverlays: function(){
-    // Clear previous OverlayMaps
-    for(let i in this._visibleOverlayMaps){
-      this._map.removeLayer(this._visibleOverlayMaps[i]);
-    }
-    this._visibleOverlayMaps.length = 0;
-
-    for(let i in this._overlayMaps){
-      if(this._overlayMaps[i].displayOnLoad){
-        // Load overlay async and non blocking
-        this._addOverlayMap(this._overlayMaps[i]);
-      }
-    }
-  },
-
-  _addOverlayMap: async function(layerInfo){
-    await layerInfo.layerBuilder.dataLoader;
-    layerInfo.layerBuilder.dataLoader = null;
-
-    var view = this._selectedView;
-
-    layerInfo.layer = layerInfo.layerBuilder.createLayer(view.mapID, view.plane, view.zoom);
-    this._visibleOverlayMaps.push(layerInfo.layer);
-    this._map.addLayer(layerInfo.layer);
-  },
-
-  _translateBounds: function(bounds){
-    var newbounds = [ [ 0, 0 ], [ 12000, 12000 ] ];
-    if(Array.isArray(bounds) && bounds.length === 2){
-      // South-West
-      if(Array.isArray(bounds[0]) && bounds[0].length === 2){
-        newbounds[0][0] = bounds[0][1];
-        newbounds[0][1] = bounds[0][0];
-      }
-      // North-East
-      if(Array.isArray(bounds[1]) && bounds[1].length === 2){
-        newbounds[1][0] = bounds[1][1];
-        newbounds[1][1] = bounds[1][0];
-      }
-    }
-    return newbounds;
-  },
-
-});
+}), MD5
+];

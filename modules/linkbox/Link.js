@@ -44,13 +44,12 @@ module.Link = ( function ( $ ) {
 		link.$container.addClass( 'mw-kartographer-link' );
 
 		link.mapID = options.mapID || 'auto';
-    link.plane = options.plane || 'auto';
+    	link.plane = options.plane || 'auto';
 		link.center = options.center || 'auto';
 		link.zoom = options.zoom || 'auto';
 
 		link.opened = false;
-
-		link.useRouter = !!options.fullScreenRoute;
+		link.useRouter = false;
 		link.fullScreenRoute = options.fullScreenRoute || null;
 		link.captionText = options.captionText || '';
 		link.dataGroups = options.dataGroups;
@@ -63,14 +62,9 @@ module.Link = ( function ( $ ) {
 		 * @protected
 		 */
 		link.fullScreenMap = null;
-
-		if ( link.useRouter && link.container.tagName === 'A' ) {
-			link.container.href = '#' + link.fullScreenRoute;
-		} else {
-			link.$container.on( 'click.kartographer', function () {
-				link.openFullScreen();
-			} );
-		}
+		link.$container.on( 'click.kartographer', function () {
+			link.openFullScreen();
+		} );
 	};
 
 	/**
@@ -82,7 +76,6 @@ module.Link = ( function ( $ ) {
 	 * @member Kartographer.Linkbox.LinkClass
 	 */
 	Link.prototype.openFullScreen = function ( position ) {
-
 		var link = this,
 			map = link.fullScreenMap,
 			mapObject,
@@ -91,8 +84,8 @@ module.Link = ( function ( $ ) {
 		position = position || {};
 		position.center = position.center || link.center;
 		position.zoom = typeof position.zoom === 'number' ? position.zoom : link.zoom;
-    position.mapID = position.mapID || link.mapID;
-    position.plane = position.plane || link.plane;
+    	position.mapID = position.mapID || link.mapID;
+    	position.plane = position.plane || link.plane;
 
 		if ( map && map._updatingHash ) {
 			// Skip - there is nothing to do.
@@ -118,8 +111,8 @@ module.Link = ( function ( $ ) {
 				fullscreen: true,
 				link: true,
 				parentLink: this,
-        mapID: position.mapID,
-        plane: position.plane,
+        		mapID: position.mapID,
+        		plane: position.plane,
 				center: position.center,
 				zoom: position.zoom,
 				captionText: link.captionText,
