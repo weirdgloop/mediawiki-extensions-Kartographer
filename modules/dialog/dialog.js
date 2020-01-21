@@ -74,7 +74,6 @@ module.Dialog = ( function ( $, mw, CloseFullScreenControl, router ) {
 				// Add the button to the footer
 				dialog.$foot.append( $inlineContainer );
 
-				// button.on( 'change', dialog.toggleSideBar, null, dialog );
         button.on( 'change', dialog.openURL, null, dialog );
 			} );
 		} );
@@ -91,7 +90,7 @@ module.Dialog = ( function ( $, mw, CloseFullScreenControl, router ) {
   MapDialog.prototype.createURL = function ( ) {
     var externalLinks = mw.config.get( 'wgKartographerExternalLinks' );
     // select first url in list
-    var url = externalLinks.services[0].links[0].url;
+    var url = mw.config.get( 'wgKartographerDataConfig' ).standaloneURL;
     // Replace parts
     var view; // = this.map.getInitialMapPosition();
     view = {
@@ -114,35 +113,6 @@ module.Dialog = ( function ( $, mw, CloseFullScreenControl, router ) {
 
     return url;
   };
-
-	MapDialog.prototype.toggleSideBar = function ( open ) {
-		var dialog = this;
-
-		mw.loader.using( 'ext.kartographer.dialog.sidebar' ).then( function () {
-			var SideBar;
-			if ( !dialog.sideBar ) {
-				SideBar = require( 'ext.kartographer.dialog.sidebar' );
-				dialog.sideBar = new SideBar( { dialog: dialog } );
-			}
-
-			open = ( typeof open === 'undefined' ) ? !dialog.$mapDetailsButton.value : open;
-
-			if ( dialog.$mapDetailsButton.value !== open ) {
-				dialog.$mapDetailsButton.setValue( open );
-				// This `change` event callback is fired again, so skip here.
-				return;
-			}
-
-			dialog.$body.toggleClass( 'mw-kartographer-mapDialog-sidebar-opened', open );
-
-			mw.track( 'mediawiki.kartographer', {
-				action: open ? 'sidebar-show' : 'sidebar-hide',
-				isFullScreen: true,
-				feature: dialog.map.parentMap || dialog.map.parentLink
-			} );
-			dialog.sideBar.toggle( open );
-		} );
-	};
 
 	MapDialog.prototype.getActionProcess = function ( action ) {
 		var dialog = this;
@@ -212,9 +182,7 @@ module.Dialog = ( function ( $, mw, CloseFullScreenControl, router ) {
 		return MapDialog.super.prototype.getSetupProcess.call( this, options )
 			.next( function () {
 				var dialog = this,
-					isFirstTimeOpen = !dialog.$mapDetailsButton,
-					isSideBarVisible = dialog.sideBar;
-
+					isFirstTimeOpen = !dialog.$mapDetailsButton
 				if ( options.map && options.map !== dialog.map ) {
 
 					if ( dialog.map ) {
@@ -239,14 +207,6 @@ module.Dialog = ( function ( $, mw, CloseFullScreenControl, router ) {
 					if ( isFirstTimeOpen ) {
 						// The button does not exist yet, add it
 						dialog.addFooterButton();
-					} else if ( isSideBarVisible ) {
-						// The button exists, the sidebar was open, call `tearDown` and reopen it.
-						dialog.sideBar.tearDown();
-						dialog.map.doWhenReady( function () {
-							dialog.offsetMap( true );
-							dialog.toggleSideBar( true );
-						} );
-						return;
 					}
 					// The button exists, the sidebar was not open, simply run `offsetMap`
 					dialog.map.doWhenReady( function () {
@@ -264,13 +224,6 @@ module.Dialog = ( function ( $, mw, CloseFullScreenControl, router ) {
 					return;
 				}
 				this.map.doWhenReady( function () {
-					this.map.$container.find( '.leaflet-marker-icon' ).each( function () {
-						var height = $( this ).height();
-						$( this ).css( {
-							clip: 'rect(auto auto ' + ( ( height / 2 ) + 10 ) + 'px auto)'
-						} );
-					} );
-
 					mw.hook( 'wikipage.maps' ).fire( this.map, true /* isFullScreen */ );
 				}, this );
 			}, this );

@@ -21,11 +21,6 @@ L.Control.extend({
     L.setOptions(this, options);
     this._map = null;
     this._plane = this.options.planeMin || 0;
-    if('visible' in options){
-      this._visible = options.visible;
-    }else{
-      this._visible = true;
-    }
   },
 
   onAdd: function(map) {
@@ -39,58 +34,32 @@ L.Control.extend({
     let listenerDown = () => this.setPlane(this._plane - 1);
     let listenerLabel = () => this.setPlane(this.options.planeMin || 0); // Reset plane
 
-    if(this._visible){
-      this._buttonUp = this._createButton(this, this.options.upicon, 'Move up', containerName + '-up ' + (this._plane + 1 > this.options.planeMax ? className : ''), container, listenerUp);
-      this._buttonPlane = this._createButton(this, this._plane, 'Current plane', containerName + '-plane', container, listenerLabel);
-      this._buttonDown = this._createButton(this, this.options.downicon, 'Move down', containerName + '-down ' + (this._plane - 1 < this.options.planeMin ? className : ''), container, listenerDown);
-    }
-
-    map.on('planechanging', this._planeChanging, this);
+    this._buttonUp = this._createButton(this, this.options.upicon, 'Move up', containerName + '-up ' + (this._plane + 1 > this.options.planeMax ? className : ''), container, listenerUp);
+    this._buttonPlane = this._createButton(this, this._plane, 'Current plane', containerName + '-plane', container, listenerLabel);
+    this._buttonDown = this._createButton(this, this.options.downicon, 'Move down', containerName + '-down ' + (this._plane - 1 < this.options.planeMin ? className : ''), container, listenerDown);
 
     return container;
   },
 
-  onRemove: function(map) {
-    map.off('planechanging', this._planeChanging, this);
-  },
-
-  _planeChanging: function(e) {
-    let className = 'leaflet-disabled';
-    this._plane = e.plane;
-
-    if(this._visible){
-      this._buttonPlane.textContent = e.plane;
-
-      // Disable buttons
-      L.DomUtil.removeClass(this._buttonUp, className);
-      L.DomUtil.removeClass(this._buttonDown, className);
-
-      if(this._plane - 1 < this.options.planeMin){
-        L.DomUtil.addClass(this._buttonDown, className);
-      }
-      if(this._plane + 1 > this.options.planeMax){
-        L.DomUtil.addClass(this._buttonUp, className);
-      }
-    }
-  },
-
   setPlane: function(plane) {
-    var old = this._plane;
-    if(plane === old){
-      // Plane didn't change
-      return;
-    }
-
     if(plane < this.options.planeMin || plane > this.options.planeMax){
-      // New plane is not within bounds
-      return;
+          // New plane is not within bounds
+          return;
     }
+    this._map.setPlane(plane)
+    this._plane = plane
+    this._buttonPlane.textContent = plane;
 
-    this._map.fire('planechanging', {
-      current: old,
-      plane: Number(plane),
-      userChanged: true,
-    });
+    // Disable buttons
+    L.DomUtil.removeClass(this._buttonUp, 'leaflet-disabled');
+    L.DomUtil.removeClass(this._buttonDown, 'leaflet-disabled');
+
+    if(plane - 1 < this.options.planeMin){
+      L.DomUtil.addClass(this._buttonDown, 'leaflet-disabled');
+    }
+    if(plane + 1 > this.options.planeMax){
+      L.DomUtil.addClass(this._buttonUp, 'leaflet-disabled');
+    }
   },
 
   getPlane: function() {

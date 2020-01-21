@@ -94,8 +94,8 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 				map = kartobox.map( {
 					featureType: 'mapframe',
 					container: container,
-          mapID: data.mapID,
-          plane: data.plane,
+          			mapID: data.mapID,
+          			plane: data.plane,
 					center: [ data.latitude, data.longitude ],
 					zoom: data.zoom,
 					lang: data.lang,
@@ -114,12 +114,6 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 				} );
 				map.doWhenReady( function () {
 					map.$container.css( 'backgroundImage', '' );
-					map.$container.find( '.leaflet-marker-icon' ).each( function () {
-						var height = $( this ).height();
-						$( this ).css( {
-							clip: 'rect(auto auto ' + ( ( height / 2 ) + 10 ) + 'px auto)'
-						} );
-					} );
 				} );
 
 				mapsInArticle.push( map );
@@ -138,57 +132,6 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 
 				promises.push( deferred.promise() );
 			}
-		} );
-
-		// Allow customizations of interactive maps in article.
-		$.when( promises ).then( function () {
-			mw.hook( 'wikipage.maps' ).fire( mapsInArticle, false /* isFullScreen */ );
-
-			if ( routerInited ) {
-				return;
-			}
-			// execute this piece of code only once
-			routerInited = true;
-
-			// Opens a map in full screen. #/map(/:zoom)(/:latitude)(/:longitude)
-			// Examples:
-			//     #/map/0
-			//     #/map/0/5
-			//     #/map/0/16/-122.4006/37.7873
-			router.route( /map\/([0-9]+)(?:\/([0-9]+))?(?:\/([+-]?\d+\.?\d{0,5})?\/([+-]?\d+\.?\d{0,5})?)?/, function ( maptagId, zoom, latitude, longitude ) {
-				var map = maps[ maptagId ],
-					position;
-
-				if ( !map ) {
-					router.navigate( '' );
-					return;
-				}
-
-				if ( zoom !== undefined && latitude !== undefined && longitude !== undefined ) {
-					position = {
-						center: [ +latitude, +longitude ],
-						zoom: +zoom,
-            mapID: 0, // TODO
-            plane: 0, // TODO
-					};
-				} else {
-					position = map.getInitialMapPosition();
-				}
-
-				// We need this hack to differentiate these events from `open` events.
-				if ( !map.fullScreenMap && !map.clicked ) {
-					mw.track( 'mediawiki.kartographer', {
-						action: 'hashopen',
-						isFullScreen: true,
-						feature: map
-					} );
-					map.clicked = false;
-				}
-				map.openFullScreen( position );
-			} );
-
-			// Check if we need to open a map in full screen.
-			router.checkRoute();
 		} );
 	} );
 

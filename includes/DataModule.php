@@ -20,8 +20,6 @@ class DataModule extends ResourceLoaderModule {
 	public function getScript( ResourceLoaderContext $context ) {
 		$config = $context->getResourceLoader()->getConfig();
 		return ResourceLoader::makeConfigSetScript( [
-			'wgKartographerMapServer' => $config->get( 'KartographerMapServer' ),
-			'wgKartographerIconServer' => $config->get( 'KartographerIconServer' ),
 			'wgKartographerSrcsetScales' => $config->get( 'KartographerSrcsetScales' ),
 			'wgKartographerStyles' => $config->get( 'KartographerStyles' ),
 			'wgKartographerDfltStyle' => $config->get( 'KartographerDfltStyle' ),

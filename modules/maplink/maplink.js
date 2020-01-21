@@ -62,6 +62,7 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 	 * @ignore
 	 */
 	mw.hook( 'wikipage.content' ).add( function () {
+		console.log("hook")
 
 		// `wikipage.content` may be fired more than once.
 		$.each( maplinks, function () {
@@ -72,6 +73,7 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 		// search outside. This is an anti-pattern and should be improved...
 		// Meanwhile .mw-body is better than searching the full document.
 		$( '.mw-kartographer-maplink', '.mw-body' ).each( function ( index ) {
+			console.log('each')
 			var data = getMapData( this ),
 				link;
 
@@ -86,66 +88,8 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 				captionText: data.captionText,
 				fullScreenRoute: '/maplink/' + index
 			} );
-			mw.track( 'mediawiki.kartographer', {
-				action: 'view',
-				isFullScreen: false,
-				feature: link
-			} );
-			link.$container.click( function () {
-				// We need this hack to differentiate these events from `hashopen` events.
-				link.clicked = true;
-
-				mw.track( 'mediawiki.kartographer', {
-					action: 'open',
-					isFullScreen: true,
-					feature: link
-				} );
-			} );
+			link.$container.attr('href', '#mapFullscreen')
 		} );
-
-		if ( routerInited ) {
-			return;
-		}
-		// execute this piece of code only once
-		routerInited = true;
-
-		// Opens a maplink in full screen. #/maplink(/:zoom)(/:latitude)(/:longitude)
-		// Examples:
-		//     #/maplink/0
-		//     #/maplink/0/5
-		//     #/maplink/0/16/-122.4006/37.7873
-		router.route( /maplink\/([0-9]+)(?:\/([0-9]+))?(?:\/([+-]?\d+\.?\d{0,5})?\/([+-]?\d+\.?\d{0,5})?)?/, function ( maptagId, zoom, latitude, longitude ) {
-			var link = maplinks[ maptagId ],
-				position;
-
-			if ( !link ) {
-				router.navigate( '' );
-				return;
-			}
-
-			if ( zoom !== undefined && latitude !== undefined && longitude !== undefined ) {
-				position = {
-					center: [ +latitude, +longitude ],
-					zoom: +zoom,
-          mapID: 0, // TODO
-          plane: 0, // TODO
-				};
-			}
-
-			// We need this hack to differentiate these events from `open` events.
-			if ( !link.fullScreenMap && !link.clicked ) {
-				mw.track( 'mediawiki.kartographer', {
-					action: 'hashopen',
-					isFullScreen: true,
-					feature: link
-				} );
-				link.clicked = false;
-			}
-			link.openFullScreen( position );
-		} );
-
-		// Check if we need to open a map in full screen.
-		router.checkRoute();
 	} );
 
 	return maplinks;
