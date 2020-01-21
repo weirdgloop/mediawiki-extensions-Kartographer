@@ -490,7 +490,7 @@
 			"attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
 			"baseMapsFile": "https://maps.runescape.wiki/osrs/data/basemaps.json",
 			"wikiImageURL": "https://oldschool.runescape.wiki/images/"
-		},
+		}
 	},
 	"TrackingCategories": [
 		"kartographer-tracking-category",
