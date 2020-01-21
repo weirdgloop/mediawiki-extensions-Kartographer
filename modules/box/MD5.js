@@ -1,8 +1,12 @@
-// import L from 'leaflet';
-
-// @if KARTOGRAPHER=true
-
-class MD5{
+/**
+ * Simple md5 script, NOT used for security
+ *
+ * Based on http://www.myersdaily.org/joseph/javascript/md5.js
+ * article: https://web.archive.org/web/20170425230948/http://www.webreference.com:80/programming/javascript/jkm3/index.html
+ */
+/* eslint-disable no-bitwise */
+module.MD5 = (function(){
+  return class MD5{
     static md5cycle(x, k) {
       var a = x[0], b = x[1], c = x[2], d = x[3];
 
@@ -177,58 +181,5 @@ class MD5{
     static add32(a, b) {
       return (a + b) & 0xFFFFFFFF;
     }
-};
-
-module.MapControler = 
-// @endif
-// @if KARTOGRAPHER=false
-// module.exports.MapControler =
-// @endif
-
-MapTileLayer =
-// @endif
-// @if KARTOGRAPHER=false
-// module.exports =
-// @endif
-[L.TileLayer.extend({
-  initialize: function(url, options) {
-    L.TileLayer.prototype.initialize.call(this, url, options);
-    // L.setOptions(this, options);
-
-    this._mapID = this.options.mapID;
-    this._cacheVersion = this.options.cacheVersion;
-  },
-
-  onAdd: function(map) {
-    L.TileLayer.prototype.onAdd.call(this, map);
-  },
-
-  onRemove: function(map) {
-    L.TileLayer.prototype.onRemove.call(this, map);
-  },
-
-  // Inject plane into URL
-  getTileUrl: function(coords) {
-    var data = {
-      r: L.Browser.retina ? '@2x' : '',
-      s: this._getSubdomain(coords),
-      x: coords.x,
-      y: coords.y,
-      z: this._getZoomForUrl(),
-      p: this._map.getPlane(),
-      mapID: this._mapID,
-      cacheVersion: this._cacheVersion,
-    };
-
-    if (this._map && !this._map.options.crs.infinite) {
-      var invertedY = this._globalTileRange.max.y - coords.y;
-      if (this.options.tms) {
-        data['y'] = invertedY;
-      }
-      data['-y'] = invertedY;
-    }
-
-    return L.Util.template(this._url, L.Util.extend(data, this.options));
-  },
-}), MD5
-];
+  };
+}() );

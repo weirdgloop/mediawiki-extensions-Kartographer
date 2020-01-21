@@ -160,13 +160,11 @@
 				"oojs-ui.styles.icons-media",
 				"jquery.throttle-debounce",
 				"mapbox",
-				"ext.kartographer.lib.topojson",
 				"ext.kartographer",
 				"ext.kartographer.style",
-				"ext.kartographer.settings",
 				"ext.kartographer.site",
 				"ext.kartographer.data",
-				"ext.kartographer.layers"
+				"ext.kartographer.controls"
 			],
 			"scripts": [
 				"lib/leaflet.sleep.js",
@@ -174,44 +172,11 @@
 				"modules/box/scale_control.js",
 				"modules/box/dataLayerOpts.js",
 				"modules/box/data.js",
+				"modules/box/MapTileLayer.js",
+				"modules/box/MD5.js",
 				"modules/box/Map.js",
 				"modules/box/enablePreview.js",
 				"modules/box/index.js"
-			],
-			"messages": [
-				"kartographer-attribution"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
-		"ext.kartographer.layers": {
-			"dependencies": [
-				"mediawiki.api",
-				"mediawiki.Uri",
-				"oojs-ui.styles.icons-media",
-				"jquery.throttle-debounce",
-				"mapbox",
-				"ext.kartographer.lib.topojson",
-				"ext.kartographer",
-				"ext.kartographer.style",
-				"ext.kartographer.settings",
-				"ext.kartographer.site",
-				"ext.kartographer.data",
-				"ext.kartographer.controls"
-			],
-			"scripts": [
-				"lib/leaflet.sleep.js",
-				"modules/layers/MD5.js",
-				"modules/layers/MapTileLayer.js",
-				"modules/layers/canvasLayer.js",
-				"modules/layers/IconStore.js",
-				"modules/layers/IconProvider.js",
-				"modules/layers/IconLayerBuilder.js",
-				"modules/layers/BaseLayerBuilder.js",
-				"modules/layers/LayerDataLoader.js",
-				"modules/layers/index.js"
 			],
 			"messages": [
 				"kartographer-attribution"
@@ -228,10 +193,8 @@
 				"oojs-ui.styles.icons-media",
 				"jquery.throttle-debounce",
 				"mapbox",
-				"ext.kartographer.lib.topojson",
 				"ext.kartographer",
 				"ext.kartographer.style",
-				"ext.kartographer.settings",
 				"ext.kartographer.site",
 				"ext.kartographer.data"
 			],
@@ -241,7 +204,6 @@
 				"modules/controls/Help.js",
 				"modules/controls/Icons.js",
 				"modules/controls/CustomZoom.js",
-				"modules/controls/MapControler.js",
 				"modules/controls/MapSelect.js",
 				"modules/controls/Options.js",
 				"modules/controls/Plane.js",
@@ -324,18 +286,6 @@
 				"kartographer-sidebar-longitude",
 				"kartographer-sidebar-mapdetails",
 				"kartographer-sidebar-service"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
-		"ext.kartographer.settings": {
-			"dependencies": [
-				"mapbox"
-			],
-			"scripts": [
-				"modules/settings/settings.js"
 			],
 			"targets": [
 				"mobile",
@@ -463,19 +413,6 @@
 				"desktop"
 			]
 		},
-		"ext.kartographer.lib.topojson": {
-			"dependencies": [
-				"mapbox"
-			],
-			"scripts": [
-				"lib/topojson/topojson.js",
-				"lib/topojson/loader.js"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
 		"ext.kartographer.wv": {
 			"dependencies": [
 				"oojs-ui.styles.icons-editing-core",
@@ -543,19 +480,17 @@
 		"KartographerDfltStyle": "0",
 		"KartographerStyles": ["0", "osm"],
 		"KartographerSrcsetScales": [1.3, 1.5, 2, 2.6, 3],
-		"KartographerMapServer": "https://maps.runescape.wiki/osrs/",
-		"KartographerIconServer": "https://maps.runescape.wiki/",
+		"KartographerMapServer": "",
 		"KartographerFrameMode": "interactive",
 		"KartographerUseMarkerStyle": false,
 		"KartographerEnableMapFrame": true,
 		"KartographerDataConfig": {
-			"basePathURL": "https://chisel.weirdgloop.org/",
 			"baseTileURL": "https://maps.runescape.wiki/osrs/",
-			"tileURLFormat": "tiles/{mapID}_{cacheVersion}/{z}/{p}_{x}_{-y}.png",
+			"tileURLFormat": "rendered/{mapID}/{z}/{p}_{x}_{-y}.png",
 			"attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
-			"dataloaderFile": "https://maps.runescape.wiki/osrs/data/dataloader.json",
+			"baseMapsFile": "https://maps.runescape.wiki/osrs/data/basemaps.json",
 			"wikiImageURL": "https://oldschool.runescape.wiki/images/"
-		}
+		},
 	},
 	"TrackingCategories": [
 		"kartographer-tracking-category",

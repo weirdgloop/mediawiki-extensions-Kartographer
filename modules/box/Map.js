@@ -10,102 +10,9 @@
  * @extends L.Map
  */
 
-var markerData = {
-  "folder": "https://maps.runescape.wiki/osrs/images/",
-  "icons": {
-    "greyPin":{
-      "filename": "pin_grey.svg"
-    },
-    "greenPin":{
-      "filename": "pin_green.svg"
-    },
-    "redPin":{
-      "filename": "pin_red.svg"
-    }
-  }
-}
-
-var CanvasLayer = L.GridLayer.extend({
-
-    options: {
-        // @option minZoom: Number = 0
-        // Minimum zoom number.
-        minZoom: -3
-    },
-    binarySearch: function(arr, target) {
-        let low = 0
-        let high = arr.length;
-        while (low != high) {
-            let mid = Math.floor((low + high) / 2);
-            if (arr[mid][0] < target) {
-                low = mid + 1;
-            }
-            else {
-                high = mid;
-            }
-        }
-        return low
-    },
-
-    createTile: function(coords){
-        // create a <canvas> element for drawing
-        var tile = L.DomUtil.create('canvas', 'leaflet-tile');
-        // setup tile width and height according to the options
-        var size = this.getTileSize();
-        tile.width = size.x;
-        tile.height = size.y;
-        // get a canvas context and draw something on it using coords.x, coords.y and coords.z
-        var ctx = tile.getContext('2d');
-        let ICON_SIZE = 15
-
-        if (coords.z >= 0) {
-            if (this._map.minimapIconLocations[this._map._mapID]) {
-                if (this._map.minimapIconLocations[this._map._mapID][this._map._plane]) {
-                    let iconArr = this._map.minimapIconLocations[this._map._mapID][this._map._plane]
-                    let pxPerSquare = Math.pow(2, coords.z)
-                    let squaresPerTile = size.x / pxPerSquare
-                    let xLow = coords.x * squaresPerTile
-                    let xHigh = (coords.x + 1) * squaresPerTile - 1
-                    let yLow = (-coords.y - 1) * squaresPerTile
-                    let yHigh = (-coords.y) * squaresPerTile - 1
-                    // OPTIMIZATION: don't look through all icons, look only at ones already sorted by x coordinate
-                    let index = this.binarySearch(iconArr, xLow-ICON_SIZE)
-                    for (let i = index; i < iconArr.length; i++) {
-                        let x = iconArr[i][0]
-                        let y = iconArr[i][1]
-                        let iconType = iconArr[i][2]
-                        if (x > xHigh+ICON_SIZE) break
-                        if (y >= yLow-ICON_SIZE && y <= yHigh+ICON_SIZE) {
-                            let src = this._map.minimapIcons.folder + this._map.minimapIcons.icons[iconType].filename
-                            let canvasX = (x-xLow)*pxPerSquare
-                            let canvasY = (squaresPerTile-1-(y-yLow))*pxPerSquare
-                            // OPTIMIZATION: use cache for already loaded images.
-                            let img = this._map.imageCache[src]
-                            if (img) {
-                                ctx.drawImage(img,canvasX-Math.floor(img.width/2),canvasY-Math.floor(img.height/2))
-                            } else {
-                                img = new Image
-                                layer = this
-                                img.onload = function(){
-                                  ctx.drawImage(img,canvasX-Math.floor(img.width/2),canvasY-Math.floor(img.height/2))
-                                  layer._map.imageCache[src] = img
-                                };
-                                img.src = src
-                            }
-                        }
-                    }
-                }            
-            }
-        }
-        return tile;
-    }
-});
-
-module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager, controls) {
+module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager, MapTileLayer, MD5, controls) {
     // Skip unused variables, some have become unused because of RS Map
     var scale,
-        /* urlFormat,
-        mapServer = mw.config.get( 'wgKartographerMapServer' ), */
         worldLatLng = new L.LatLngBounds([0, 0], [128000, 128000]),
         KartographerMap,
         precisionPerZoom = [0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5],
@@ -292,13 +199,13 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             });
 
             this.readyFunction = function() {
-                if (map.ready.minimap && map.ready.dataloader && map.ready.datalayers) {
+                if (map.ready.dataloader && map.ready.datalayers) {
                     map.initView(options.mapID, options.plane, options.center, options.zoom);
                     map.fire('kartographerisready');
                 }
             }
 
-            // Add the OSRS Init function
+            // Add the RSW Init function
             this.rsMapInitialize(options, controls);
 
             /**
@@ -551,12 +458,12 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             var layer;
             try {
                 options.pointToLayer = function (feature, latlng) {
-                    let iconUrl = "https://maps.runescape.wiki/osrs/images/pin_grey.svg"
+                    let iconUrl = map.config.iconURL + "pin_grey.svg"
                     let iconSize = [26, 42]
                     let iconAnchor = [13, 42]
                     let popupAnchor = [0, -42]
-                    if (markerData.icons[feature.properties.icon]) {
-                        iconUrl = markerData.folder + markerData.icons[feature.properties.icon].filename
+                    if (map.markerIcons[feature.properties.icon]) {
+                        iconUrl = map.config.iconURL + map.markerIcons[feature.properties.icon]
                     }
                     if (feature.properties.iconSize) {
                         iconSize = feature.properties.iconSize
@@ -574,7 +481,8 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                     }
                     let icon = L.icon({iconUrl: iconUrl, iconSize: iconSize, iconAnchor: iconAnchor, popupAnchor: popupAnchor})
                     return L.marker(latlng, {icon: icon})
-                }
+                },
+                options.style = false;
                 layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) ).setFilter(function(feature){
                     return (feature.properties.mapID == map._mapID) && (feature.properties.plane == map._plane)
                 }).addTo( this );
@@ -970,38 +878,28 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
     KartographerMap = KartographerMap.extend({
         // Setup map
         rsMapInitialize: function(options, controls) {
-            this._controlers = {};
-            this.minimapIconLocations = {}
-            this.minimapIcons = {}
+            this._controllers = {};
             this.config = mw.config.get('wgKartographerDataConfig');
+            this.markerIcons = {
+                "greyPin": "pin_grey.svg",
+                "greenPin": "pin_green.svg",
+                "redPin": "pin_red.svg",
+            };
+            this._baseMaps = {}
 
             this.fullscreen = options.fullscreen;
 
             this.setupControls(controls);
             this.imageCache = {}
-            this.canvasLayer = new CanvasLayer()
-            this.addLayer(this.canvasLayer)
             if (options.parentMap) {
-                this.setBaseMaps(options.parentMap._baseMaps)
-                this.ready.dataloader = true
-                this.minimapIconLocations = options.parentMap.minimapIconLocations
-                this.minimapIcons = options.parentMap.minimapIcons
-                this.ready.minimap = true
-                this.readyFunction();
+                this.ldl_load();
                 this._plane = options.parentMap._plane
                 this._mapID = options.parentMap._mapID
             } else {
-                this.ldl_load();
-                this.fetchMinimapIcons()
+                this.ready.dataloader = true;
                 this._plane = 0;
                 this._mapID = 0;
             }
-
-            this.on('kartographerisready', async function() {
-                this.canvasLayer.bringToFront()
-                // labels.init();
-                // pathfind.init();
-            });
         },
 
         getMapID: function() {
@@ -1015,26 +913,11 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         ldl_load: async function(){
             let map = this;
             new Promise(async function(resolve, reject) {
-              var responseData = await fetch(map.config.dataloaderFile);
+              var responseData = await fetch(map.config.baseMapsFile);
               var data = await responseData.json();
-              map.setBaseMaps(data.baseMaps)
-              map.ready.dataloader = true
-              map.readyFunction()
-              resolve();
-            });
-        },
-
-        fetchMinimapIcons: async function(){
-            let map = this;
-            new Promise(async function(resolve, reject) {
-            // TODO have this as a config
-              var responseData = await fetch("https://maps.runescape.wiki/osrs/data/minimap.json");
-              var data = await responseData.json();
-              map.minimapIconLocations = data['locations']
-              map.minimapIcons = data['icons']
-              map.canvasLayer.redraw()
-              map.ready.minimap = true
-              map.readyFunction()
+              map.setBaseMaps(data);
+              map.ready.dataloader = true;
+              map.readyFunction();
               resolve();
             });
         },
@@ -1046,7 +929,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             }
             this._baseMaps = baseMaps;
             if (this.fullscreen) {
-              this._controlers.mapSelect._resetSelect(baseMaps);
+              this._controllers.mapSelect._resetSelect(baseMaps);
             }
         },
 
@@ -1057,30 +940,24 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             layer.clearLayers();
             layer._initialize(layer._geojson);
         } );
-        this.canvasLayer.redraw()
       },
 
         setMapID: function(mapID, plane, zoom, location) {
             this._mapID = mapID
 
-            if(!(mapID in this._baseMaps)){
-              console.error('Selected MapID does not exist: ', mapID);
-              return;
-            }
-
             this.loadBaseMap(mapID);
 
             if (plane === undefined) {
-              plane = 0
+              plane = this._baseMaps[mapID].defaultPlane || 0
             }
             if (this.fullscreen) {
-              this._controlers.mapSelect._changeSelectedOption(mapID)
-              this._controlers.plane.setPlane(plane)
+              this._controllers.mapSelect._changeSelectedOption(mapID)
+              this._controllers.plane.setPlane(plane)
             } else {
                 this.setPlane(plane)
             }
             if (zoom === undefined) {
-              zoom = this._baseMaps[mapID].defaultZoom
+              zoom = 2
             }
             if (location === undefined) {
                 // TODO: ???
@@ -1096,18 +973,15 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
               this.removeLayer(this.selectedLayer);
             }
 
-            let data = this._baseMaps[mapId]
+            let data = this._baseMaps[mapId] || {}
             let bounds = this._translateBounds(data.bounds)
-            // TODO: should be MapTileLayer...
-            this.selectedLayer = new controls.MapControler[0](
+            this.selectedLayer = new MapTileLayer(
               this.config.baseTileURL + this.config.tileURLFormat, {
               bounds: bounds,
-              minZoom: data.zoomLimits[0],
-              maxZoom: data.zoomLimits[1],
-              maxNativeZoom: data.maxNativeZoom,
-              mapID: data.mapId,
-              cacheVersion: data.cacheVersion,
-              attribution: data.attribution || '',
+              minZoom: -3,
+              maxZoom: 5,
+              maxNativeZoom: 3,
+              mapID: mapId,
             });
             this.addLayer(this.selectedLayer);
             this.setMaxBounds(bounds);
@@ -1131,11 +1005,11 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         },
 
         setupControls: function(controls) {
-            var controler;
+            var controller;
             // this._map.fullscreenControl.setPosition('topright');
             // top left
             if (!this.fullscreen) {
-                this._controlers.zoom = new controls.CustomZoom({
+                this._controllers.zoom = new controls.CustomZoom({
                     position: 'topleft',
                     displayZoomLevel: false
                 });
@@ -1143,36 +1017,36 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
 
             // top right
             if (this.fullscreen) {
-                this._controlers.zoom = new controls.CustomZoom({
+                this._controllers.zoom = new controls.CustomZoom({
                     position: 'topright',
                     displayZoomLevel: true
                 });
-                this._controlers.help = new controls.Help();
-                // this._controlers.icons = new controls.Icons();
-                // this._controlers.options = new controls.Options();
+                this._controllers.help = new controls.Help();
+                // this._controllers.icons = new controls.Icons();
+                // this._controllers.options = new controls.Options();
             }
 
             // bottom left
             if (this.fullscreen) {
-                this._controlers.mapSelect = new controls.MapSelect({
+                this._controllers.mapSelect = new controls.MapSelect({
                     visible: true
                 });
             }
-            this._controlers.attribution = L.control.attribution({
+            this._controllers.attribution = L.control.attribution({
                 prefix: this.config.attribution
             });
 
             //bottom right
             if (this.fullscreen) {
-                this._controlers.plane = new controls.Plane({
+                this._controllers.plane = new controls.Plane({
                     visible: true
                 });
 
             }
 
-            // add controlers to map
-            for (controler in this._controlers) {
-                this._controlers[controler].addTo(this);
+            // add controllers to map
+            for (controller in this._controllers) {
+                this._controllers[controller].addTo(this);
             }
 
             // add class to bottom-right to make vertical
@@ -1187,7 +1061,9 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
     module.dataLayerOpts,
     module.ScaleControl,
     module.Data,
-    require('ext.kartographer.controls'),
+    module.MapTileLayer,
+    module.MD5,
+    require('ext.kartographer.controls')
 ));
 
 module.map = (function(KartographerMap) {

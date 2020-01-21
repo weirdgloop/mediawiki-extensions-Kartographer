@@ -8,5 +8,4 @@ module.exports = {
 	Options: module.Options,
 	Plane: module.Plane,
 	MapSelect: module.MapSelect,
-	MapControler: module.MapControler
 };

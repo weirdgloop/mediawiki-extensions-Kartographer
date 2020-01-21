@@ -88,7 +88,7 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 				captionText: data.captionText,
 				fullScreenRoute: '/maplink/' + index
 			} );
-			link.$container.attr('href', '#')
+			link.$container.attr('href', '#mapFullscreen')
 		} );
 	} );
 
