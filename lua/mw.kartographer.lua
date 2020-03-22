@@ -25,3 +25,5 @@ function kartographer.maplink( args, geoJson )
     geoJson = geoJson or ''
 	return php.maplink( args, geoJson )
 end
+
+return kartographer
