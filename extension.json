@@ -12,7 +12,10 @@
 	"license-name": "MIT",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.31.0"
+		"MediaWiki": ">= 1.31.0",
+		"extensions": {
+			"Scribunto": "*"
+		}
 	},
 	"MessagesDirs": {
 		"Kartographer": [
@@ -440,6 +443,9 @@
 		],
 		"ParserAfterParse": [
 			"Kartographer\\Hooks::onParserAfterParse"
+		],
+		"ScribuntoExternalLibraries": [
+			"Kartographer\\Hooks::onScribuntoExternalLibraries"
 		]
 	},
 	"VisualEditorPluginModules": [
