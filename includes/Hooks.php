@@ -58,16 +58,4 @@ class Hooks {
 		}
 		return true;
 	}*/
-
-	/**
-	 * External library for Scribunto
-	 *
-	 * @param string $engine
-	 * @param string[] &$extraLibraries
-	 */
-	public static function onScribuntoExternalLibraries( $engine, array &$extraLibraries ) {
-		if ( $engine == 'lua' ) {
-			$extraLibraries['mw.kartographer'] = Scribunto_LuaKartographerLibrary::class;
-		}
-	}
 }
