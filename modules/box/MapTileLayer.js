@@ -27,7 +27,7 @@ module.MapTileLayer = L.TileLayer.extend({
     };
 
     if (this._map && !this._map.options.crs.infinite) {
-      var invertedY = this._globalTileRange.max.y - coords.y;
+      var invertedY = -coords.y - 1;
       if (this.options.tms) {
         data['y'] = invertedY;
       }
