@@ -43,10 +43,9 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
     // Don't make the map infinite (it is not round anymore)
     L.CRS.Simple.infinite = false;
     L.CRS.Simple.projection.bounds = new L.Bounds([
-        [0, 0],
+        [-12800, -12800],
         [12800, 12800]
     ]);
-
     L.Map.mergeOptions({
         sleepTime: 250,
         wakeTime: 500,
@@ -977,10 +976,11 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             let bounds = this._translateBounds(data.bounds)
             this.selectedLayer = new MapTileLayer(
               this.config.baseTileURL + this.config.tileURLFormat, {
+              tileSize: this.config.tileSize || 256,
               bounds: bounds,
               minZoom: -3,
               maxZoom: 5,
-              maxNativeZoom: 3,
+              maxNativeZoom: this.config.maxNativeZoom || 3,
               mapID: mapId,
             });
             this.addLayer(this.selectedLayer);
@@ -988,7 +988,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         },
 
         _translateBounds: function(bounds){
-            var newbounds = [ [ 0, 0 ], [ 12000, 12000 ] ];
+            var newbounds = [ [ -12000, -12000 ], [ 12000, 12000 ] ];
             if(Array.isArray(bounds) && bounds.length === 2){
               // South-West
               if(Array.isArray(bounds[0]) && bounds[0].length === 2){
