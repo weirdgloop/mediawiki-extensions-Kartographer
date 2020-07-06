@@ -988,7 +988,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         },
 
         _translateBounds: function(bounds){
-            var newbounds = [ [ -12000, -12000 ], [ 12000, 12000 ] ];
+            var newbounds = [ [ -12000, -12000 ], [ 14000, 14000 ] ];
             if(Array.isArray(bounds) && bounds.length === 2){
               // South-West
               if(Array.isArray(bounds[0]) && bounds[0].length === 2){
