@@ -461,7 +461,8 @@
 			"tileURLFormat": "rendered/{mapID}/{z}/{p}_{x}_{-y}.png",
 			"attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
 			"baseMapsFile": "https://maps.runescape.wiki/osrs/data/basemaps.json",
-			"wikiImageURL": "https://oldschool.runescape.wiki/images/"
+			"wikiImageURL": "https://oldschool.runescape.wiki/images/",
+      "iconURL": "https://maps.runescape.wiki/osrs/images/"
 		}
 	},
 	"TrackingCategories": [
