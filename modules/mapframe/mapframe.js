@@ -62,7 +62,7 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 			lang: $el.data( 'lang' ),
 			style: $el.data( 'style' ),
 			overlays: $el.data( 'overlays' ) || [],
-			captionText: captionText,
+			captionText: captionText
 		};
 	}
 
@@ -94,15 +94,15 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 				map = kartobox.map( {
 					featureType: 'mapframe',
 					container: container,
-          mapID: data.mapID,
-          plane: data.plane,
+          			mapID: data.mapID,
+          			plane: data.plane,
 					center: [ data.latitude, data.longitude ],
 					zoom: data.zoom,
 					lang: data.lang,
 					fullScreenRoute: '/map/' + index,
 					allowFullScreen: true,
 					dataGroups: data.overlays,
-					captionText: data.captionText,
+					captionText: data.captionText
 				} );
 
 				$container.removeAttr( 'href' );
@@ -110,7 +110,7 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 				mw.track( 'mediawiki.kartographer', {
 					action: 'view',
 					isFullScreen: false,
-					feature: map,
+					feature: map
 				} );
 				map.doWhenReady( function () {
 					map.$container.css( 'backgroundImage', '' );

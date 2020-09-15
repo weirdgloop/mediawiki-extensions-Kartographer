@@ -17,8 +17,6 @@ use stdClass;
  * Parses and sanitizes text properties of GeoJSON/simplestyle by putting them through parser
  */
 class SimpleStyleParser {
-
-	/** @var string[] */
 	private static $parsedProps = [ 'title', 'description' ];
 
 	/** @var Parser */
@@ -26,9 +24,6 @@ class SimpleStyleParser {
 
 	/** @var PPFrame */
 	private $frame;
-
-	/** @var array */
-	private $options;
 
 	/** @var string */
 	private $mapService;
@@ -251,6 +246,9 @@ class SimpleStyleParser {
 				break;
 
 			case 'page':
+				if ( !class_exists( 'JsonConfig\\JCSingleton' ) ) {
+					return Status::newFatal( 'kartographer-error-service-name', $object->service );
+				}
 				$jct = JCSingleton::parseTitle( $object->title, NS_DATA );
 				if ( !$jct || JCSingleton::getContentClass( $jct->getConfig()->model ) !==
 							  JCMapDataContent::class
@@ -282,7 +280,7 @@ class SimpleStyleParser {
 	 * @param object &$properties
 	 */
 	private function sanitizeProperties( &$properties ) {
-		$saveUnparsed = $this->options['saveUnparsed'] ?? false;
+		$saveUnparsed = isset( $this->options['saveUnparsed'] ) && $this->options['saveUnparsed'];
 		foreach ( self::$parsedProps as $prop ) {
 			if ( property_exists( $properties, $prop ) ) {
 				$property = &$properties->$prop;

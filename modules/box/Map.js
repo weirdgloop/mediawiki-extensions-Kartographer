@@ -13,9 +13,9 @@
 module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager, MapTileLayer, MD5, controls) {
     // Skip unused variables, some have become unused because of RS Map
     var scale,
-        worldLatLng = new L.LatLngBounds([ 0, 0 ], [ 128000, 128000 ]),
+        worldLatLng = new L.LatLngBounds([0, 0], [128000, 128000]),
         KartographerMap,
-        precisionPerZoom = [ 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5 ],
+        precisionPerZoom = [0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5],
         inlineDataLayerKey = 'kartographer-inline-data-layer',
         inlineDataLayerId = 0;
 
@@ -57,8 +57,8 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         fallbackZoom: 1,
         crs: L.CRS.Simple,
         maxBounds: [
-            [ 0, 0 ],
-            [ 128000, 128000 ],
+            [0, 0],
+            [128000, 128000]
         ],
         attributionControl: false,
         fullscreen: false,
@@ -70,7 +70,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
     L.Popup.mergeOptions({
         minWidth: 160,
         maxWidth: 300,
-        autoPanPadding: [ 12, 12 ],
+        autoPanPadding: [12, 12],
     });
 
     /* eslint-disable no-underscore-dangle */
@@ -172,7 +172,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 options.zoom = undefined;
             }
 
-            this.ready = {};
+            this.ready = {}
             $(options.container).addClass('mw-kartographer-interactive');
 
             args = L.extend({}, L.Map.prototype.options, options, {
@@ -202,7 +202,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                     map.initView(options.mapID, options.plane, options.center, options.zoom);
                     map.fire('kartographerisready');
                 }
-            };
+            }
 
             // Add the RSW Init function
             this.rsMapInitialize(options, controls);
@@ -264,6 +264,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
              */
             this.dataLayers = {};
 
+
             if (options.allowFullScreen) {
                 // embed maps, and full screen is allowed
                 this.on('dblclick', function() {
@@ -299,12 +300,12 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 this._invalidateInterative();
             }
 
-            if (this.parentMap) {
+            if (this.parentMap) {                
                 $.each( this.parentMap.dataLayers, function ( groupId, layer ) {
                     var newLayer = map.addGeoJSONLayer( groupId, layer.getGeoJSON(), layer.options );
                     newLayer.dataGroup = layer.group;
                 } );
-                map.ready.datalayers = true;
+                map.ready.datalayers = true
                 map.readyFunction();
                 return;
             }
@@ -312,11 +313,11 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             this.addDataGroups(options.dataGroups).then(function() {
                 if (typeof options.data === 'object') {
                     map.addDataLayer(options.data).then(function() {
-                        map.ready.datalayers = true;
+                        map.ready.datalayers = true
                         map.readyFunction();
                     });
                 } else {
-                    map.ready.datalayers = true;
+                    map.ready.datalayers = true
                     map.readyFunction();
                 }
             }).then(undefined, function(err) {
@@ -373,7 +374,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 center: center,
                 zoom: zoom,
             };
-            this.setMapID(mapID, plane, zoom, [ center.lat, center.lng ]);
+            this.setMapID(mapID, plane, zoom, [center.lat, center.lng]);
             return this;
         },
 
@@ -395,7 +396,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             return DataManager.loadGroups( dataGroups ).then( function ( dataGroups ) {
                 $.each( dataGroups, function ( key, group ) {
                     var layerOptions = {
-                            attribution: group.attribution,
+                            attribution: group.attribution
                         },
                         layer;
                     if ( group.isExternal ) {
@@ -456,59 +457,33 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             var layer;
             try {
                 options.pointToLayer = function (feature, latlng) {
-                    let iconUrl = map.config.iconURL + 'pin_grey.svg';
-                    let iconSize = [ 26, 42 ];
-                    let iconAnchor = [ 13, 42 ];
-                    let popupAnchor = [ 0, -42 ];
+                    let iconUrl = map.config.iconURL + "pin_grey.svg"
+                    let iconSize = [26, 42]
+                    let iconAnchor = [13, 42]
+                    let popupAnchor = [0, -42]
                     if (map.markerIcons[feature.properties.icon]) {
-                        iconUrl = map.config.iconURL + map.markerIcons[feature.properties.icon];
+                        iconUrl = map.config.iconURL + map.markerIcons[feature.properties.icon]
                     }
                     if (feature.properties.iconSize) {
-                        iconSize = feature.properties.iconSize;
+                        iconSize = feature.properties.iconSize
                     }
                     if (feature.properties.iconWikiLink) {
-                        iconSize = feature.properties.iconSize;
-                        iconAnchor = feature.properties.iconAnchor;
-                        popupAnchor = feature.properties.popupAnchor;
-                        let filename = feature.properties.iconWikiLink;
-                        var hash = MD5.md5(filename);
+                        iconSize = feature.properties.iconSize
+                        iconAnchor = feature.properties.iconAnchor
+                        popupAnchor = feature.properties.popupAnchor
+                        let filename = feature.properties.iconWikiLink
+                        var hash = MD5.md5(filename)
                         iconUrl = map.config.wikiImageURL +
                             hash.substr(0, 1) + '/' + hash.substr(0, 2) + '/' +
                             filename;
 
                     }
-                    // Test if 'mapID' is set in feature
-                    if (typeof feature.properties.mapID === 'undefined') {
-                      feature.properties.mapID = null;
-                    }
-                    // Test if 'plane' is set in feature
-                    if (typeof feature.properties.plane === 'undefined') {
-                      feature.properties.plane = null;
-                    }
-                    let icon = L.icon({
-                      iconUrl: iconUrl,
-                      iconSize: iconSize,
-                      iconAnchor: iconAnchor,
-                      popupAnchor: popupAnchor,
-                    });
-                    return L.marker(latlng, { icon: icon });
-                };
+                    let icon = L.icon({iconUrl: iconUrl, iconSize: iconSize, iconAnchor: iconAnchor, popupAnchor: popupAnchor})
+                    return L.marker(latlng, {icon: icon})
+                },
                 options.style = false;
-                layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) )
-                  .setFilter(function(feature){
-                    // filter out icons that should only be diplayed
-                    // on some layers or some maps
-                    // default: feature is displayed
-                    let display = true;
-                    // check mapID
-                    if (feature.properties.mapID !== null){
-                      display = (feature.properties.mapID === map._mapID);
-                    }
-                    // check plane
-                    if (display && feature.properties.plane !== null){
-                      display = (feature.properties.plane === map._plane);
-                    }
-                    return display;
+                layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) ).setFilter(function(feature){
+                    return (feature.properties.mapID == map._mapID) && (feature.properties.plane == map._plane)
                 }).addTo( this );
                 layer.getAttribution = function () {
                     return this.options.attribution;
@@ -545,8 +520,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                             position.mapID,
                             position.plane,
                             position.center,
-                            position.zoom,
-                          );
+                            position.zoom                        );
                     });
                 } else {
                     map = this.fullScreenMap = new KartographerMap({
@@ -567,7 +541,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                             position.mapID,
                             position.plane,
                             position.center,
-                            position.zoom,
+                            position.zoom                       
                         );
                 }
 
@@ -626,7 +600,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 mapID: mapID,
                 plane: plane,
                 center: center,
-                zoom: zoom,
+                zoom: zoom
             };
         },
 
@@ -906,20 +880,20 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             this._controllers = {};
             this.config = mw.config.get('wgKartographerDataConfig');
             this.markerIcons = {
-                greyPin: 'pin_grey.svg',
-                greenPin: 'pin_green.svg',
-                redPin: 'pin_red.svg',
+                "greyPin": "pin_grey.svg",
+                "greenPin": "pin_green.svg",
+                "redPin": "pin_red.svg",
             };
-            this._baseMaps = {};
+            this._baseMaps = {}
 
             this.fullscreen = options.fullscreen;
 
             this.setupControls(controls);
-            this.imageCache = {};
+            this.imageCache = {}
             if (options.parentMap) {
-                this.loadLayerData();
-                this._plane = options.parentMap._plane;
-                this._mapID = options.parentMap._mapID;
+                this.ldl_load();
+                this._plane = options.parentMap._plane
+                this._mapID = options.parentMap._mapID
             } else {
                 this.ready.dataloader = true;
                 this._plane = 0;
@@ -935,9 +909,9 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             return this._plane;
         },
 
-        loadLayerData: async function(){
+        ldl_load: async function(){
             let map = this;
-            let dataLoader = new Promise(async function(resolve, reject) {
+            new Promise(async function(resolve, reject) {
               var responseData = await fetch(map.config.baseMapsFile);
               var data = await responseData.json();
               map.setBaseMaps(data);
@@ -948,7 +922,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         },
 
         setBaseMaps: function(data){
-            let baseMaps = {};
+            let baseMaps = {}
             for(let i in data) {
               baseMaps[data[i].mapId] = data[i];
             }
@@ -958,38 +932,38 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             }
         },
 
-        setPlane: function(plane) {
-          this._plane = plane;
-          this.selectedLayer.redraw();
-          $.each( this.dataLayers, function ( groupId, layer ) {
-              layer.clearLayers();
-              layer._initialize(layer._geojson);
-          } );
-        },
+      setPlane: function(plane) {
+        this._plane = plane
+        this.selectedLayer.redraw()
+        $.each( this.dataLayers, function ( groupId, layer ) {
+            layer.clearLayers();
+            layer._initialize(layer._geojson);
+        } );
+      },
 
         setMapID: function(mapID, plane, zoom, location) {
-            this._mapID = mapID;
+            this._mapID = mapID
 
             this.loadBaseMap(mapID);
 
             if (plane === undefined) {
-              plane = this._baseMaps[mapID].defaultPlane || 0;
+              plane = this._baseMaps[mapID].defaultPlane || 0
             }
             if (this.fullscreen) {
-              this._controllers.mapSelect._changeSelectedOption(mapID);
-              this._controllers.plane.setPlane(plane);
+              this._controllers.mapSelect._changeSelectedOption(mapID)
+              this._controllers.plane.setPlane(plane)
             } else {
-                this.setPlane(plane);
+                this.setPlane(plane)
             }
             if (zoom === undefined) {
-              zoom = 2;
+              zoom = 2
             }
             if (location === undefined) {
                 // TODO: ???
               location = [ this._baseMaps[mapID].center[1],
-                  this._baseMaps[mapID].center[0] ];
+                  this._baseMaps[mapID].center[0] ]
             }
-            this.setView(location, zoom);
+            this.setView(location, zoom)
         },
 
         loadBaseMap: function(mapId){
@@ -998,8 +972,8 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
               this.removeLayer(this.selectedLayer);
             }
 
-            let data = this._baseMaps[mapId] || {};
-            let bounds = this._translateBounds(data.bounds);
+            let data = this._baseMaps[mapId] || {}
+            let bounds = this._translateBounds(data.bounds)
             this.selectedLayer = new MapTileLayer(
               this.config.baseTileURL + this.config.tileURLFormat, {
               tileSize: this.config.tileSize || 256,
@@ -1037,7 +1011,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             if (!this.fullscreen) {
                 this._controllers.zoom = new controls.CustomZoom({
                     position: 'topleft',
-                    displayZoomLevel: false,
+                    displayZoomLevel: false
                 });
             }
 
@@ -1045,7 +1019,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             if (this.fullscreen) {
                 this._controllers.zoom = new controls.CustomZoom({
                     position: 'topright',
-                    displayZoomLevel: true,
+                    displayZoomLevel: true
                 });
                 this._controllers.help = new controls.Help();
                 // this._controllers.icons = new controls.Icons();
@@ -1062,11 +1036,12 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 prefix: this.config.attribution
             });
 
-            // bottom right
+            //bottom right
             if (this.fullscreen) {
                 this._controllers.plane = new controls.Plane({
                     visible: true
                 });
+
             }
 
             // add controllers to map
