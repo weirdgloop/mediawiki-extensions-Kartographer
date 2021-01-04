@@ -1,6 +1,7 @@
 <?php
 namespace Kartographer\Tests;
 
+use ExtensionRegistry;
 use Kartographer\State;
 use MediaWikiTestCase;
 use Parser;
@@ -43,13 +44,16 @@ class KartographerTest extends MediaWikiTestCase {
 		$this->setMwGlobals( 'wgKartographerWikivoyageMode', $wikivoyageMode );
 		$output = $this->parse( $input );
 		$state = State::getState( $output );
+		$hasParserFunctions = ExtensionRegistry::getInstance()->isLoaded( 'ParserFunctions' );
 
 		if ( $expected === false ) {
 			$this->assertTrue( $state->hasBrokenTags(), $message . ' Parse is expected to fail' );
-			$this->assertTrue(
-				$this->hasTrackingCategory( $output, 'kartographer-broken-category' ),
-				$message . ' Category for failed maps should be added'
-			);
+			if ( $hasParserFunctions ) {
+				$this->assertTrue(
+					$this->hasTrackingCategory( $output, 'kartographer-broken-category' ),
+					$message . ' Category for failed maps should be added'
+				);
+			}
 			return;
 		}
 		$this->assertFalse( $state->hasBrokenTags(), $message . ' Parse is expected to succeed' );
@@ -57,10 +61,12 @@ class KartographerTest extends MediaWikiTestCase {
 			$state->hasValidTags(),
 			$message . ' State is expected to have valid tags'
 		);
-		$this->assertFalse(
-			$this->hasTrackingCategory( $output, 'kartographer-broken-category' ),
-			$message . ' No tracking category'
-		);
+		if ( $hasParserFunctions ) {
+			$this->assertFalse(
+				$this->hasTrackingCategory( $output, 'kartographer-broken-category' ),
+				$message . ' No tracking category'
+			);
+		}
 
 		$expected = json_encode( json_decode( $expected ) ); // Normalize JSON
 
