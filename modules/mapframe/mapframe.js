@@ -133,6 +133,11 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 				promises.push( deferred.promise() );
 			}
 		} );
+
+		// Allow customizations of interactive maps in article.
+		$.when( promises ).then( function () {
+			mw.hook( 'wikipage.maps' ).fire( mapsInArticle, false /* isFullScreen */ );
+		} );
 	} );
 
 	return maps;
