@@ -881,8 +881,12 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             this.config = mw.config.get('wgKartographerDataConfig');
             this.markerIcons = {
                 "greyPin": "pin_grey.svg",
-                "greenPin": "pin_green.svg",
                 "redPin": "pin_red.svg",
+                "greenPin": "pin_green.svg",
+                "bluePin": "pin_blue.svg",
+                "cyanPin": "pin_cyan.svg",
+                "magentaPin": "pin_magenta.svg",
+                "yellowPin": "pin_yellow.svg",
             };
             this._baseMaps = {}
 
