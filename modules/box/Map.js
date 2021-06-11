@@ -7,7 +7,7 @@
  *
  * @alias KartographerMap
  * @class Kartographer.Box.MapClass
- * @extends L.Map
+ * @extends L.Maps
  */
 
 module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager, MapTileLayer, MD5, controls) {
@@ -457,31 +457,64 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             var layer;
             try {
                 options.pointToLayer = function (feature, latlng) {
-                    let iconUrl = map.config.iconURL + "pin_grey.svg"
-                    let iconSize = [26, 42]
-                    let iconAnchor = [13, 42]
-                    let popupAnchor = [0, -42]
-                    if (map.markerIcons[feature.properties.icon]) {
-                        iconUrl = map.config.iconURL + map.markerIcons[feature.properties.icon]
-                    }
-                    if (feature.properties.iconSize) {
-                        iconSize = feature.properties.iconSize
-                    }
-                    if (feature.properties.iconWikiLink) {
-                        iconSize = feature.properties.iconSize
-                        iconAnchor = feature.properties.iconAnchor
-                        popupAnchor = feature.properties.popupAnchor
-                        let filename = feature.properties.iconWikiLink
-                        var hash = MD5.md5(filename)
-                        iconUrl = map.config.wikiImageURL +
-                            hash.substr(0, 1) + '/' + hash.substr(0, 2) + '/' +
-                            filename;
+                    if (feature.properties.shape) {
+                        let ct = feature.properties.shape.toLowerCase()
+                        if (isNaN(feature.properties.radius)) {
+                            feature.properties.radius = 10
+                        }
+                        let opts = {
+                            radius: feature.properties.radius || 10,
+                            color: feature.properties.stroke || '#3388ff',
+                            weight: feature.properties['stroke-width'] || 3,
+                            opacity: feature.properties['stroke-opacity'] || 1,
+                            fillColor: feature.properties.fill || '#3388ff',
+                            fillOpacity: feature.properties['fill-opacity'] || 0.2,
+                        }
+                        if (ct == 'circlemarker') {
+                            return L.circleMarker(latlng, opts)
+                        }
+                        return L.circle(latlng, opts)
+                    } else if (feature.properties.radius) {
+                        if (isNaN(feature.properties.radius)) {
+                            feature.properties.radius = 10
+                        }
+                        let opts = {
+                            radius: feature.properties.radius || 10,
+                            color: feature.properties.stroke || '#3388ff',
+                            weight: feature.properties['stroke-width'] || 3,
+                            opacity: feature.properties['stroke-opacity'] || 1,
+                            fillColor: feature.properties.fill || '#3388ff',
+                            fillOpacity: feature.properties['fill-opacity'] || 0.2,
+                        }
+                        return L.circleMarker(latlng, opts)
+                    } else {
+                        let iconUrl = map.config.iconURL + "pin_grey.svg"
+                        let iconSize = [26, 42]
+                        let iconAnchor = [13, 42]
+                        let popupAnchor = [0, -42]
+                        if (map.markerIcons[feature.properties.icon]) {
+                            iconUrl = map.config.iconURL + map.markerIcons[feature.properties.icon]
+                        }
+                        if (feature.properties.iconSize) {
+                            iconSize = feature.properties.iconSize
+                        }
+                        if (feature.properties.iconWikiLink) {
+                            iconSize = feature.properties.iconSize
+                            iconAnchor = feature.properties.iconAnchor
+                            popupAnchor = feature.properties.popupAnchor
+                            let filename = feature.properties.iconWikiLink
+                            var hash = MD5.md5(filename)
+                            iconUrl = map.config.wikiImageURL +
+                                hash.substr(0, 1) + '/' + hash.substr(0, 2) + '/' +
+                                filename;
 
+                        }
+                        let icon = L.icon({iconUrl: iconUrl, iconSize: iconSize, iconAnchor: iconAnchor, popupAnchor: popupAnchor})
+                        return L.marker(latlng, {icon: icon})
                     }
-                    let icon = L.icon({iconUrl: iconUrl, iconSize: iconSize, iconAnchor: iconAnchor, popupAnchor: popupAnchor})
-                    return L.marker(latlng, {icon: icon})
-                },
-                options.style = false;
+                };
+                //options.style = false;
+                console.log(geoJson);
                 layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) ).setFilter(function(feature){
                     return (feature.properties.mapID == map._mapID) && (feature.properties.plane == map._plane)
                 }).addTo( this );
@@ -494,6 +527,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             } catch ( e ) {
                 mw.log( e );
             }
+
         },
 
         /**
