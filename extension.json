@@ -45,6 +45,7 @@
 		"ext.kartographer.style": {
 			"styles": [
 				"styles/kartographer.less",
+				"styles/mapElements.less",
 				"styles/link.less",
 				"styles/dialog.less",
 				"styles/control-attribution.less",

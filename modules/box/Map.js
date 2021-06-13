@@ -458,22 +458,56 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             try {
                 options.pointToLayer = function (feature, latlng) {
                     if (feature.properties.shape) {
-                        let ct = feature.properties.shape.toLowerCase()
-                        if (isNaN(feature.properties.radius)) {
-                            feature.properties.radius = 10
+                        let shp = feature.properties.shape.toLowerCase()
+                        if (shp == 'circlemarker' || shp == 'circle') {
+                            // Cricles and circle markers
+                            if (isNaN(feature.properties.radius)) {
+                                feature.properties.radius = 10
+                            }
+                            let opts = {
+                                radius: feature.properties.radius || 10,
+                                color: feature.properties.stroke || '#3388ff',
+                                weight: feature.properties['stroke-width'] || 3,
+                                opacity: feature.properties['stroke-opacity'] || 1,
+                                fillColor: feature.properties.fill || '#3388ff',
+                                fillOpacity: feature.properties['fill-opacity'] || 0.2,
+                            }
+                            if (shp == 'circlemarker') {
+                                return L.circleMarker(latlng, opts)
+                            }
+                            return L.circle(latlng, opts)
+                        } else if (shp == 'text') {
+                            // Text only markers
+                            let mk = L.marker(latlng, { opacity:0.5, keyboard:false, interactive: false,
+                                icon:L.icon({ iconUrl:map.config.iconURL + "pin_grey.svg", iconSize:[1,1], iconAnchor:[0.5,1] })
+                            })
+                            let cl = 'leaflet-vis-tooltip'
+                            mk.bindTooltip(feature.properties.label || 'Label', {
+                                permanent: true,
+                                className: 'leaflet-vis-tooltip',
+                                direction: feature.properties.direction || 'auto',
+                                opacity: 1,
+                                interactive: true,
+                            })
+                            return mk
+                        } else if (shp == 'dot' || shp == 'squaredot') {
+                            // Dot and square dot markers
+                            let iclass = 'leaflet-dot'
+                            if (shp == 'squaredot') {
+                                iclass = 'leaflet-sqdot'
+                            }
+                            let istyle = ''
+                            if (feature.properties.fill) {
+                                istyle = ' style="background-color:'+feature.properties.fill+';"'
+                            }
+                            let html = '<div class="'+iclass+'"'+istyle+'></div>'
+                            let icon = L.divIcon({
+                                className: 'leaflet-div-dot',
+                                html: html,
+                                iconSize: feature.properties.iconSize || [12, 12],
+                            })
+                            return L.marker(latlng, {icon: icon})
                         }
-                        let opts = {
-                            radius: feature.properties.radius || 10,
-                            color: feature.properties.stroke || '#3388ff',
-                            weight: feature.properties['stroke-width'] || 3,
-                            opacity: feature.properties['stroke-opacity'] || 1,
-                            fillColor: feature.properties.fill || '#3388ff',
-                            fillOpacity: feature.properties['fill-opacity'] || 0.2,
-                        }
-                        if (ct == 'circlemarker') {
-                            return L.circleMarker(latlng, opts)
-                        }
-                        return L.circle(latlng, opts)
                     } else if (feature.properties.radius) {
                         if (isNaN(feature.properties.radius)) {
                             feature.properties.radius = 10
