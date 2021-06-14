@@ -482,9 +482,12 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                                 icon:L.icon({ iconUrl:map.config.iconURL + "pin_grey.svg", iconSize:[1,1], iconAnchor:[0.5,1] })
                             })
                             let cl = 'leaflet-vis-tooltip'
+                            if (feature.properties.class) {
+                                cl = cl + ' ' + feature.properties.class
+                            }
                             mk.bindTooltip(feature.properties.label || 'Label', {
                                 permanent: true,
-                                className: 'leaflet-vis-tooltip',
+                                className: cl,
                                 direction: feature.properties.direction || 'auto',
                                 opacity: 1,
                                 interactive: true,
