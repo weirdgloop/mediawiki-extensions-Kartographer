@@ -7,7 +7,7 @@
  *
  * @alias KartographerMap
  * @class Kartographer.Box.MapClass
- * @extends L.Maps
+ * @extends L.Map
  */
 
 module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, DataManager, MapTileLayer, MD5, controls) {
@@ -562,7 +562,6 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             } catch ( e ) {
                 mw.log( e );
             }
-
         },
 
         /**
