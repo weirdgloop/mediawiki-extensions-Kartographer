@@ -550,8 +550,6 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                         return L.marker(latlng, {icon: icon})
                     }
                 };
-                //options.style = false;
-                console.log(geoJson);
                 layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) ).setFilter(function(feature){
                     return (feature.properties.mapID == map._mapID) && (feature.properties.plane == map._plane)
                 }).addTo( this );
