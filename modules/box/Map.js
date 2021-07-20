@@ -879,6 +879,11 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         rsMapInitialize: function(options, controls) {
             this._controllers = {};
             this.config = mw.config.get('wgKartographerDataConfig');
+            var mapVers = mw.message('kartographer-map-version');
+            if (mapVers.exists()) {
+                this.config.mapVersion = mapVers.text();
+            }
+            this.config.baseMapsFile = L.Util.template(this.config.baseMapsFile, {mapVersion: this.config.mapVersion});
             this.markerIcons = {
                 "greyPin": "pin_grey.svg",
                 "redPin": "pin_red.svg",
@@ -896,12 +901,14 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             this.imageCache = {}
             if (options.parentMap) {
                 this.ldl_load();
-                this._plane = options.parentMap._plane
-                this._mapID = options.parentMap._mapID
+                this._plane = options.parentMap._plane;
+                this._mapID = options.parentMap._mapID;
+                this._mapVersion = options.parentMap._mapVersion;
             } else {
                 this.ready.dataloader = true;
                 this._plane = 0;
                 this._mapID = 0;
+                this._mapVersion = this.config.mapVersion;
             }
         },
 
@@ -986,6 +993,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
               maxZoom: 5,
               maxNativeZoom: this.config.maxNativeZoom || 3,
               mapID: mapId,
+              mapVersion: this.config.mapVersion,
             });
             this.addLayer(this.selectedLayer);
             this.setMaxBounds(bounds);
