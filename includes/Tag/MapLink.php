@@ -54,6 +54,10 @@ class MapLink extends TagHandler {
 		if ( $this->plane !== null ) {
 			$attrs['data-plane'] = $this->plane;
 		}
+		// RS attributes
+		if ( $this->mapVersion !== null ) {
+			$attrs['data-mapversion'] = $this->mapVersion;
+		}
 
 		$style = $this->extractMarkerCss();
 		if ( $style ) {

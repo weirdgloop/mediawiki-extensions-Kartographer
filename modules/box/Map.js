@@ -879,9 +879,13 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         rsMapInitialize: function(options, controls) {
             this._controllers = {};
             this.config = mw.config.get('wgKartographerDataConfig');
-            var mapVers = mw.message('kartographer-map-version');
-            if (mapVers.exists()) {
-                this.config.mapVersion = mapVers.text();
+            var mesVers = mw.message('kartographer-map-version');
+            if (mesVers.exists()) {
+                this.config.mapVersion = mesVers.text();
+            }
+            var mapVers = this.config.mapVersion;
+            if (options.mapVersion) {
+                mapVers = options.mapVersion;
             }
             this.config.baseMapsFile = L.Util.template(this.config.baseMapsFile, {mapVersion: this.config.mapVersion});
             this.markerIcons = {
@@ -908,7 +912,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 this.ready.dataloader = true;
                 this._plane = 0;
                 this._mapID = 0;
-                this._mapVersion = this.config.mapVersion;
+                this._mapVersion = mapVers;
             }
         },
 
@@ -993,7 +997,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
               maxZoom: 5,
               maxNativeZoom: this.config.maxNativeZoom || 3,
               mapID: mapId,
-              mapVersion: this.config.mapVersion,
+              mapVersion: this._mapVersion,
             });
             this.addLayer(this.selectedLayer);
             this.setMaxBounds(bounds);
