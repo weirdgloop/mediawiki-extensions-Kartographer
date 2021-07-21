@@ -46,6 +46,7 @@ module.Link = ( function ( $ ) {
 		link.mapID = options.mapID || 'auto';
     	link.plane = options.plane || 'auto';
     	link.mapVersion = options.mapVersion || null;
+    	link.plainTiles = options.plainTiles || false;
 		link.center = options.center || 'auto';
 		link.zoom = options.zoom || 'auto';
 
@@ -88,6 +89,7 @@ module.Link = ( function ( $ ) {
     	position.mapID = position.mapID || link.mapID;
     	position.plane = position.plane || link.plane;
     	position.mapVersion = position.mapVersion || link.mapVersion || null;
+    	position.plainTiles = position.plainTiles || link.plainTiles || false;
 
 		if ( map && map._updatingHash ) {
 			// Skip - there is nothing to do.
@@ -116,6 +118,7 @@ module.Link = ( function ( $ ) {
         		mapID: position.mapID,
         		plane: position.plane,
         		mapVersion: position.mapVersion,
+        		plainTiles: position.plainTiles,
 				center: position.center,
 				zoom: position.zoom,
 				captionText: link.captionText,

@@ -58,6 +58,10 @@ class MapLink extends TagHandler {
 		if ( $this->mapVersion !== null ) {
 			$attrs['data-mapversion'] = $this->mapVersion;
 		}
+		// RS attributes
+		if ( $this->plainTiles !== null) {
+			$attrs['data-plaintiles'] = $this->plainTiles;
+		}
 
 		$style = $this->extractMarkerCss();
 		if ( $style ) {

@@ -176,6 +176,11 @@ class MapFrame extends TagHandler {
 					$attrs['data-mapversion'] = $this->mapVersion;
 				}
 
+				// RS attributes
+				if ( $this->plainTiles !== null) {
+					$attrs['data-plaintiles'] = $this->plainTiles;
+				}
+
 				if ( $this->showGroups ) {
 					$attrs['data-overlays'] = FormatJson::encode( $this->showGroups, false,
 						FormatJson::ALL_OK );

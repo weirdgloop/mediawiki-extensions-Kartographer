@@ -459,6 +459,7 @@
 		"KartographerEnableMapFrame": true,
 		"KartographerDataConfig": {
 			"baseTileURL": "https://maps.runescape.wiki/osrs/",
+			"basePlainTileURL": "https://maps.runescape.wiki/osrs/",
 			"tileURLFormat": "rendered/{mapID}/{z}/{p}_{x}_{-y}.png",
 			"attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
 			"baseMapsFile": "https://maps.runescape.wiki/osrs/data/basemaps.json",
