@@ -158,7 +158,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
 
             // Set properties from arguments
             if (options.mapID === 'auto') {
-                options.mapID = 0;
+                options.mapID = -1;
             }
             this._mapID = options.mapID;
             if (options.plane === 'auto') {
@@ -374,7 +374,11 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 center: center,
                 zoom: zoom,
             };
-            this.setMapID(mapID, plane, zoom, [center.lat, center.lng]);
+            let location = center
+            if (center != undefined) {
+                location = [center.lat, center.lng];
+            }
+            this.setMapID(mapID, plane, zoom, location);
             return this;
         },
 
@@ -910,9 +914,13 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 this._mapVersion = options.parentMap._mapVersion;
                 this._plainTiles = options.parentMap._plainTiles;
             } else {
-                this.ready.dataloader = true;
+                if (this._baseMaps[0]) {
+                    this.ready.dataloader = true;
+                } else {
+                    this.ldl_load();
+                }
                 this._plane = 0;
-                this._mapID = 0;
+                this._mapID = -1;
                 this._mapVersion = mapVers;
                 this._plainTiles = options.plainTiles || false;
             }

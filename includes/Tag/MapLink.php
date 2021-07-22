@@ -33,11 +33,17 @@ class MapLink extends TagHandler {
 		}
 		$text = $this->parser->recursiveTagParse( $text, $this->frame );
 
+		// For RS, default is Lumbridge
+		if ( $this->lat == null || $this->lon == null ) {
+			$this->lat = 3200;
+			$this->lon = 3200;
+		}
+
 		$attrs = [
 			'class' => 'mw-kartographer-maplink',
 			'mw-data' => 'interface',
 			'data-style' => $this->mapStyle,
-			'href' => SpecialMap::link( $this->lat, $this->lon, $this->zoom )->getLocalURL()
+			'href' => SpecialMap::link( $this->lon, $this->lat, $this->zoom, $this->mapid, $this->plane )->getLocalURL()
 		];
 		if ( $this->zoom !== null ) {
 			$attrs['data-zoom'] = $this->zoom;

@@ -155,7 +155,7 @@ abstract class TagHandler {
 		global $wgKartographerStyles, $wgKartographerDfltStyle;
 
 		// RS attributes
-		$this->mapid = $this->getInt( 'mapid', 0 );
+		$this->mapid = $this->getInt( 'mapid', -1 );
 		$this->plane = $this->getInt( 'plane', 0 );
 		$this->mapVersion = $this->getText( 'mapversion', null, '/^[a-zA-Z0-9\-_]+$/' );
 		$this->plainTiles = $this->getText( 'plaintiles', null, '/^(true|false)$/' );

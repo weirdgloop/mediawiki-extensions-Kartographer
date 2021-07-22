@@ -7,6 +7,7 @@ use Html;
 use Language;
 use UnexpectedValueException;
 use Kartographer\SpecialMap;
+use Kartographer\RsStaticMap;
 
 /**
  * The <mapframe> tag inserts a map into wiki page
@@ -160,7 +161,7 @@ class MapFrame extends TagHandler {
 					$staticMapID = $this->mapid;
 					$attrs['data-mapid'] = $this->mapid;
 				} else {
-					$staticMapID = 0;
+					$staticMapID = -1;
 				}
 
 				// RS attributes
@@ -216,7 +217,7 @@ class MapFrame extends TagHandler {
 		$attrs['style'] = "background-image: url({$bgUrl});";
 		*/
 		$attrs['style'] = "";
-		$attrs['href'] = SpecialMap::link( $staticLat, $staticLon, $staticZoom )->getLocalURL();
+		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, $staticMapID, $staticPlane )->getLocalURL();
 
 		if ( !$framed ) {
 			$attrs['style'] .= " width: {$width}; height: {$height};";
