@@ -127,6 +127,7 @@ class MapFrame extends TagHandler {
 				}
 
 				$height = "{$this->height}px";
+				$staticHeight = $this->height;
 
 				$attrs = [
 					'class' => 'mw-kartographer-map',
@@ -198,25 +199,17 @@ class MapFrame extends TagHandler {
 			$containerClass .= ' mw-kartographer-full';
 		}
 
-		/*
-		$params = [
-			'lang' => $this->langCode,
-		];
-		// This will not work correctly for RS Map as this is we don't use a dynamic map tile creator server
-		$bgUrl = "{$wgKartographerMapServer}/{$staticMapID}/{$staticZoom}/{$staticPlane}_{$staticLat}_" .
-			"{$staticLon}.png";
-		if ( $this->showGroups ) {
-			$params += [
-				'domain' => $wgServerName,
-				'title' => $this->parser->getTitle()->getPrefixedText(),
-				'groups' => implode( ',', $this->showGroups ),
-			];
+		// Get the static initial background
+		$rsmap = new RsStaticMap();
+		$bgProps = $rsmap->getMap( $staticMapID, $staticZoom, $staticPlane, [$staticLon, $staticLat], [$staticWidth, $staticHeight] );
+		$bgStyle = [];
+		foreach ($bgProps as $key => $val) {
+			if ( !empty($val) ) {
+				$bgStyle[] = $key . ': ' . $val . ';';
+			}
 		}
-		$bgUrl .= '?' . wfArrayToCgi( $params );
 
-		$attrs['style'] = "background-image: url({$bgUrl});";
-		*/
-		$attrs['style'] = "";
+		$attrs['style'] = implode(' ', $bgStyle);
 		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, $staticMapID, $staticPlane )->getLocalURL();
 
 		if ( !$framed ) {

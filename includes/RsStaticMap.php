@@ -97,13 +97,13 @@ class RsStaticMap {
 		$tile_size = Simple::pointToLonLat( [self::TILE_SIZE, self::TILE_SIZE], $zoom );
 		// Low tile
 		$tile_low = [ floor( $corner_low[0] / $tile_size[0] ), floor( $corner_low[1] / $tile_size[1] ) ];
-		// Offset from coner to low tile
-		$init_offset = [ $corner_low[0] - ($tile_low[0] * $tile_size[0]), $corner_low[1] - ($tile_low[1] * $tile_size[1]) ];
-		$init_px = Simple::LonLatToPoint( $init_offset, $zoom );
-		$init_px[0] = -$init_px[0];
-		$init_px[1] = $init_px[1] - $size[1];
 		// High tile
 		$tile_high = [ floor( $corner_high[0] / $tile_size[0] ), floor( $corner_high[1] / $tile_size[1] ) ];
+		// Offset for tiles
+		$init_offset = [ $corner_low[0] - ($tile_low[0] * $tile_size[0]), $corner_high[1] - ($tile_high[1] * $tile_size[1]) ];
+		$init_px = Simple::LonLatToPoint( $init_offset, $zoom );
+		$init_px[0] = -$init_px[0];
+		$init_px[1] = $init_px[1] - self::TILE_SIZE;
 
 		$bg_images = [];
 		$bg_pos = [];
@@ -126,14 +126,6 @@ class RsStaticMap {
 			"background-image" => implode(", ", $bg_images),
 			"background-position" => implode(", ", $bg_pos),
 			"background-repeat" => "no-repeat",
-			"map-size" => implode(", ", $map_size),
-			"corner-low" => implode(", ", $corner_low),
-			"corner-high" => implode(", ", $corner_high),
-			"tile-size" => implode(", ", $tile_size),
-			"tile-low" => implode(", ", $tile_low),
-			"init-offset" => implode(", ", $init_offset),
-			"init-px" => implode(", ", $init_px),
-			"tile-high" => implode(", ", $tile_high)
 		);
 	}
 
