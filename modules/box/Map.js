@@ -957,14 +957,14 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             }
         },
 
-      setPlane: function(plane) {
-        this._plane = plane
-        this.selectedLayer.redraw()
-        $.each( this.dataLayers, function ( groupId, layer ) {
-            layer.clearLayers();
-            layer._initialize(layer._geojson);
-        } );
-      },
+        setPlane: function(plane) {
+            this._plane = plane
+            this.selectedLayer.redraw()
+            $.each( this.dataLayers, function ( groupId, layer ) {
+                layer.clearLayers();
+                layer._initialize(layer._geojson);
+            } );
+        },
 
         setMapID: function(mapID, plane, zoom, location) {
             this._mapID = mapID

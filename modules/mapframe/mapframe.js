@@ -55,10 +55,10 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 		}
 
 		return {
-      mapID: +$el.data( 'mapid' ),
-      plane: +$el.data( 'plane' ),
-      mapVersion: $el.data( 'mapversion' ),
-      plainTiles: $el.data( 'plaintiles' ),
+			mapID: +$el.data( 'mapid' ),
+			plane: +$el.data( 'plane' ),
+			mapVersion: $el.data( 'mapversion' ),
+			plainTiles: $el.data( 'plaintiles' ),
 			latitude: +$el.data( 'lat' ),
 			longitude: +$el.data( 'lon' ),
 			zoom: +$el.data( 'zoom' ),
@@ -118,7 +118,11 @@ module.exports = ( function ( $, mw, kartobox, router ) {
 					feature: map
 				} );
 				map.doWhenReady( function () {
-					map.$container.css( 'backgroundImage', '' );
+					map.$container.css( {
+						['backgroundImage']: '',
+						['background-position']: '',
+						['background-repeat']: ''
+					} );
 				} );
 
 				mapsInArticle.push( map );
