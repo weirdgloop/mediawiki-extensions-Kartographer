@@ -81,8 +81,11 @@ class SpecialMap extends SpecialPage {
 			}
 		}
 
+		$special_note = $this->msg( 'kartographer-specialmap-note' )->parse();
+
 		$this->getOutput()->addHTML(
-			Html::openElement( 'div', [ 'id' => 'mw-specialMap-container', 'class' => 'thumb' ] )
+			Html::rawElement( 'p', [ 'id' => 'mw-specialMap-note' ], $special_note )
+			. Html::openElement( 'div', [ 'id' => 'mw-specialMap-container', 'class' => 'thumb' ] )
 				. Html::openElement( 'div', [ 'class' => 'thumbinner' ] )
 					. Html::openElement( 'div', [ 'id' => 'mw-specialMap-inner' ] )
 						. Html::element( 'div', [ 'id' => 'mw-specialMap-map', 'style' => implode(' ', $map_style) ] )
