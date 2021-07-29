@@ -38,6 +38,17 @@
 	text-decoration: none;
 }
 
+.leaflet-draw a .sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
 /* ================================================================== */
 /* Toolbar actions menu
 /* ================================================================== */
@@ -173,6 +184,14 @@
 
 .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-marker {
 	background-position: -120px -1px;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-circlemarker {
+	background-position: -273px -2px;
+}
+
+.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-circlemarker {
+	background-position: -271px -1px;
 }
 
 /* ================================================================== */

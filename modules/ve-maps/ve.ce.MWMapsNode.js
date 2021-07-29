@@ -138,7 +138,7 @@ ve.ce.MWMapsNode.prototype.update = function () {
 			this.map = null;
 		}
 		this.updateStatic();
-		$( '<img>' ).attr( 'src', this.model.getUrl( 1000, 1000 ) );
+		//$( '<img>' ).attr( 'src', this.model.getUrl( 1000, 1000 ) );
 	}
 	switch ( align ) {
 		case 'right':
@@ -162,7 +162,7 @@ ve.ce.MWMapsNode.prototype.update = function () {
  * Setup an interactive map
  */
 ve.ce.MWMapsNode.prototype.setupMap = function () {
-	var mwData = this.model.getAttribute( 'mw' ),
+	var mwData = this.model && this.model.getAttribute( 'mw' ),
 		mwAttrs = mwData && mwData.attrs,
 		node = this;
 
@@ -170,6 +170,8 @@ ve.ce.MWMapsNode.prototype.setupMap = function () {
 		container: this.$map[ 0 ],
 		center: [ +mwAttrs.latitude, +mwAttrs.longitude ],
 		zoom: +mwAttrs.zoom,
+		mapID: +mwAttrs.mapID,
+		plane: +mwAttrs.plane,
 		lang: mwAttrs.lang || mw.config.get( 'wgPageContentLanguage' )
 		// TODO: Support style editing
 	} );
@@ -195,10 +197,10 @@ ve.ce.MWMapsNode.prototype.updateGeoJson = function () {
 		return;
 	}
 	mwData = this.model.getAttribute( 'mw' );
-	geoJson = mwData && mwData.body.extsrc;
+	geoJson = mwData && mwData.body && mwData.body.extsrc;
 
 	if ( geoJson !== this.geoJson ) {
-		require( 'ext.kartographer.editing' ).updateKartographerLayer( this.map, mwData && mwData.body.extsrc ).then( this.updateMapPosition.bind( this ) );
+		require( 'ext.kartographer.editing' ).updateKartographerLayer( this.map, mwData && mwData.body && mwData.body.extsrc ).then( this.updateMapPosition.bind( this ) );
 		this.geoJson = geoJson;
 	}
 };
@@ -223,16 +225,23 @@ ve.ce.MWMapsNode.prototype.updateMapPosition = function () {
 		mwData.attrs.latitude = mapData.latitude = current.center.lat.toString();
 		mwData.attrs.longitude = mapData.longitude = current.center.lng.toString();
 		mwData.attrs.zoom = mapData.zoom = current.zoom.toString();
+		mwData.attrs.plane = mapData.plane = current.plane.toString();
+		mwData.attrs.mapID = mapData.mapID = current.mapID.toString();
 	} else if (
 		isNaN( updatedData.latitude ) || isNaN( updatedData.longitude ) || isNaN( updatedData.zoom ) ||
+		isNaN( updatedData.plane ) || isNaN( updatedData.mapID ) ||
 		mapData.latitude !== updatedData.latitude ||
 		mapData.longitude !== updatedData.longitude ||
-		mapData.zoom !== updatedData.zoom
+		mapData.zoom !== updatedData.zoom ||
+		mapData.plane !== updatedData.plane ||
+		mapData.mapID !== updatedData.mapID
 	) {
 		this.map.setView( [ updatedData.latitude, updatedData.longitude ], updatedData.zoom );
 		mapData.latitude = updatedData.latitude;
 		mapData.longitude = updatedData.longitude;
 		mapData.zoom = updatedData.zoom;
+		mapData.zoom = updatedData.plane;
+		mapData.zoom = updatedData.mapID;
 	} else {
 		this.map.invalidateSize();
 	}
@@ -245,7 +254,7 @@ ve.ce.MWMapsNode.prototype.updateMapPosition = function () {
  * @param {number} height Height
  */
 ve.ce.MWMapsNode.prototype.updateStatic = function ( width, height ) {
-	var url, node = this;
+	var bgcss, url, node = this;
 
 	if ( !this.model.getCurrentDimensions().width ) {
 		return;
@@ -253,13 +262,16 @@ ve.ce.MWMapsNode.prototype.updateStatic = function ( width, height ) {
 
 	if ( this.$imageLoader ) {
 		this.$imageLoader.off();
+		this.$imageLoader.remove();
 		this.$imageLoader = null;
 	}
 
-	url = this.model.getUrl( width, height );
+	bgcss = this.model.getUrl( width, height );
+	url = bgcss['background-image'].match( /url\([^\)]*\)$/g );
 
-	this.$imageLoader = this.$( '<img>' ).on( 'load', function () {
-		node.$map.css( 'backgroundImage', 'url(' + url + ')' );
+	this.$imageLoader = $( '<img>' ).on( 'load', function () {
+		this.$imageLoader.remove();
+		node.$map.css( bgcss );
 	} ).attr( 'src', url );
 };
 
@@ -295,7 +307,7 @@ ve.ce.MWMapsNode.prototype.getAttributeChanges = function ( width, height ) {
 ve.ce.MWMapsNode.prototype.onMapFocus = function () {
 	if ( !this.requiresInteractive() ) {
 		// Preload larger static map for resizing
-		$( '<img>' ).attr( 'src', this.model.getUrl( 1000, 1000 ) );
+		//$( '<img>' ).attr( 'src', this.model.getUrl( 1000, 1000 ) );
 	}
 };
 

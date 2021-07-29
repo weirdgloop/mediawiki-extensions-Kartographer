@@ -52,16 +52,39 @@ ve.ui.MWMapsDialog.prototype.initialize = function () {
 	// Parent method
 	ve.ui.MWMapsDialog.super.prototype.initialize.call( this );
 
+	var self = this;
+
 	this.$mapContainer = $( '<div>' ).addClass( 've-ui-mwMapsDialog-mapWidget' );
 	this.$map = $( '<div>' ).appendTo( this.$mapContainer );
 	this.map = null;
 	this.scalable = null;
 	this.updatingGeoJson = false;
+	this.mapData = null;
 
 	this.dimensions = new ve.ui.DimensionsWidget();
 
 	this.align = new ve.ui.AlignWidget( {
 		dir: this.getDir()
+	} );
+
+	this.mapSelect = new OO.ui.ComboBoxInputWidget( {
+		options: [],
+		classes: [ 've-ui-mwMapsDialog-mapSelWidget' ],
+		menu: {
+			filterFromInput: true,
+			filterMode: 'substring'
+		}
+	} );
+	this.mapName = new OO.ui.LabelWidget( {
+		label: ve.msg( 'visualeditor-mwmapsdialog-reset-map' ),
+		classes: [ 'visualeditor-mwmapsdialog-loadingname' ]
+	} );
+
+	this.planeSelect = new OO.ui.NumberInputWidget( {
+		min: 0,
+		max: 5,
+		step: 1,
+		classes: [ 've-ui-mwMapsDialog-planeWidget' ]
 	} );
 
 	this.input = new ve.ui.MWAceEditorWidget( {
@@ -92,13 +115,31 @@ ve.ui.MWMapsDialog.prototype.initialize = function () {
 		label: ve.msg( 'visualeditor-mwmapsdialog-align' )
 	} );
 
+	this.mapSelectHoriz = new OO.ui.HorizontalLayout( {
+		items: [ 
+			new OO.ui.LabelWidget( { label: ve.msg( 'visualeditor-mwmapsdialog-mapselect' ), classes: [ 've-ui-mwMapsDialog-mapFieldLabel' ] } ),
+			this.mapSelect,
+			this.mapName
+		],
+		classes: [ 've-ui-mwMapsDialog-mapFieldWidget' ]
+	} );
+
+	this.planeSelectField = new OO.ui.FieldLayout( this.planeSelect, {
+		align: 'right',
+		label: ve.msg( 'visualeditor-mwmapsdialog-planeselect' )
+	} );
+
 	this.$currentPositionLatField = $( '<td></td>' );
 	this.$currentPositionLonField = $( '<td></td>' );
 	this.$currentPositionZoomField = $( '<td></td>' );
+	this.$currentPositionPlaneField = $( '<td></td>' );
+	this.$currentPositionMapIdField = $( '<td></td>' );
 	$currentPositionTable = $( '<table>' ).addClass( 've-ui-mwMapsDialog-position-table' )
-		.append( $( '<tr>' ).append( '<th>' + ve.msg( 'visualeditor-mwmapsdialog-position-lat' ) + '</th>' ).append( this.$currentPositionLatField ) )
 		.append( $( '<tr>' ).append( '<th>' + ve.msg( 'visualeditor-mwmapsdialog-position-lon' ) + '</th>' ).append( this.$currentPositionLonField ) )
-		.append( $( '<tr>' ).append( '<th>' + ve.msg( 'visualeditor-mwmapsdialog-position-zoom' ) + '</th>' ).append( this.$currentPositionZoomField ) );
+		.append( $( '<tr>' ).append( '<th>' + ve.msg( 'visualeditor-mwmapsdialog-position-lat' ) + '</th>' ).append( this.$currentPositionLatField ) )
+		.append( $( '<tr>' ).append( '<th>' + ve.msg( 'visualeditor-mwmapsdialog-position-zoom' ) + '</th>' ).append( this.$currentPositionZoomField ) )
+		.append( $( '<tr>' ).append( '<th>' + ve.msg( 'visualeditor-mwmapsdialog-position-plane' ) + '</th>' ).append( this.$currentPositionPlaneField ) )
+		.append( $( '<tr>' ).append( '<th>' + ve.msg( 'visualeditor-mwmapsdialog-position-mapid' ) + '</th>' ).append( this.$currentPositionMapIdField ) );
 
 	positionPopupButton = new OO.ui.PopupButtonWidget( {
 		$overlay: this.$overlay,
@@ -122,11 +163,41 @@ ve.ui.MWMapsDialog.prototype.initialize = function () {
 	panel.$element.append(
 		this.dimensionsField.$element,
 		this.alignField.$element,
+		this.mapSelectHoriz.$element,
+		this.planeSelectField.$element,
 		this.$mapContainer,
 		this.$mapPositionContainer.append( positionPopupButton.$element, this.resetMapButton.$element ),
 		this.geoJsonField.$element
 	);
 	this.$body.append( panel.$element );
+
+	// Get base maps data
+	this.mapsConfig = mw.config.get( 'wgKartographerDataConfig' );
+	var mapVers = this.mapsConfig.mapVersion;
+	var mesVers = mw.message('kartographer-map-version');
+    if (mesVers.exists()) {
+        mapVers = mesVers.text();
+    }
+    var baseUrl = this.mapsConfig.baseMapsFile;
+    baseUrl = baseUrl.replace( '{mapVersion}', mapVers );
+    $.getJSON( baseUrl, function (data) {
+    	var mapData = {};
+    	var mapList = [];
+    	data.forEach( function (map) {
+    		if ( !isNaN(map.mapId) ) {
+    			mapList.push({ data:map.mapId, label:map.name })
+    			mapData[ map.mapId ] = map;
+    		}
+    	} );
+    	self.mapData = mapData;
+    	self.mapSelect.setOptions( mapList );
+
+
+    	var mwAttrs = self.selectedNode && self.selectedNode.getAttribute( 'mw' ).attrs || {};
+    	if ( mwAttrs && !isNaN(mwAttrs.mapID) ) {
+    		self.mapName.setLabel( self.mapData[ mwAttrs.mapID ].name );
+    	}
+    } );
 };
 
 /**
@@ -170,14 +241,15 @@ ve.ui.MWMapsDialog.prototype.resetMapPosition = function () {
 	}
 
 	position = this.getInitialMapPosition();
-	this.map.setView( position.center, position.zoom );
 
-	this.updateActions();
 	this.resetMapButton.setDisabled( true );
-
 	this.map.once( 'moveend', function () {
 		dialog.resetMapButton.setDisabled( false );
 	} );
+
+	this.map.setView( position.center, position.zoom );
+
+	this.updateActions();
 };
 
 /**
@@ -198,6 +270,58 @@ ve.ui.MWMapsDialog.prototype.updateActions = function () {
 };
 
 /**
+ * Change the mapID
+ */
+ve.ui.MWMapsDialog.prototype.updateMapID = function ( mapID ) {
+	if ( !this.map ) {
+		return;
+	}
+	if ( isNaN(mapID) || mapID === '' ) {
+		return;
+	}
+	var dialog = this,
+		zoom = this.map.getZoom(),
+		plane = this.map.getPlane(),
+		mapName = this.mapData[mapID].name ;
+
+	this.mapSelect.setValue( mapID );
+	this.mapName.setLabel( mapName );
+
+	this.mapSelect.setDisabled( true );
+	this.map.once( 'layeradd', function () {
+		dialog.mapSelect.setDisabled( false );
+		dialog.planeSelect.setDisabled( false );
+	} );
+
+	// setMapID(mapID, plane, zoom, location)
+	this.map.setMapID(mapID, plane, zoom, undefined);
+
+	this.updateActions();
+}
+
+/**
+ * Change the map plane
+ */
+ve.ui.MWMapsDialog.prototype.updateMapPlane = function ( plane ) {
+	if ( !this.map ) {
+		return;
+	}
+	if ( isNaN(plane) ) {
+		return;
+	}
+	var dialog = this;
+
+	this.planeSelect.setDisabled( true );
+	this.map.selectedLayer.once( 'tileload tileerror', function () {
+		dialog.planeSelect.setDisabled( false );
+	} );
+
+	this.map.setPlane(plane);
+
+	this.updateActions();
+}
+
+/**
  * @inheritdoc ve.ui.MWExtensionWindow
  */
 ve.ui.MWMapsDialog.prototype.insertOrUpdateNode = function () {
@@ -216,7 +340,7 @@ ve.ui.MWMapsDialog.prototype.insertOrUpdateNode = function () {
  * @inheritdoc ve.ui.MWExtensionWindow
  */
 ve.ui.MWMapsDialog.prototype.updateMwData = function ( mwData ) {
-	var center, scaled, latitude, longitude, zoom,
+	var center, scaled, latitude, longitude, zoom, mapID, plane
 		dimensions = this.scalable.getBoundedDimensions(
 			this.dimensions.getDimensions()
 		);
@@ -225,6 +349,8 @@ ve.ui.MWMapsDialog.prototype.updateMwData = function ( mwData ) {
 	ve.ui.MWMapsDialog.super.prototype.updateMwData.call( this, mwData );
 
 	if ( this.map ) {
+		mapID = this.map.getMapID();
+		plane = this.map.getPlane();
 		center = this.map.getCenter();
 		zoom = this.map.getZoom();
 		scaled = this.map.getScaleLatLng( center.lat, center.lng, zoom );
@@ -237,6 +363,8 @@ ve.ui.MWMapsDialog.prototype.updateMwData = function ( mwData ) {
 	mwData.attrs.latitude = latitude.toString();
 	mwData.attrs.longitude = longitude.toString();
 	mwData.attrs.zoom = zoom.toString();
+	mwData.attrs.mapID = mapID.toString();
+	mwData.attrs.plane = plane.toString();
 	if ( !( this.selectedNode instanceof ve.dm.MWInlineMapsNode ) ) {
 		mwData.attrs.width = dimensions.width.toString();
 		mwData.attrs.height = dimensions.height.toString();
@@ -272,7 +400,7 @@ ve.ui.MWMapsDialog.prototype.getSetupProcess = function ( data ) {
 				this.scalable = this.selectedNode.getScalable();
 			} else {
 				this.scalable = ve.dm.MWMapsNode.static.createScalable(
-					inline ? { width: 850, height: 400 } : { width: 400, height: 300 }
+					inline ? { width: 850, height: 400 } : { width: 300, height: 300 }
 				);
 			}
 
@@ -286,6 +414,8 @@ ve.ui.MWMapsDialog.prototype.getSetupProcess = function ( data ) {
 				heightChange: 'onDimensionsChange'
 			} );
 			this.align.connect( this, { choose: 'updateActions' } );
+			this.mapSelect.connect( this, { change: 'updateMapID' } );
+			this.planeSelect.connect( this, { change: 'updateMapPlane' } );
 			this.resetMapButton.connect( this, { click: 'resetMapPosition' } );
 
 			this.dimensionsField.toggle( !inline );
@@ -294,6 +424,24 @@ ve.ui.MWMapsDialog.prototype.getSetupProcess = function ( data ) {
 
 			// TODO: Support block/inline conversion
 			this.align.selectItemByData( mwAttrs.align || 'right' );
+
+			if ( !isNaN(mwAttrs.mapID) ) {
+				this.mapSelect.setValue( mwAttrs.mapID );
+				if ( this.mapData ) {
+					this.mapName.setLabel( this.mapData[ mwAttrs.mapID ].name );
+				} else {
+					this.mapName.setLabel( ve.msg('visualeditor-mwmapsdialog-loadingname') );
+				}
+			} else {
+				this.mapSelect.setValue( 28 );
+				if ( this.mapData ) {
+					this.mapName.setLabel( this.mapData[28].name );
+				} else {
+					this.mapName.setLabel( ve.msg('visualeditor-mwmapsdialog-loadingname') );
+				}
+			}
+
+			this.planeSelect.setValue( mwAttrs.plane || 0);
 
 			this.resetMapButton.$element.toggle( !!this.selectedNode );
 
@@ -321,11 +469,15 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
 			mwData = dialog.selectedNode && dialog.selectedNode.getAttribute( 'mw' ),
 			mwAttrs = mwData && mwData.attrs;
 
+		if ( !mwAttrs ) { mwAttrs = {}; }
+
 		// TODO: Support 'style' editing
 		dialog.map = require( 'ext.kartographer.box' ).map( {
 			container: dialog.$map[ 0 ],
 			center: mapPosition.center,
 			zoom: mapPosition.zoom,
+			mapID: mapPosition.mapID,
+			plane: mapPosition.plane,
 			lang: mwAttrs.lang || mw.config.get( 'wgPageContentLanguage' ),
 			alwaysInteractive: true
 		} );
@@ -338,6 +490,9 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
 			setTimeout( function () {
 				dialog.resetMapPosition();
 			}, OO.ui.theme.getDialogTransitionDuration() );
+
+			dialog.planeSelect.setDisabled( false );
+			dialog.mapSelect.setDisabled( false );
 
 			// if geojson and no center, we need the map to automatically
 			// position itself when the feature layer is added.
@@ -353,14 +508,22 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
 
 			geoJsonLayer = editing.getKartographerLayer( dialog.map );
 			new L.Control.Draw( {
+				position: 'topright',
 				edit: { featureGroup: geoJsonLayer },
 				draw: {
-					circle: false,
+					circle: defaultShapeOptions,
+					circlemarker: defaultShapeOptions,
 					// TODO: Determine metric preference from locale information
 					polyline: defaultShapeOptions,
 					polygon: defaultShapeOptions,
 					rectangle: defaultShapeOptions,
-					marker: { icon: L.mapbox.marker.icon( {} ) }
+					marker: { icon: L.icon( {
+						icon: "pin_blue.svg",
+						iconUrl: (dialog.mapsConfig.iconURL + "pin_blue.svg"),
+						iconSize: [26, 42],
+						iconAnchor: [13, 42],
+						popupAnchor: [0, -42]
+					} ) }
 				}
 			} ).addTo( dialog.map );
 
@@ -390,6 +553,8 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
 				dialog.$currentPositionLatField.text( scaled[ 0 ] );
 				dialog.$currentPositionLonField.text( scaled[ 1 ] );
 				dialog.$currentPositionZoomField.text( position.zoom );
+				dialog.$currentPositionMapIdField.text( position.mapID );
+				dialog.$currentPositionPlaneField.text( position.plane );
 			}
 
 			function onMapMove() {
@@ -413,7 +578,7 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
  * @return {Object} Object containing latitude, longitude and zoom
  */
 ve.ui.MWMapsDialog.prototype.getInitialMapPosition = function () {
-	var latitude, longitude, zoom,
+	var latitude, longitude, zoom, mapID, plane
 		pageCoords = mw.config.get( 'wgCoordinates' ),
 		mwData = this.selectedNode && this.selectedNode.getAttribute( 'mw' ),
 		mwAttrs = mwData && mwData.attrs;
@@ -422,20 +587,28 @@ ve.ui.MWMapsDialog.prototype.getInitialMapPosition = function () {
 		latitude = +mwAttrs.latitude;
 		longitude = +mwAttrs.longitude;
 		zoom = +mwAttrs.zoom;
+		mapID = +mwAttrs.mapID;
+		plane = +mwAttrs.plane;
 	} else if ( pageCoords ) {
 		// Use page coordinates if Extension:GeoData is available
 		latitude = pageCoords.lat;
 		longitude = pageCoords.lon;
-		zoom = 5;
+		mapID = pageCoords.mapID;
+		plane = pageCoords.plane;
+		zoom = 2;
 	} else if ( !mwAttrs || !mwAttrs.extsrc ) {
-		latitude = 30;
-		longitude = 0;
+		latitude = 3200;
+		longitude = 3200;
+		mapID = 28;
+		plane = 0;
 		zoom = 2;
 	}
 
 	return {
 		center: [ latitude, longitude ],
-		zoom: zoom
+		zoom: zoom,
+		mapID: mapID,
+		plane: plane
 	};
 };
 
@@ -472,6 +645,7 @@ ve.ui.MWMapsDialog.prototype.getTeardownProcess = function ( data ) {
 			this.input.disconnect( this );
 			this.dimensions.disconnect( this );
 			this.resetMapButton.disconnect( this );
+			this.planeSelect.disconnect( this );
 
 			this.dimensions.clear();
 			if ( this.map ) {

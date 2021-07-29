@@ -3,8 +3,32 @@
 	background-repeat: no-repeat;
 }
 
+
+.ve-ui-mwMapsDialog-mapFieldWidget {
+	margin-top: 0.85714286em;
+}
+.ve-ui-mwMapsDialog-mapFieldWidget .ve-ui-mwMapsDialog-mapFieldLabel {
+	text-align: right;
+	padding-right: 2.64285714em;
+	margin-right: 0;
+	width: 40%;
+}
+.ve-ui-mwMapsDialog-mapSelWidget {
+	min-width: 10em;
+	width: 28%;
+	margin-right: 2%;
+}
+.ve-ui-mwMapsDialog-mapLabelWidget {
+	width: 30%;
+}
+
+.ve-ui-mwMapsDialog-planeWidget {
+	min-width: 9em;
+	width:  30%;
+}
+
 .ve-ui-mwMapsDialog-mapWidget {
-	margin: 0 auto 1em auto;
+	margin: 0.85714286em auto 1em auto;
 	max-width: 866px;
 	max-height: 400px;
 	overflow: auto;
