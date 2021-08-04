@@ -4,6 +4,7 @@ module.MapTileLayer = L.TileLayer.extend({
     // L.setOptions(this, options);
 
     this._mapID = this.options.mapID;
+    this._mapVersion = this.options.mapVersion
   },
 
   onAdd: function(map) {
@@ -24,6 +25,7 @@ module.MapTileLayer = L.TileLayer.extend({
       z: this._getZoomForUrl(),
       p: this._map.getPlane(),
       mapID: this._mapID,
+      mapVersion: this._mapVersion,
     };
 
     if (this._map && !this._map.options.crs.infinite) {

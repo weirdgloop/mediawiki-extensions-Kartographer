@@ -158,7 +158,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
 
             // Set properties from arguments
             if (options.mapID === 'auto') {
-                options.mapID = 0;
+                options.mapID = -1;
             }
             this._mapID = options.mapID;
             if (options.plane === 'auto') {
@@ -374,7 +374,11 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 center: center,
                 zoom: zoom,
             };
-            this.setMapID(mapID, plane, zoom, [center.lat, center.lng]);
+            let location = center
+            if (center != undefined) {
+                location = [center.lat, center.lng];
+            }
+            this.setMapID(mapID, plane, zoom, location);
             return this;
         },
 
@@ -947,6 +951,15 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
         rsMapInitialize: function(options, controls) {
             this._controllers = {};
             this.config = mw.config.get('wgKartographerDataConfig');
+            var mesVers = mw.message('kartographer-map-version');
+            if (mesVers.exists()) {
+                this.config.mapVersion = mesVers.text();
+            }
+            var mapVers = this.config.mapVersion;
+            if (options.mapVersion) {
+                mapVers = options.mapVersion;
+            }
+            this.config.baseMapsFile = L.Util.template(this.config.baseMapsFile, {mapVersion: this.config.mapVersion});
             this.markerIcons = {
                 "greyPin": "pin_grey.svg",
                 "redPin": "pin_red.svg",
@@ -964,12 +977,20 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             this.imageCache = {}
             if (options.parentMap) {
                 this.ldl_load();
-                this._plane = options.parentMap._plane
-                this._mapID = options.parentMap._mapID
+                this._plane = options.parentMap._plane;
+                this._mapID = options.parentMap._mapID;
+                this._mapVersion = options.parentMap._mapVersion;
+                this._plainTiles = options.parentMap._plainTiles;
             } else {
-                this.ready.dataloader = true;
+                if (this._baseMaps[0]) {
+                    this.ready.dataloader = true;
+                } else {
+                    this.ldl_load();
+                }
                 this._plane = 0;
-                this._mapID = 0;
+                this._mapID = -1;
+                this._mapVersion = mapVers;
+                this._plainTiles = options.plainTiles || false;
             }
         },
 
@@ -1004,14 +1025,14 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             }
         },
 
-      setPlane: function(plane) {
-        this._plane = plane
-        this.selectedLayer.redraw()
-        $.each( this.dataLayers, function ( groupId, layer ) {
-            layer.clearLayers();
-            layer._initialize(layer._geojson);
-        } );
-      },
+        setPlane: function(plane) {
+            this._plane = plane
+            this.selectedLayer.redraw()
+            $.each( this.dataLayers, function ( groupId, layer ) {
+                layer.clearLayers();
+                layer._initialize(layer._geojson);
+            } );
+        },
 
         setMapID: function(mapID, plane, zoom, location) {
             this._mapID = mapID
@@ -1046,14 +1067,19 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
 
             let data = this._baseMaps[mapId] || {}
             let bounds = this._translateBounds(data.bounds)
+            let baseUrl = this.config.baseTileURL
+            if (this._plainTiles && this.config.basePlainTileURL) {
+                baseUrl = this.config.basePlainTileURL;
+            }
             this.selectedLayer = new MapTileLayer(
-              this.config.baseTileURL + this.config.tileURLFormat, {
+              baseUrl + this.config.tileURLFormat, {
               tileSize: this.config.tileSize || 256,
               bounds: bounds,
               minZoom: -3,
               maxZoom: 5,
               maxNativeZoom: this.config.maxNativeZoom || 3,
               mapID: mapId,
+              mapVersion: this._mapVersion,
             });
             this.addLayer(this.selectedLayer);
             this.setMaxBounds(bounds);

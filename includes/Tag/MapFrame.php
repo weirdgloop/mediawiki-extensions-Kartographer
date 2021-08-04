@@ -7,6 +7,7 @@ use Html;
 use Language;
 use UnexpectedValueException;
 use Kartographer\SpecialMap;
+use Kartographer\RsStaticMap;
 
 /**
  * The <mapframe> tag inserts a map into wiki page
@@ -126,6 +127,7 @@ class MapFrame extends TagHandler {
 				}
 
 				$height = "{$this->height}px";
+				$staticHeight = $this->height;
 
 				$attrs = [
 					'class' => 'mw-kartographer-map',
@@ -160,7 +162,7 @@ class MapFrame extends TagHandler {
 					$staticMapID = $this->mapid;
 					$attrs['data-mapid'] = $this->mapid;
 				} else {
-					$staticMapID = 0;
+					$staticMapID = -1;
 				}
 
 				// RS attributes
@@ -169,6 +171,16 @@ class MapFrame extends TagHandler {
 					$attrs['data-plane'] = $this->plane;
 				} else {
 					$staticPlane = 0;
+				}
+
+				// RS attributes
+				if ( $this->mapVersion !== null) {
+					$attrs['data-mapversion'] = $this->mapVersion;
+				}
+
+				// RS attributes
+				if ( $this->plainTiles !== null) {
+					$attrs['data-plaintiles'] = $this->plainTiles;
 				}
 
 				if ( $this->showGroups ) {
@@ -187,26 +199,18 @@ class MapFrame extends TagHandler {
 			$containerClass .= ' mw-kartographer-full';
 		}
 
-		/*
-		$params = [
-			'lang' => $this->langCode,
-		];
-		// This will not work correctly for RS Map as this is we don't use a dynamic map tile creator server
-		$bgUrl = "{$wgKartographerMapServer}/{$staticMapID}/{$staticZoom}/{$staticPlane}_{$staticLat}_" .
-			"{$staticLon}.png";
-		if ( $this->showGroups ) {
-			$params += [
-				'domain' => $wgServerName,
-				'title' => $this->parser->getTitle()->getPrefixedText(),
-				'groups' => implode( ',', $this->showGroups ),
-			];
+		// Get the static initial background
+		$rsmap = new RsStaticMap();
+		$bgProps = $rsmap->getMap( $staticMapID, $staticZoom, $staticPlane, [$staticLon, $staticLat], [$staticWidth, $staticHeight] );
+		$bgStyle = [];
+		foreach ($bgProps as $key => $val) {
+			if ( !empty($val) ) {
+				$bgStyle[] = $key . ': ' . $val . ';';
+			}
 		}
-		$bgUrl .= '?' . wfArrayToCgi( $params );
 
-		$attrs['style'] = "background-image: url({$bgUrl});";
-		*/
-		$attrs['style'] = "";
-		$attrs['href'] = SpecialMap::link( $staticLat, $staticLon, $staticZoom )->getLocalURL();
+		$attrs['style'] = implode(' ', $bgStyle);
+		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, $staticMapID, $staticPlane )->getLocalURL();
 
 		if ( !$framed ) {
 			$attrs['style'] .= " width: {$width}; height: {$height};";

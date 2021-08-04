@@ -5,7 +5,9 @@
 		"Max Semenik",
 		"Ed Sanders",
 		"Julien Girault",
-		"Ralph Bisschops"
+		"Ralph Bisschops",
+		"Jonathan Lee",
+		"Jonas Doggart"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:Kartographer",
 	"descriptionmsg": "kartographer-desc",
@@ -106,6 +108,7 @@
 				"leafletdraw-draw-handlers-circle-radius",
 				"leafletdraw-draw-handlers-circle-tooltip-start",
 				"leafletdraw-draw-handlers-marker-tooltip-start",
+				"leafletdraw-draw-handlers-circlemarker-tooltip-start",
 				"leafletdraw-draw-handlers-polygon-tooltip-cont",
 				"leafletdraw-draw-handlers-polygon-tooltip-end",
 				"leafletdraw-draw-handlers-polygon-tooltip-start",
@@ -119,9 +122,11 @@
 				"leafletdraw-draw-toolbar-actions-title",
 				"leafletdraw-draw-toolbar-buttons-circle",
 				"leafletdraw-draw-toolbar-buttons-marker",
+				"leafletdraw-draw-toolbar-buttons-circlemarker",
 				"leafletdraw-draw-toolbar-buttons-polygon",
 				"leafletdraw-draw-toolbar-buttons-polyline",
 				"leafletdraw-draw-toolbar-buttons-rectangle",
+				"leafletdraw-draw-toolbar-finish-text",
 				"leafletdraw-draw-toolbar-undo-text",
 				"leafletdraw-draw-toolbar-undo-title",
 				"leafletdraw-edit-handlers-edit-tooltip-subtext",
@@ -131,10 +136,14 @@
 				"leafletdraw-edit-toolbar-actions-cancel-title",
 				"leafletdraw-edit-toolbar-actions-save-text",
 				"leafletdraw-edit-toolbar-actions-save-title",
+				"leafletdraw-edit-toolbar-actions-clearall-text",
+				"leafletdraw-edit-toolbar-actions-clearall-title",
 				"leafletdraw-edit-toolbar-buttons-edit",
 				"leafletdraw-edit-toolbar-buttons-editdisabled",
 				"leafletdraw-edit-toolbar-buttons-remove",
-				"leafletdraw-edit-toolbar-buttons-removedisabled"
+				"leafletdraw-edit-toolbar-buttons-removedisabled",
+				"leafletdraw-draw-toolbar-finish-text",
+				"leafletdraw-draw-toolbar-finish-title"
 			],
 			"targets": [
 				"mobile",
@@ -180,7 +189,8 @@
 				"modules/box/index.js"
 			],
 			"messages": [
-				"kartographer-attribution"
+				"kartographer-attribution",
+				"kartographer-map-version"
 			],
 			"targets": [
 				"mobile",
@@ -303,7 +313,8 @@
 			"messages": [
 				"visualeditor-mwmapsdialog-position-lat",
 				"visualeditor-mwmapsdialog-position-lon",
-				"visualeditor-mwmapsdialog-position-zoom"
+				"visualeditor-mwmapsdialog-position-zoom",
+				"visualeditor-mwmapsdialog-position-plane"
 			],
 			"targets": [
 				"mobile",
@@ -346,14 +357,20 @@
 				"modules/ve-maps/ve.ui.MWMaps.css"
 			],
 			"messages": [
+				"kartographer-map-version",
 				"visualeditor-mwmapscontextitem-nosupport",
 				"visualeditor-mwmapscontextitem-title",
 				"visualeditor-mwmapsdialog-align",
 				"visualeditor-mwmapsdialog-geojson",
+				"visualeditor-mwmapsdialog-loadingname",
+				"visualeditor-mwmapsdialog-mapselect",
+				"visualeditor-mwmapsdialog-planeselect",
 				"visualeditor-mwmapsdialog-position-button",
 				"visualeditor-mwmapsdialog-position-lat",
 				"visualeditor-mwmapsdialog-position-lon",
 				"visualeditor-mwmapsdialog-position-zoom",
+				"visualeditor-mwmapsdialog-position-plane",
+				"visualeditor-mwmapsdialog-position-mapid",
 				"visualeditor-mwmapsdialog-reset-map",
 				"visualeditor-mwmapsdialog-size",
 				"visualeditor-mwmapsdialog-title"
@@ -459,10 +476,12 @@
 		"KartographerEnableMapFrame": true,
 		"KartographerDataConfig": {
 			"baseTileURL": "https://maps.runescape.wiki/osrs/",
+			"basePlainTileURL": "https://maps.runescape.wiki/osrs/",
 			"tileURLFormat": "rendered/{mapID}/{z}/{p}_{x}_{-y}.png",
 			"attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
 			"baseMapsFile": "https://maps.runescape.wiki/osrs/data/basemaps.json",
-			"wikiImageURL": "https://oldschool.runescape.wiki/images/"
+			"wikiImageURL": "https://oldschool.runescape.wiki/images/",
+			"mapVersion": "2021-04-19_a"
 		}
 	},
 	"TrackingCategories": [

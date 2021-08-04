@@ -49,15 +49,78 @@ ve.dm.MWMapsNode.static.toDataElement = function () {
 };
 
 ve.dm.MWMapsNode.static.getUrl = function ( dataElement, width, height ) {
+	var _tileSize = 256;
 	var mwAttrs = dataElement.attributes.mw.attrs;
 
-	return 'https://maps.wikimedia.org/img/osm-intl,' +
-		mwAttrs.zoom + ',' +
-		mwAttrs.latitude + ',' +
-		mwAttrs.longitude + ',' +
-		( width || mwAttrs.width ) + 'x' +
-		( height || mwAttrs.height ) +
-		'.jpeg?' + $.param( { lang: mwAttrs.lang || mw.config.get( 'wgPageContentLanguage' ) } );
+	var scale = Math.pow( 2, mwAttrs.zoom );
+	var toCoord = function ( point, scale ) {
+		return ( ( point / scale - 0 ) / 1 );
+	};
+	var toPoint = function ( coord, scale ) {
+		return ( scale * ( 1 * coord + 0 ) );
+	};
+	var tileSize = toCoord( _tileSize, scale );
+
+	// Map size
+	var mapWidth = toCoord( width, scale );
+	var mapHeight = toCoord( height, scale );
+	// Corner low coords
+	var lowX = mwAttrs.longitude - (mapWidth / 2);
+	var lowY = mwAttrs.latitude - (mapHeight / 2);
+	// Corner high coords
+	var highX = mwAttrs.longitude + (mapWidth / 2);
+	var highY = mwAttrs.latitude - (mapHeight / 2);
+	// Tile low
+	var tileLowX = Math.floor( lowX / tileSize );
+	var tileLowY = Math.floor( lowY / tileSize );
+	// Tile high
+	var tileHighX = Math.floor( highX / tileSize );
+	var tileHighY = Math.floor( highY / tileSize );
+	// Initial offset
+	var initOffX = lowX - (tileLowX * tileSize);
+	initOffX = -( toPoint(initOffX, scale) );
+	var initOffY = lowY - (tileLowY * tileSize);
+	initOffX = toPoint(initOffX, scale) - _tileSize;
+
+	var mapsConfig = mw.config.get( 'wgKartographerDataConfig' );
+	var mapVers = mapsConfig.mapVersion;
+	var mesVers = mw.message('kartographer-map-version');
+    if (mesVers.exists()) {
+        mapVers = mesVers.text();
+    }
+    var  baseUrl = mapsConfig.baseTileURL + mapsConfig.tileURLFormat;
+    baseUrl = baseUrl.replace( '{mapVersion}', mapVers );
+	var getTileUrl = function ( mapID, zoom, plane, x, y ) {
+		var url = baseUrl.replace( '{mapID}', mapID )
+			.replace( '{z}', zoom )
+			.replace( '{p}', plane )
+			.replace( '{x}', x )
+			.replace( '{y}', y ).replace( '{-y}', y )
+		return url;
+	};
+
+	// Make tiles
+	var bgImages = [];
+	var bgPos = [];
+	var yCount = 0;
+	for (let y = tileHighY; y >= tileLowY; y -= 1) {
+		var yOff = initOffY + (yCount * _tileSize);
+		yCount += 1;
+		var xCount = 0;
+		for (let x = tileLowX; x <= tileHighX; x += 1) {
+			var xOff = initOffX + (xCount * _tileSize);
+			xCount += 1;
+			var tileUrl = getTileUrl( mwAttrs.mapID, mwAttrs.zoom, mwAttrs.plane, x, y );
+			bgImages.push( "url("+tileUrl+")" );
+			bgPos.push( xOff+"px "+yOff+"px" );
+		}
+	}
+
+	return {
+		'background-image': bgImages.join(', '),
+		'background-position': bgPos.join(', '),
+		'background-repeat': 'no-repeat'
+	}
 };
 
 ve.dm.MWMapsNode.static.createScalable = function ( dimensions ) {

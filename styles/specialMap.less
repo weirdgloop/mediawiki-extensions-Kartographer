@@ -1,6 +1,7 @@
 @mapWidth: 256px;
 @mapHeight: 256px;
-@markerColor: #7b4e10;
+@markerColor: #fff;
+@markerShadow: #000;
 @markerSize: 10px;
 
 /* stylelint-disable selector-max-id */
@@ -19,6 +20,7 @@ div#mw-specialMap-container {
 div#mw-specialMap-inner {
 	height: @mapHeight;
 	position: relative;
+	background: #000;
 }
 
 div#mw-specialMap-map {
@@ -26,7 +28,7 @@ div#mw-specialMap-map {
 	width: @mapWidth;
 	height: @mapHeight;
 	/* stylelint-disable function-parentheses-space-inside */
-	background-image: url(https://maps.wikimedia.org/osm-intl/0/0/0.png);
+	/* background-image: url(https://maps.wikimedia.org/osm-intl/0/0/0.png); */
 	/* stylelint-enable function-parentheses-space-inside */
 	background-position: center;
 	background-repeat: no-repeat;
@@ -40,7 +42,7 @@ div#mw-specialMap-map {
 	( min-resolution: 144dpi ) {
 	div#mw-specialMap-map {
 		/* stylelint-disable function-parentheses-space-inside */
-		background-image: url(https://maps.wikimedia.org/osm-intl/0/0/0@1.5x.png);
+		/* background-image: url(https://maps.wikimedia.org/osm-intl/0/0/0@1.5x.png); */
 		/* stylelint-enable function-parentheses-space-inside */
 	}
 }
@@ -51,7 +53,7 @@ div#mw-specialMap-map {
 	( min-resolution: 192dpi ) {
 	div#mw-specialMap-map {
 		/* stylelint-disable function-parentheses-space-inside */
-		background-image: url(https://maps.wikimedia.org/osm-intl/0/0/0@2x.png);
+		/* background-image: url(https://maps.wikimedia.org/osm-intl/0/0/0@2x.png); */
 		/* stylelint-enable function-parentheses-space-inside */
 	}
 }
@@ -65,6 +67,8 @@ div#mw-specialMap-marker {
 	margin-top: -1 * (@markerSize/2);
 	margin-left: -1 * (@markerSize/2);
 	border-radius: @markerSize/2;
+	-webkit-filter: drop-shadow(0px 0px 3px @markerShadow);
+	filter: drop-shadow(0px 0px 3px @markerShadow);
 }
 
 div#mw-specialMap-caption {
@@ -81,6 +85,12 @@ span#mw-specialMap-icon {
 	margin-top: -1 * (@markerSize/2);
 	margin-left: 0.5em;
 	border-radius: @markerSize/2;
+	-webkit-filter: drop-shadow(0px 0px 3px @markerShadow);
+	filter: drop-shadow(0px 0px 3px @markerShadow);
+}
+
+p#mw-specialMap-addinfo {
+	margin: 0;
 }
 
 div#mw-specialMap-attributions {
@@ -89,4 +99,6 @@ div#mw-specialMap-attributions {
 	font-size: 9px;
 	right: 0;
 	text-align: right;
+	padding: 0 3px;
+	background:rgba(255,255,255,0.6);
 }

@@ -9,3 +9,9 @@ Julien Girault <jgirault@wikimedia.org>
 Patch Contributors (minor contributors, historically)
 
 James D. Forrester <jforrester@wikimedia.org>
+
+
+Weird Gloop Contributors
+
+ Jonathan Lee <@cookmeplox>
+ Jonas Doggart <@traggodsanoj>
