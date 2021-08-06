@@ -953,7 +953,11 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
             this.config = mw.config.get('wgKartographerDataConfig');
             var mesVers = mw.message('kartographer-map-version');
             if (mesVers.exists()) {
-                this.config.mapVersion = mesVers.text();
+                // Backup to be safe
+                var verstr = mesVers.text();
+                if ( verstr != '⧼kartographer-map-version⧽') {
+                    this.config.mapVersion = mesVers.text();
+                }
             }
             var mapVers = this.config.mapVersion;
             if (options.mapVersion) {
