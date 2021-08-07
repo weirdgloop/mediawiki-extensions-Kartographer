@@ -43,8 +43,14 @@ module.Link = ( function ( $ ) {
 		link.$container = $( link.container );
 		link.$container.addClass( 'mw-kartographer-link' );
 
-		link.mapID = options.mapID || 'auto';
-    	link.plane = options.plane || 'auto';
+		link.mapID = 'auto';
+		if ( !isNaN(options.mapID) ) {
+			link.mapID = options.mapID;
+		}
+    	link.plane = 'auto';
+    	if ( !isNaN(options.plane) ) {
+			link.plane = options.plane;
+		}
     	link.mapVersion = options.mapVersion || null;
     	link.plainTiles = options.plainTiles || false;
 		link.center = options.center || 'auto';
@@ -86,8 +92,12 @@ module.Link = ( function ( $ ) {
 		position = position || {};
 		position.center = position.center || link.center;
 		position.zoom = typeof position.zoom === 'number' ? position.zoom : link.zoom;
-    	position.mapID = position.mapID || link.mapID;
-    	position.plane = position.plane || link.plane;
+    	if ( isNaN(position.mapID) ) {
+    		position.mapID = link.mapID;
+    	}
+    	if ( isNaN(position.plane) ) {
+    		position.plane = link.plane;
+    	}
     	position.mapVersion = position.mapVersion || link.mapVersion || null;
     	position.plainTiles = position.plainTiles || link.plainTiles || false;
 
