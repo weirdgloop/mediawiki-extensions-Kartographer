@@ -10,10 +10,27 @@
 namespace Kartographer;
 
 use Kartographer\Tag\TagHandler;
+use MediaWiki\MediaWikiServices;
 use Parser;
 use ParserOutput;
 
 class Hooks {
+	// When [[MediaWiki:Kartographer-map-version]] is edited, clear the basemaps cache.
+	public static function onPageContentSaveComplete( &$wikiPage, &$user, $content, $summary, $isMinor, $isWatch, $section, &$flags, $revision, &$status, $baseRevId, $undidRevId ) {
+		if ( $wikiPage->getTitle()->getPrefixedDBkey() === 'MediaWiki:Kartographer-map-version' ) {
+			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+
+			$cache->delete(
+				$cache->makeKey(
+					'Kartographer',
+					'basemaps'
+				)
+			);
+		}
+
+		return true;
+	}
+
 	/**
 	 * ParserFirstCallInit hook handler
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ParserFirstCallInit

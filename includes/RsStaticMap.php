@@ -43,20 +43,39 @@ class RsStaticMap {
 	}
 
 	private function getMapData() {
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$url = $this->mapsConfig['baseMapsFile'];
 		$url = str_replace('{mapVersion}', $this->mapVersion, $url);
-		$json = file_get_contents($url);
-		$obj = json_decode($json, true);
 
-		$data = array();
-		foreach ($obj as $map) {
-			$data[ $map['mapId'] ] = $map;
-		}
-		if ( empty($data) ) {
-			$this->baseMaps = false;
-		} else {
-			$this->baseMaps = $data;
-		}
+		$this->baseMaps = $cache->getWithSetCallback(
+			$cache->makeKey(
+				'Kartographer',
+				'basemaps'
+			),
+			3600, // 1 hour cache time since this shouldn't change often.
+			function () use ( $url ) {
+				// Default to no baseMaps incase of errors fetching or decoding basemaps.json.
+				$baseMaps = false;
+
+				$json = file_get_contents($url);
+
+				if ( $json !== false ) {
+					$obj = json_decode($json, true);
+
+					if ( $obj !== null ) {
+						$data = [];
+						foreach ( $obj as $map ) {
+							$data[ $map['mapId'] ] = $map;
+						}
+
+						if ( !empty($data) ) {
+							$baseMaps = $data;
+						}
+					}
+				}
+				return $baseMaps;
+			}
+		);
 	}
 
 	private function getTileUrl( $mapid, $zoom, $plane, $x, $y ) {

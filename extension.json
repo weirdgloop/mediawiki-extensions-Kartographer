@@ -453,6 +453,9 @@
 		"remoteExtPath": "Kartographer"
 	},
 	"Hooks": {
+		"PageSaveComplete": [
+			"Kartographer\\Hooks::onPageSaveComplete"
+		],
 		"ParserFirstCallInit": [
 			"Kartographer\\Hooks::onParserFirstCallInit"
 		],
