@@ -543,12 +543,15 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                             iconSize = feature.properties.iconSize
                             iconAnchor = feature.properties.iconAnchor
                             popupAnchor = feature.properties.popupAnchor
-                            let filename = feature.properties.iconWikiLink
-                            var hash = MD5.md5(filename)
-                            iconUrl = map.config.wikiImageURL +
-                                hash.substr(0, 1) + '/' + hash.substr(0, 2) + '/' +
-                                filename;
-
+                            if (feature.properties.iconWikiLink.startsWith(map.config.wikiImageURL)) {
+                                iconUrl = feature.properties.iconWikiLink;
+                            } else {
+                                let filename = feature.properties.iconWikiLink
+                                var hash = MD5.md5(filename)
+                                iconUrl = map.config.wikiImageURL +
+                                    hash.substr(0, 1) + '/' + hash.substr(0, 2) + '/' +
+                                    filename;
+                            }
                         }
                         let icon = L.icon({iconUrl: iconUrl, iconSize: iconSize, iconAnchor: iconAnchor, popupAnchor: popupAnchor})
                         return L.marker(latlng, {icon: icon})
