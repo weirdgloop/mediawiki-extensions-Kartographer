@@ -160,7 +160,7 @@ class RsStaticMap {
 			}
 		}
 		
-		// Fall back too absolute RS map bounds
+		// Fall back to absolute RS map bounds
 		if ( $lon > self::MAX_BOUNDS[0][1] || $lon < self::MAX_BOUNDS[0][0] || $lat > self::MAX_BOUNDS[1][1] || $lat < self::MAX_BOUNDS[1][0] ) {
 			return false;
 		}
@@ -203,5 +203,17 @@ class RsStaticMap {
 			}
 		}
 		return [3200, 3200];
+	}
+
+	public function getBounds( $mapid = null ) {
+		if ( $this->baseMaps && $mapid != null && isset($this->baseMaps[$mapid]) ) {
+			$map = $this->baseMaps[$mapid];
+			if ( isset($map['bounds']) ) {
+				return $map['bounds'];
+			}
+		}
+
+		// Fall back to absolute RS map bounds
+		return self::MAX_BOUNDS;
 	}
 }

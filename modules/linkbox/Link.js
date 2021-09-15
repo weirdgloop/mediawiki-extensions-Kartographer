@@ -53,6 +53,7 @@ module.Link = ( function ( $ ) {
 		}
     	link.mapVersion = options.mapVersion || null;
     	link.plainTiles = options.plainTiles || false;
+		link.bounds = options.bounds || null;
 		link.center = options.center || 'auto';
 		link.zoom = options.zoom || 'auto';
 
@@ -100,6 +101,7 @@ module.Link = ( function ( $ ) {
     	}
     	position.mapVersion = position.mapVersion || link.mapVersion || null;
     	position.plainTiles = position.plainTiles || link.plainTiles || false;
+		position.bounds = position.bounds || link.bounds || null;
 
 		if ( map && map._updatingHash ) {
 			// Skip - there is nothing to do.
@@ -129,6 +131,7 @@ module.Link = ( function ( $ ) {
         		plane: position.plane,
         		mapVersion: position.mapVersion,
         		plainTiles: position.plainTiles,
+				bounds: position.bounds,
 				center: position.center,
 				zoom: position.zoom,
 				captionText: link.captionText,
