@@ -46,11 +46,10 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 		}
 
 		return {
-			mapID: +$el.data( 'mapid' ),
-			plane: +$el.data( 'plane' ),
-			mapVersion: $el.data( 'mapversion' ),
-			plainTiles: $el.data( 'plaintiles' ),
-			bounds: $el.data( 'bounds' ),
+      mapID: +$el.data( 'mapid' ),
+      plane: +$el.data( 'plane' ),
+      mapVersion: $el.data( 'mapversion' ),
+      plainTiles: $el.data( 'plaintiles' ),
 			latitude: +$el.data( 'lat' ),
 			longitude: +$el.data( 'lon' ),
 			zoom: +$el.data( 'zoom' ),
@@ -84,11 +83,10 @@ module.exports = ( function ( $, mw, router, kartolink ) {
 			link = maplinks[ index ] = kartolink.link( {
 				featureType: 'maplink',
 				container: this,
-				mapID: data.mapID,
-				plane: data.plane,
-				mapVersion: data.mapVersion,
-				plainTiles: data.plainTiles,
-				bounds: data.bounds,
+        mapID: data.mapID,
+        plane: data.plane,
+        mapVersion: data.mapVersion,
+        plainTiles: data.plainTiles,
 				center: [ data.latitude, data.longitude ],
 				zoom: data.zoom,
 				dataGroups: data.overlays,

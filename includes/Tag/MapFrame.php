@@ -210,13 +210,6 @@ class MapFrame extends TagHandler {
 		}
 
 		$attrs['style'] = implode(' ', $bgStyle);
-
-		// RS attributes
-		$this->bounds = $rsmap->getBounds( $staticMapID );
-		if ( $this->bounds !== null ) {
-			$attrs['data-bounds'] = FormatJson::encode( $this->bounds, false, FormatJson::ALL_OK );
-		}
-
 		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, $staticMapID, $staticPlane )->getLocalURL();
 
 		if ( !$framed ) {

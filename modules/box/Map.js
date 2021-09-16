@@ -988,14 +988,16 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                 this._mapID = options.parentMap._mapID;
                 this._mapVersion = options.parentMap._mapVersion;
                 this._plainTiles = options.parentMap._plainTiles;
-                this._bounds = options.parentMap._bounds;
             } else {
-                this.ready.dataloader = true;
+                if (this._baseMaps[0]) {
+                    this.ready.dataloader = true;
+                } else {
+                    this.ldl_load();
+                }
                 this._plane = 0;
                 this._mapID = -1;
                 this._mapVersion = mapVers;
                 this._plainTiles = options.plainTiles || false;
-                this._bounds = options.bounds || null;
             }
         },
 
@@ -1072,9 +1074,6 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
 
             let data = this._baseMaps[mapId] || {}
             let bounds = this._translateBounds(data.bounds)
-            if ( this._bounds ) {
-                bounds = this._translateBounds(this._bounds)
-            }
             let baseUrl = this.config.baseTileURL
             if (this._plainTiles && this.config.basePlainTileURL) {
                 baseUrl = this.config.basePlainTileURL;

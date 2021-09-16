@@ -68,10 +68,6 @@ class MapLink extends TagHandler {
 		if ( $this->plainTiles !== null) {
 			$attrs['data-plaintiles'] = $this->plainTiles;
 		}
-		// RS attributes
-		if ( $this->bounds !== null) {
-			$attrs['data-bounds'] = FormatJson::encode( $this->bounds, false, FormatJson::ALL_OK );
-		}
 
 		$style = $this->extractMarkerCss();
 		if ( $style ) {
