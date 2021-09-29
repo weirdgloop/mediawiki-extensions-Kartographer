@@ -201,7 +201,7 @@ class MapFrame extends TagHandler {
 
 		// Get the static initial background
 		$rsmap = new RsStaticMap();
-		$bgProps = $rsmap->getMap( $staticMapID, $staticZoom, $staticPlane, [$staticLon, $staticLat], [$staticWidth, $staticHeight] );
+		$bgProps = $rsmap->getMap( (string)$staticMapID, $staticZoom, $staticPlane, [$staticLon, $staticLat], [$staticWidth, $staticHeight] );
 		$bgStyle = [];
 		foreach ($bgProps as $key => $val) {
 			if ( !empty($val) ) {
@@ -210,7 +210,7 @@ class MapFrame extends TagHandler {
 		}
 
 		$attrs['style'] = implode(' ', $bgStyle);
-		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, $staticMapID, $staticPlane )->getLocalURL();
+		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, (string)$staticMapID, $staticPlane )->getLocalURL();
 
 		if ( !$framed ) {
 			$attrs['style'] .= " width: {$width}; height: {$height};";

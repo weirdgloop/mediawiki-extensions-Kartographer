@@ -65,7 +65,7 @@ class RsStaticMap {
 					if ( $obj !== null ) {
 						$data = [];
 						foreach ( $obj as $map ) {
-							$data[ $map['mapId'] ] = $map;
+							$data[ (string)$map['mapId'] ] = $map;
 						}
 
 						if ( !empty($data) ) {
@@ -89,7 +89,7 @@ class RsStaticMap {
 
 	public function getMap( $mapid, $zoom, $plane, $center, $size ) {
 		if ( !isset($this->baseMaps[$mapid]) ) {
-			$mapid = -1;
+			$mapid = '-1';
 		}
 		$mapData = $this->baseMaps[$mapid];
 
@@ -175,7 +175,7 @@ class RsStaticMap {
 		return fales;
 	}
 
-	public function getDefaultPlane( $mapid = -1 ) {
+	public function getDefaultPlane( $mapid = '-1' ) {
 		if ( isset($this->baseMaps[$mapid]) ) {
 			$map = $this->baseMaps[$mapid];
 			if ( isset($map['defaultPlane']) ) {
@@ -185,7 +185,7 @@ class RsStaticMap {
 		return 0;
 	}
 
-	public function getName( $mapid = -1 ) {
+	public function getName( $mapid = '-1' ) {
 		if ( isset($this->baseMaps[$mapid]) ) {
 			$map = $this->baseMaps[$mapid];
 			if ( isset($map['name']) ) {
@@ -195,7 +195,7 @@ class RsStaticMap {
 		return 'unknown';
 	}
 
-	public function getCenter( $mapid = -1) {
+	public function getCenter( $mapid = '-1' ) {
 		if ( isset($this->baseMaps[$mapid]) ) {
 			$map = $this->baseMaps[$mapid];
 			if ( isset($map['center']) ) {

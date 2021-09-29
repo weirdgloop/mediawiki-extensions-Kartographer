@@ -39,11 +39,11 @@ class SpecialMap extends SpecialPage {
 			list( $mapid, $zoom, $plane, $lon, $lat ) = $coord;
 			// Auto set plane by mapid if negative
 			if ($plane < 0) {
-				$plane = $this->rsmap->getDefaultPlane( $mapid);
+				$plane = $this->rsmap->getDefaultPlane( (string)$mapid );
 			}
 
 			// Validate coords by mapid
-			if ( $this->rsmap->coordinatesAreValid( $lon, $lat, $mapid ) ) {
+			if ( $this->rsmap->coordinatesAreValid( $lon, $lat, (string)$mapid ) ) {
 				$coordText = CoordFormatter::formatDecimal( $lat, $lon, $this->getLanguage() );
 				$x = 128;
 				$y = 128;
@@ -56,16 +56,16 @@ class SpecialMap extends SpecialPage {
 			} else {
 				$coordText = $this->msg( 'kartographer-specialmap-invalid-coordinates' )->text();
 				$markerHtml = '';
-				if ( !$this->rsmap->mapIdIsValid($mapid) ) {
+				if ( !$this->rsmap->mapIdIsValid( (string)$mapid ) ) {
 					$mapid = -1;
 				}
-				$mapcenter = $this->rsmap->getCenter($mapid);
+				$mapcenter = $this->rsmap->getCenter( (string)$mapid );
 				$lon = $mapcenter[0];
 				$lat = $mapcenter[1];
 			}
 		}
 
-		$mapname = $this->rsmap->getName( $mapid );
+		$mapname = $this->rsmap->getName( (string)$mapid );
 
 		$attributions = Html::rawElement( 'div', [ 'id' => 'mw-specialMap-attributions' ],
 			$this->msg( 'kartographer-attribution' )->title( $this->getPageTitle() )->parse() );
@@ -73,7 +73,7 @@ class SpecialMap extends SpecialPage {
 			$this->msg( 'kartographer-map-addinfo' )->params( $mapid, $mapname, $zoom, $plane )->parse() );
 
 		// Size is defined in ../styless/specialMap.less
-		$map_background = $this->rsmap->getMap( $mapid, $zoom, $plane, [$lon, $lat], [256, 256] );
+		$map_background = $this->rsmap->getMap( (string)$mapid, $zoom, $plane, [$lon, $lat], [256, 256] );
 		$map_style = [];
 		foreach ($map_background as $key => $val) {
 			if ( !empty($val) ) {
