@@ -172,7 +172,7 @@ class RsStaticMap {
 		if ( isset($this->baseMaps[$mapid]) ) {
 			return true;
 		}
-		return fales;
+		return false;
 	}
 
 	public function getDefaultPlane( $mapid = '-1' ) {
