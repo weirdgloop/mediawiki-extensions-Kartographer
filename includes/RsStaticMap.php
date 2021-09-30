@@ -91,17 +91,13 @@ class RsStaticMap {
 		if ( !isset($this->baseMaps[$mapid]) ) {
 			$mapid = '-1';
 		}
-		$mapData = $this->baseMaps[$mapid];
+		$mapData = $this->baseMaps[$mapid] ?? [];
 
 		if ( !is_array($center) || !$this->coordinatesAreValid( $center[0], $center[1], $mapid ) ) {
-			$center = $mapData['center'];
+			$center = $mapData['center'] ?? [3200, 3200]; // Lumbridge
 		}
 		if ( !isset($plane) || $plane < 0 ) {
-			if ( isset($mapData['defaultPlane']) ) {
-				$plane = $mapData['defaultPlane'];
-			} else {
-				$plane = 0;
-			}
+			$plane = $mapData['defaultPlane'] ?? 0;
 		}
 		if ( !isset($zoom) || $zoom < self::ZOOM_RANGE[0] || $zoom > self::ZOOM_RANGE[1] ) {
 			$zoom = 2;
