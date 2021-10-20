@@ -5,6 +5,8 @@ namespace Kartographer\Tag;
 use FormatJson;
 use Html;
 use Kartographer\SpecialMap;
+use Kartographer\RsStaticMap;
+
 
 /**
  * The <mapframe> tag inserts a map into wiki page
@@ -30,6 +32,7 @@ class MapFrame extends TagHandler {
 		// @todo: should these have defaults?
 		$this->width = $this->getText( 'width', false, '/^(\d+|([1-9]\d?|100)%|full)$/' );
 		$this->height = $this->getInt( 'height' );
+		$staticHeight = $this->height;
 		$defaultAlign = $this->getLanguage()->isRTL() ? 'left' : 'right';
 		$this->align = $this->getText( 'align', $defaultAlign, '/^(left|center|right)$/' );
 	}
@@ -121,8 +124,37 @@ class MapFrame extends TagHandler {
 			$staticLat = $this->lat;
 			$staticLon = $this->lon;
 		} else {
-			$staticLat = 'a';
-			$staticLon = 'a';
+			// For RS, default is Lumbridge
+			$attrs['data-lat'] = 3200;
+			$attrs['data-lon'] = 3200;
+			$staticLat = 3200;
+			$staticLon = 3200;
+		}
+
+		// RS attributes
+		if ( $this->mapid !== null ) {
+			$staticMapID = $this->mapid;
+			$attrs['data-mapid'] = $this->mapid;
+		} else {
+			$staticMapID = -1;
+		}
+
+		// RS attributes
+		if ( $this->plane !== null ) {
+			$staticPlane = $this->plane;
+			$attrs['data-plane'] = $this->plane;
+		} else {
+			$staticPlane = 0;
+		}
+
+		// RS attributes
+		if ( $this->mapVersion !== null) {
+			$attrs['data-mapversion'] = $this->mapVersion;
+		}
+
+		// RS attributes
+		if ( $this->plainTiles !== null) {
+			$attrs['data-plaintiles'] = $this->plainTiles;
 		}
 
 		if ( $this->specifiedLangCode !== null ) {
@@ -140,43 +172,28 @@ class MapFrame extends TagHandler {
 			$containerClass .= ' mw-kartographer-full';
 		}
 
-		$attrs['href'] = SpecialMap::link( $staticLat, $staticLon, $staticZoom, $this->resolvedLangCode )
-			->getLocalURL();
-		$imgUrlParams = [
-			'lang' => $this->resolvedLangCode,
-		];
-		if ( $this->showGroups ) {
-			$imgUrlParams += [
-				'domain' => $wgServerName,
-				'title' => $this->parser->getTitle()->getPrefixedText(),
-				'groups' => implode( ',', $this->showGroups ),
-			];
-		}
-		$imgUrl = "{$wgKartographerMapServer}/img/{$this->mapStyle},{$staticZoom},{$staticLat}," .
-		"{$staticLon},{$staticWidth}x{$this->height}.png";
-		$imgUrl .= '?' . wfArrayToCgi( $imgUrlParams );
+		// Get the static initial background
+		$rsmap = new RsStaticMap();
+		$bgProps = $rsmap->getMap( (string)$staticMapID, $staticZoom, $staticPlane, [$staticLon, $staticLat], [$staticWidth, $staticHeight] );
+		$bgStyle = [];
+		foreach ($bgProps as $key => $val) {
+			if ( !empty($val) ) {
+				$bgStyle[] = $key . ': ' . $val . ';';
+			}
+ 		}
+
+ 		$attrs['style'] .= implode(' ', $bgStyle);
+		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, (string)$staticMapID, $staticPlane )->getLocalURL();
 		$imgAttrs = [
-			'src' => $imgUrl,
+			'src' => '',
 			'alt' => '',
 			'width' => (int)$staticWidth,
 			'height' => (int)$this->height,
 			'decoding' => 'async'
 		];
 
-		if ( $wgResponsiveImages && $wgKartographerSrcsetScales ) {
-			// For now only support 2x, not 1.5. Saves some bytes...
-			$srcSetScales = array_intersect( $wgKartographerSrcsetScales, [ 2 ] );
-			$srcSets = [];
-			foreach ( $srcSetScales as $srcSetScale ) {
-				$scaledImgUrl = "{$wgKartographerMapServer}/img/{$this->mapStyle},{$staticZoom},{$staticLat}," .
-				"{$staticLon},{$staticWidth}x{$this->height}@{$srcSetScale}x.png";
-				$scaledImgUrl .= '?' . wfArrayToCgi( $imgUrlParams );
-				$srcSets[] = "{$scaledImgUrl} {$srcSetScale}x";
-			}
-			$imgAttrs[ 'srcset' ] = implode( ', ', $srcSets );
-		}
-
 		if ( !$framed ) {
+			wfDebugLog("grs", "frame");
 			$attrs[ 'class' ] .= " {$containerClass} {$alignClasses[$this->align]}";
 			return Html::rawElement( 'a', $attrs, Html::rawElement( 'img', $imgAttrs ) );
 		}

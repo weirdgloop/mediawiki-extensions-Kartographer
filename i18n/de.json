@@ -5,8 +5,8 @@
 			"TMg"
 		]
 	},
-	"kartographer-attribution": "[https://foundation.wikimedia.org/wiki/Maps_Terms_of_Use Wikimedia Karten] | Kartendaten © [https://www.openstreetmap.org/copyright OpenStreetMap-Autoren]",
-	"kartographer-attribution-short": "[https://foundation.wikimedia.org/wiki/Maps_Terms_of_Use Wikimedia] | © [https://www.openstreetmap.org/copyright OpenStreetMap]",
+	"kartographer-attribution": "[https://weirdgloop.org/licensing/ Lizenz]",
+	"kartographer-attribution-short": "[https://weirdgloop.org/licensing/ Lizenz]",
 	"kartographer-broken-category": "Seiten mit defekten Karten",
 	"kartographer-broken-category-desc": "Die Seite enthält eine ungültige Kartenverwendung",
 	"kartographer-desc": "Erlaubt das Einfügen von Karten in Wikiseiten",
@@ -110,5 +110,19 @@
 	"visualeditor-mwmapsdialog-size": "Größe",
 	"visualeditor-mwmapsdialog-title": "Karte",
 	"visualeditor-mwmapscontextitem-nosupport": "Diese Karte enthält dynamische Funktionen und kann derzeit nur im Quelltextmodus bearbeitet werden.",
-	"visualeditor-mwmapscontextitem-title": "Karte"
+	"visualeditor-mwmapscontextitem-title": "Karte",
+	"kartographer-coord-decimal": "$1,$2",
+	"kartographer-map-addinfo": "$2 (mapID: $1)<br />Zoom: $3  Vergrößerung: $4",
+	"kartographer-specialmap-note": "Url hat den Format: Spezial:Karte/''mapID''/''Vergrößerung''/''Niveau''/''x''/''y''",
+	"leafletdraw-draw-handlers-circlemarker-tooltip-start": "Karte anklicken, um den Kreismarker zu platzieren.",
+	"leafletdraw-draw-toolbar-buttons-circlemarker": "Einen Kreismarker zeichnen",
+	"leafletdraw-draw-toolbar-finish-text": "Fertig",
+	"leafletdraw-edit-toolbar-actions-clearall-text": "Alle löschen",
+	"leafletdraw-edit-toolbar-actions-clearall-title": "Alle Ebenen löschen",
+	"leafletdraw-draw-toolbar-finish-text": "Vervollständigen",
+	"leafletdraw-draw-toolbar-finish-title": "Zur Vervollständigung der Zeichnung klicken",
+	"visualeditor-mwmapsdialog-loadingname": "Wird geladen...",
+	"visualeditor-mwmapsdialog-mapselect": "Karte wählen",
+	"visualeditor-mwmapsdialog-planeselect": "Niveau",
+	"visualeditor-mwmapsdialog-position-plane": "Niveau"
 }

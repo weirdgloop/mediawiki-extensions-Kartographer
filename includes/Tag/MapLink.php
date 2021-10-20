@@ -42,12 +42,17 @@ class MapLink extends TagHandler {
 		}
 		$text = $this->parser->recursiveTagParse( $text, $this->frame );
 
+		// For RS, default is Lumbridge
+		if ( $this->lat == null || $this->lon == null ) {
+			$this->lat = 3200;
+			$this->lon = 3200;
+		}
+
 		$attrs = [
 			'class' => 'mw-kartographer-maplink',
 			'data-mw' => 'interface',
 			'data-style' => $this->mapStyle,
-			'href' => SpecialMap::link( $this->lat, $this->lon, $this->zoom, $this->resolvedLangCode )
-				->getLocalURL()
+			'href' => SpecialMap::link( $this->lon, $this->lat, $this->zoom, $this->mapid, $this->plane )->getLocalURL()
 		];
 
 		if ( $this->zoom !== null ) {
@@ -60,6 +65,24 @@ class MapLink extends TagHandler {
 		if ( $this->specifiedLangCode !== null ) {
 			$attrs['data-lang'] = $this->specifiedLangCode;
 		}
+
+		// RS attributes
+		if ( $this->mapid !== null ) {
+			$attrs['data-mapid'] = $this->mapid;
+		}
+		// RS attributes
+		if ( $this->plane !== null ) {
+			$attrs['data-plane'] = $this->plane;
+		}
+		// RS attributes
+		if ( $this->mapVersion !== null ) {
+			$attrs['data-mapversion'] = $this->mapVersion;
+		}
+		// RS attributes
+		if ( $this->plainTiles !== null) {
+			$attrs['data-plaintiles'] = $this->plainTiles;
+		}
+
 		$style = $this->extractMarkerCss();
 		if ( $style ) {
 			$attrs['class'] .= ' mw-kartographer-autostyled';

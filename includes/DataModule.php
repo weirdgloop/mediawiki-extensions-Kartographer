@@ -23,12 +23,12 @@ class DataModule extends ResourceLoaderModule {
 	public function getScript( ResourceLoaderContext $context ) {
 		$config = $this->getConfig();
 		return ResourceLoader::makeConfigSetScript( [
-			'wgKartographerMapServer' => $config->get( 'KartographerMapServer' ),
 			'wgKartographerSrcsetScales' => $config->get( 'KartographerSrcsetScales' ),
 			'wgKartographerStyles' => $config->get( 'KartographerStyles' ),
 			'wgKartographerDfltStyle' => $config->get( 'KartographerDfltStyle' ),
 			'wgKartographerEnableMapFrame' => $config->get( 'KartographerEnableMapFrame' ),
 			'wgKartographerUsePageLanguage' => $config->get( 'KartographerUsePageLanguage' ),
+			'wgKartographerDataConfig' => $config->get( 'KartographerDataConfig' )
 		] );
 	}
 
