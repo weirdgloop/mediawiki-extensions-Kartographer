@@ -556,7 +556,7 @@ KartographerMap = L.Map.extend( {
 	                        iconUrl = feature.properties.iconWikiLink;
 	                    } else {
 	                        let filename = feature.properties.iconWikiLink
-	                        iconUrl = map.config.wikiImageURL + filename;
+	                        iconUrl = '/images/' + filename;
 	                    }
 	                }
 	                let icon = L.icon({iconUrl: iconUrl, iconSize: iconSize, iconAnchor: iconAnchor, popupAnchor: popupAnchor})
