@@ -547,10 +547,7 @@ module.Map = (function(mw, OpenFullScreenControl, dataLayerOpts, ScaleControl, D
                                 iconUrl = feature.properties.iconWikiLink;
                             } else {
                                 let filename = feature.properties.iconWikiLink
-                                var hash = MD5.md5(filename)
-                                iconUrl = map.config.wikiImageURL +
-                                    hash.substr(0, 1) + '/' + hash.substr(0, 2) + '/' +
-                                    filename;
+                                iconUrl = '/images/' + filename;
                             }
                         }
                         let icon = L.icon({iconUrl: iconUrl, iconSize: iconSize, iconAnchor: iconAnchor, popupAnchor: popupAnchor})
