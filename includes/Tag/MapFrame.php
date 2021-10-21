@@ -32,7 +32,6 @@ class MapFrame extends TagHandler {
 		// @todo: should these have defaults?
 		$this->width = $this->getText( 'width', false, '/^(\d+|([1-9]\d?|100)%|full)$/' );
 		$this->height = $this->getInt( 'height' );
-		$staticHeight = $this->height;
 		$defaultAlign = $this->getLanguage()->isRTL() ? 'left' : 'right';
 		$this->align = $this->getText( 'align', $defaultAlign, '/^(left|center|right)$/' );
 	}
@@ -68,6 +67,7 @@ class MapFrame extends TagHandler {
 		$options = $this->parser->getOptions();
 
 		$width = is_numeric( $this->width ) ? "{$this->width}px" : $this->width;
+		$staticWidth = (int)$this->width;
 		$fullWidth = false;
 		if ( preg_match( '/^\d+%$/', $width ) ) {
 			if ( $width === '100%' ) {
@@ -84,8 +84,6 @@ class MapFrame extends TagHandler {
 			$this->align = 'none';
 			$fullWidth = true;
 			$staticWidth = 800;
-		} else {
-			$staticWidth = $this->width;
 		}
 		// TODO if fullwidth, we really should use interactive mode..
 		// BUT not possible to use both modes at the same time right now. T248023
@@ -174,7 +172,7 @@ class MapFrame extends TagHandler {
 
 		// Get the static initial background
 		$rsmap = new RsStaticMap();
-		$bgProps = $rsmap->getMap( (string)$staticMapID, $staticZoom, $staticPlane, [$staticLon, $staticLat], [$staticWidth, $staticHeight] );
+		$bgProps = $rsmap->getMap( (string)$staticMapID, $staticZoom, $staticPlane, [$staticLon, $staticLat], [$staticWidth, (int)$this->height] );
 		$bgStyle = [];
 		foreach ($bgProps as $key => $val) {
 			if ( !empty($val) ) {
@@ -187,7 +185,7 @@ class MapFrame extends TagHandler {
 		$imgAttrs = [
 			'src' => '',
 			'alt' => '',
-			'width' => (int)$staticWidth,
+			'width' => $staticWidth,
 			'height' => (int)$this->height,
 			'decoding' => 'async'
 		];
