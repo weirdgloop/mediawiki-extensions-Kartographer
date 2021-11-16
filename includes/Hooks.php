@@ -14,6 +14,7 @@ use Kartographer\Tag\MapLink;
 use Kartographer\Tag\TagHandler;
 use MediaWiki\MediaWikiServices;
 use Parser;
+use WikiPage;
 
 class Hooks {
 	// When [[MediaWiki:Kartographer-map-version]] is edited, clear the basemaps cache.
