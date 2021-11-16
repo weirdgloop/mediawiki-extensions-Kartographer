@@ -17,7 +17,7 @@ use Parser;
 
 class Hooks {
 	// When [[MediaWiki:Kartographer-map-version]] is edited, clear the basemaps cache.
-	public static function onPageContentSaveComplete( &$wikiPage, &$user, $content, $summary, $isMinor, $isWatch, $section, &$flags, $revision, &$status, $baseRevId, $undidRevId ) {
+	public static function onPageSaveComplete( WikiPage $wikiPage, MediaWiki\User\UserIdentity $user, string $summary, int $flags, MediaWiki\Revision\RevisionRecord $revisionRecord, MediaWiki\Storage\EditResult $editResult ) {
 		if ( $wikiPage->getTitle()->getPrefixedDBkey() === 'MediaWiki:Kartographer-map-version' ) {
 			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 	
