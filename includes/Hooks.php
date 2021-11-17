@@ -14,10 +14,11 @@ use Kartographer\Tag\MapLink;
 use Kartographer\Tag\TagHandler;
 use MediaWiki\MediaWikiServices;
 use Parser;
+use WikiPage;
 
 class Hooks {
 	// When [[MediaWiki:Kartographer-map-version]] is edited, clear the basemaps cache.
-	public static function onPageSaveComplete( $wikiPage, $user, $summary, $flags, $revisionRecord, $editResult ) {
+	public static function onPageSaveComplete( WikiPage $wikiPage, MediaWiki\User\UserIdentity $user, string $summary, int $flags, MediaWiki\Revision\RevisionRecord $revisionRecord, MediaWiki\Storage\EditResult $editResult ) {
 		if ( $wikiPage->getTitle()->getPrefixedDBkey() === 'MediaWiki:Kartographer-map-version' ) {
 			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 	
