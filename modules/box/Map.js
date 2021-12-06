@@ -790,7 +790,7 @@ KartographerMap = L.Map.extend( {
 			// eslint-disable-next-line no-jquery/no-sizzle
 			if ( this.$container.is( ':visible' ) && save ) {
 				// Updates map data.
-				this.initView( this.getCenter(), this.getZoom(), false );
+				this.initView( this.getMapID(), this.getPlane(), this.getCenter(), this.getZoom() );
 				// Updates container's data attributes to avoid `NaN` errors
 				if ( !this.fullscreen ) {
 					this.$container.closest( '.mw-kartographer-interactive' ).data( {
@@ -979,7 +979,7 @@ KartographerMap = L.Map.extend( {
 		this.invalidateSize();
 		if ( position ) {
 			// at rare times during load fases, position might be undefined
-			this.initView( position.center, position.zoom, true );
+			this.initView( this.getMapID(), this.getPlane(), position.center, position.zoom );
 		}
 
 		return this;
