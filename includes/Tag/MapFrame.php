@@ -182,18 +182,11 @@ class MapFrame extends TagHandler {
 
  		$attrs['style'] .= implode(' ', $bgStyle);
 		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, (string)$staticMapID, $staticPlane )->getLocalURL();
-		$imgAttrs = [
-			'src' => '',
-			'alt' => '',
-			'width' => $staticWidth,
-			'height' => (int)$this->height,
-			'decoding' => 'async'
-		];
 
 		if ( !$framed ) {
 			wfDebugLog("grs", "frame");
 			$attrs[ 'class' ] .= " {$containerClass} {$alignClasses[$this->align]}";
-			return Html::rawElement( 'a', $attrs, Html::rawElement( 'img', $imgAttrs ) );
+			return Html::rawElement( 'a', $attrs );
 		}
 
 		$containerClass .= " thumb {$thumbAlignClasses[$this->align]}";
@@ -201,7 +194,7 @@ class MapFrame extends TagHandler {
 		$captionFrame = Html::rawElement( 'div', [ 'class' => 'thumbcaption' ],
 			$caption ? $this->parser->recursiveTagParse( $caption ) : '' );
 
-		$mapDiv = Html::rawElement( 'a', $attrs, Html::rawElement( 'img', $imgAttrs ) );
+		$mapDiv = Html::rawElement( 'a', $attrs, );
 
 		return Html::rawElement( 'div', [ 'class' => $containerClass ],
 			Html::rawElement( 'div', [
