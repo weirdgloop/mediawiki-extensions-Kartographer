@@ -201,7 +201,7 @@ class SimpleStyleParser {
 			foreach ( $json as &$element ) {
 				$this->normalize( $element );
 			}
-		} elseif ( is_object( $json ) && $json->type === 'ExternalData' ) {
+		} elseif ( is_object( $json ) && isset( $json->type ) && $json->type === 'ExternalData' ) {
 			throw new LogicException( "Unexpected service name '{$json->service}'" );
 		}
 		$status->value = $json;
