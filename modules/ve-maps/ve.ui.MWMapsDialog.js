@@ -47,6 +47,8 @@ ve.ui.MWMapsDialog.prototype.initialize = function () {
 	// Parent method
 	ve.ui.MWMapsDialog.super.prototype.initialize.call( this );
 
+	var self = this;
+
 	this.helpLink = new OO.ui.ButtonWidget( {
 		icon: 'help',
 		classes: [ 've-ui-mwMapsDialog-help' ],
@@ -81,6 +83,49 @@ ve.ui.MWMapsDialog.prototype.initialize = function () {
 	// Map area panel
 	this.scalable = null;
 
+	this.mapID = new OO.ui.NumberInputWidget( { min: -1, max: 99999, step: 1, showButtons: false } );
+	this.mapName = new OO.ui.ComboBoxInputWidget( { options: [], menu: { filterFromInput: true, filterMode: 'substring' } } );
+	this.mapField = new OO.ui.HorizontalLayout({ items:[
+		new OO.ui.LabelWidget( { label: ve.msg( 'visualeditor-mwmapsdialog-mapselect' ) } ),
+		this.mapName,
+		this.mapID
+	], classes: [ 've-ui-mwMapsDialog-mapFieldLayout' ] });
+	// Get base maps data and use
+	this.mapsConfig = mw.config.get( 'wgKartographerDataConfig' );
+	var mapVers = this.mapsConfig.mapVersion;
+	var mesVers = mw.message('kartographer-map-version');
+	if (mesVers.exists()) {
+		mapVers = mesVers.text();
+	}
+	var baseUrl = this.mapsConfig.baseMapsFile;
+	baseUrl = baseUrl.replace( '{mapVersion}', mapVers );
+	$.getJSON( baseUrl, function (data) {
+		var mapData = {},
+			mapNameIDs = {}
+			mapList = [];
+		data.forEach( function (map) {
+			if ( !isNaN(map.mapId) ) {
+				mapList.push({ data:map.name, label:map.name })
+				mapData[ map.mapId ] = map;
+				mapNameIDs[ map.name ] = map.mapId;
+			}
+		} );
+		self.mapData = mapData;
+		self.mapNameIDs = mapNameIDs;
+		self.mapName.setOptions( mapList );
+		var mwAttrs = self.selectedNode && self.selectedNode.getAttribute( 'mw' ).attrs || {};
+		if ( mwAttrs && !isNaN(mwAttrs.mapID) ) {
+			self.mapID.setValue( mwAttrs.mapID );
+			self.mapName.setValue( self.mapNameIDs[mwAttrs.mapID] );
+		}
+	} );
+
+	this.plane = new OO.ui.NumberInputWidget( { min: 0, max: 5, step: 1 } );
+	this.planeField = new OO.ui.FieldLayout( this.plane, {
+		align: 'left',
+		label: ve.msg( 'visualeditor-mwmapsdialog-position-plane' )
+	} );
+
 	this.latitude = new OO.ui.TextInputWidget();
 	this.latitudeField = new OO.ui.FieldLayout( this.latitude, {
 		align: 'left',
@@ -93,7 +138,7 @@ ve.ui.MWMapsDialog.prototype.initialize = function () {
 		label: ve.msg( 'visualeditor-mwmapsdialog-position-lon' )
 	} );
 
-	this.zoom = new OO.ui.NumberInputWidget( { min: 1, max: 19, step: 1 } );
+	this.zoom = new OO.ui.NumberInputWidget( { min: -3, max: 5, step: 1 } );
 	this.zoomField = new OO.ui.FieldLayout( this.zoom, {
 		align: 'left',
 		label: ve.msg( 'visualeditor-mwmapsdialog-position-zoom' )
@@ -107,6 +152,8 @@ ve.ui.MWMapsDialog.prototype.initialize = function () {
 
 	this.areaPanel.$element.append(
 		this.$areaMap,
+		this.mapField.$element,
+		this.planeField.$element,
 		this.latitudeField.$element,
 		this.longitudeField.$element,
 		this.zoomField.$element,
@@ -171,6 +218,76 @@ ve.ui.MWMapsDialog.prototype.initialize = function () {
 };
 
 /**
+ * Handle change events on the mapID widget
+ */
+ve.ui.MWMapsDialog.prototype.onMapIDChange = function () {
+	this.updateActions();
+	if ( !this.map ) {
+		return;
+	}
+	// Set the mapID (default the plane and position)
+	var mapID = this.mapID.getValue();
+	if ( !mapID || isNaN(mapID) ) {
+		return;
+	}
+	if ( !this.mapData[mapID] || this.mapData[mapID].name == this.mapName.getValue() ) {
+		return;
+	}
+	this.map.setMapID(mapID);
+	this.mapName.setValue(this.mapData[mapID].name);
+	// Update the plane and position inputs
+	var pos = this.map.getMapPosition();
+	this.plane.setValue( pos.plane );
+	this.latitude.setValue( pos.center.lat );
+	this.longitude.setValue( pos.center.lng );
+	// Update the map area box based on the new vaules
+	this.updateMapArea();
+};
+/**
+ * Handle change events on the mapName widget
+ */
+ve.ui.MWMapsDialog.prototype.onMapNameChange = function () {
+	this.updateActions();
+	if ( !this.map ) {
+		return;
+	}
+	// Set the mapID (default the plane and position)
+	var mapName = this.mapName.getValue();
+	if ( !mapName || isNaN(this.mapNameIDs[mapName]) ) {
+		return;
+	}
+	var mapID = this.mapNameIDs[mapName];
+	if ( mapID == this.mapID.getValue() ) {
+		return;
+	}
+	this.map.setMapID(mapID);
+	this.mapID.setValue(mapID);
+	// Update the plane and position inputs
+	var pos = this.map.getMapPosition();
+	this.plane.setValue( pos.plane );
+	this.latitude.setValue( pos.center.lat );
+	this.longitude.setValue( pos.center.lng );
+	// Update the map area box based on the new vaules
+	this.updateMapArea();
+};
+
+/**
+ * Handle change events on the plane widget
+ */
+ve.ui.MWMapsDialog.prototype.onPlaneChange = function () {
+	this.updateActions();
+	if ( !this.map ) {
+		return;
+	}
+	var plane = this.plane.getValue();
+	if ( !plane || isNaN(plane) ) {
+		return;
+	}
+	this.map.setPlane(plane);
+	this.updateMapArea();
+};
+
+/**
  * Handle change events on the latitude and longitude widgets
  */
 ve.ui.MWMapsDialog.prototype.onCoordsChange = function () {
@@ -208,6 +325,7 @@ ve.ui.MWMapsDialog.prototype.onDimensionsChange = function () {
  */
 ve.ui.MWMapsDialog.prototype.updateMapArea = function () {
 	var
+		mapID, plane,
 		dimensions, centerCoord, zoom,
 		centerPoint, boundPoints, boundCoords;
 
@@ -340,7 +458,7 @@ ve.ui.MWMapsDialog.prototype.insertOrUpdateNode = function () {
  * @inheritdoc ve.ui.MWExtensionWindow
  */
 ve.ui.MWMapsDialog.prototype.updateMwData = function ( mwData ) {
-	var latitude, longitude, zoom,
+	var mapID, plae, latitude, longitude, zoom,
 		lang = this.language.getLang(),
 		util = require( 'ext.kartographer.util' ),
 		dimensions = this.scalable.getBoundedDimensions(
@@ -351,6 +469,8 @@ ve.ui.MWMapsDialog.prototype.updateMwData = function ( mwData ) {
 	ve.ui.MWMapsDialog.super.prototype.updateMwData.call( this, mwData );
 
 	if ( this.map ) {
+		mapID = this.mapID.getValue();
+		plane = this.plane.getValue();
 		latitude = this.latitude.getValue();
 		longitude = this.longitude.getValue();
 		zoom = this.zoom.getValue();
@@ -358,6 +478,8 @@ ve.ui.MWMapsDialog.prototype.updateMwData = function ( mwData ) {
 		// Map not loaded in insert, can't insert
 		return;
 	}
+	mwData.attrs.mapID = mapID.toString();
+	mwData.attrs.plane = plane.toString();
 	mwData.attrs.latitude = latitude.toString();
 	mwData.attrs.longitude = longitude.toString();
 	mwData.attrs.zoom = zoom.toString();
@@ -407,6 +529,9 @@ ve.ui.MWMapsDialog.prototype.getSetupProcess = function ( data ) {
 			// Events
 			this.indexLayout.connect( this, { set: 'onIndexLayoutSet' } );
 
+			this.mapID.connect( this, { change: 'onMapIDChange' } );
+			this.mapName.connect( this, { change: 'onMapNameChange' } );
+			this.plane.connect( this, { change: 'onPlaneChange' } );
 			this.latitude.connect( this, { change: 'onCoordsChange' } );
 			this.longitude.connect( this, { change: 'onCoordsChange' } );
 			this.zoom.connect( this, { change: 'onZoomChange' } );
@@ -427,6 +552,14 @@ ve.ui.MWMapsDialog.prototype.getSetupProcess = function ( data ) {
 			this.dimensionsField.toggle( !inline );
 			this.alignField.toggle( !inline );
 
+			var mapID = mapPosition.mapID;
+			if ( !this.mapData[mapID] ) {
+				mapID = "-1";
+			}
+			this.mapID.setValue( String( mapID ) ).setReadOnly( isReadOnly );
+			this.mapName.setValue( String( this.mapData[mapID].name ) ).setReadOnly( isReadOnly );
+
+			this.plane.setValue( String( mapPosition.plane ) ).setReadOnly( isReadOnly );
 			this.latitude.setValue( String( mapPosition.center[ 0 ] ) ).setReadOnly( isReadOnly );
 			this.longitude.setValue( String( mapPosition.center[ 1 ] ) ).setReadOnly( isReadOnly );
 			this.zoom.setValue( String( mapPosition.zoom ) ).setReadOnly( isReadOnly );
@@ -459,12 +592,17 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
 			editing = require( 'ext.kartographer.editing' ),
 			util = require( 'ext.kartographer.util' ),
 			defaultShapeOptions = { shapeOptions: L.mapbox.simplestyle.style( {} ) },
+			mapPosition = dialog.getInitialMapPosition(),
 			mwData = dialog.selectedNode && dialog.selectedNode.getAttribute( 'mw' ),
 			mwAttrs = mwData && mwData.attrs;
 
 		// TODO: Support 'style' editing
 		dialog.map = require( 'ext.kartographer.box' ).map( {
 			container: dialog.$map[ 0 ],
+			center: mapPosition.center,
+			zoom: mapPosition.zoom,
+			mapID: mapPosition.mapID,
+			plane: mapPosition.plane,
 			lang: mwAttrs && mwAttrs.lang || util.getDefaultLanguage(),
 			alwaysInteractive: true
 		} );
@@ -496,6 +634,7 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
 			// * Allow large bleed when drawing map cutout area.
 			dialog.map.getRenderer( dialog.mapCutout ).options.padding = 10;
 
+			dialog.map.setMapID( dialog.mapID.getValue(), dialog.plane.getValue() );
 			dialog.updateMapContents();
 			dialog.updateMapArea();
 			dialog.resetMapZoomAndPosition( true );
@@ -561,7 +700,13 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
 					polyline: defaultShapeOptions,
 					polygon: defaultShapeOptions,
 					rectangle: defaultShapeOptions,
-					marker: { icon: L.mapbox.marker.icon( {} ) }
+					marker: { icon: L.icon( {
+						icon: "pin_blue.svg",
+						iconUrl: (dialog.mapsConfig.iconURL + "pin_blue.svg"),
+						iconSize: [26, 42],
+						iconAnchor: [13, 42],
+						popupAnchor: [0, -42]
+					} ) }
 				}
 			} );
 
@@ -603,27 +748,35 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
  * @return {Object} Object containing latitude, longitude and zoom
  */
 ve.ui.MWMapsDialog.prototype.getInitialMapPosition = function () {
-	var latitude, longitude, zoom,
+	var mapID, plane, latitude, longitude, zoom,
 		pageCoords = mw.config.get( 'wgCoordinates' ),
 		mwData = this.selectedNode && this.selectedNode.getAttribute( 'mw' ),
 		mwAttrs = mwData && mwData.attrs;
 
 	if ( mwAttrs && mwAttrs.zoom ) {
+		mapID = +mwAttrs.mapID
+		plane = +mwAttrs.plane
 		latitude = +mwAttrs.latitude;
 		longitude = +mwAttrs.longitude;
 		zoom = +mwAttrs.zoom;
 	} else if ( pageCoords ) {
 		// Use page coordinates if Extension:GeoData is available
+		mapID = pageCoords.mapID;
+		plane = pageCoords.plane;
 		latitude = pageCoords.lat;
 		longitude = pageCoords.lon;
 		zoom = 5;
 	} else if ( !mwAttrs || !mwAttrs.extsrc ) {
-		latitude = 30;
-		longitude = 0;
+		mapID = -1;
+		plane = 0;
+		latitude = 3200;
+		longitude = 3200;
 		zoom = 2;
 	}
 
 	return {
+		mapID: mapID,
+		plane: plane,
 		center: [ latitude, longitude ],
 		zoom: zoom
 	};
@@ -663,6 +816,9 @@ ve.ui.MWMapsDialog.prototype.getTeardownProcess = function ( data ) {
 			// Events
 			this.indexLayout.disconnect( this );
 
+			this.mapID.disconnect( this );
+			this.mapName.disconnect( this );
+			this.plane.disconnect( this );
 			this.latitude.disconnect( this );
 			this.longitude.disconnect( this );
 			this.zoom.disconnect( this );

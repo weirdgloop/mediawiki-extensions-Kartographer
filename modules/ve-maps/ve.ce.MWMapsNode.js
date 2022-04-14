@@ -141,7 +141,7 @@ ve.ce.MWMapsNode.prototype.update = function () {
 		}
 		this.updateStatic();
 		// Preload larger static map for resizing
-		$( '<img>' ).attr( 'src', this.model.getUrl( 1000, 1000 ) );
+		//$( '<img>' ).attr( 'src', this.model.getUrl( 1000, 1000 ) );
 	}
 	switch ( align ) {
 		case 'right':
@@ -178,6 +178,8 @@ ve.ce.MWMapsNode.prototype.setupMap = function () {
 		container: this.$map[ 0 ],
 		center: [ +mwAttrs.latitude, +mwAttrs.longitude ],
 		zoom: +mwAttrs.zoom,
+		mapID: +mwAttrs.mapID,
+		plane: +mwAttrs.plane,
 		lang: mwAttrs.lang || util.getDefaultLanguage()
 		// TODO: Support style editing
 	} );
@@ -231,16 +233,23 @@ ve.ce.MWMapsNode.prototype.updateMapPosition = function () {
 		mwData.attrs.latitude = mapData.latitude = current.center.lat.toString();
 		mwData.attrs.longitude = mapData.longitude = current.center.lng.toString();
 		mwData.attrs.zoom = mapData.zoom = current.zoom.toString();
+		mwData.attrs.plane = mapData.plane = current.plane.toString();
+		mwData.attrs.mapID = mapData.mapID = current.mapID.toString();
 	} else if (
 		isNaN( updatedData.latitude ) || isNaN( updatedData.longitude ) || isNaN( updatedData.zoom ) ||
+		isNaN( updatedData.plane ) || isNaN( updatedData.mapID ) ||
 		mapData.latitude !== updatedData.latitude ||
 		mapData.longitude !== updatedData.longitude ||
-		mapData.zoom !== updatedData.zoom
+		mapData.zoom !== updatedData.zoom ||
+		mapData.plane !== updatedData.plane ||
+		mapData.mapID !== updatedData.mapID
 	) {
 		this.map.setView( [ updatedData.latitude, updatedData.longitude ], updatedData.zoom );
 		mapData.latitude = updatedData.latitude;
 		mapData.longitude = updatedData.longitude;
 		mapData.zoom = updatedData.zoom;
+		mapData.plane = updatedData.plane;
+		mapData.mapID = updatedData.mapID;
 	} else {
 		this.map.invalidateSize();
 	}
@@ -253,7 +262,7 @@ ve.ce.MWMapsNode.prototype.updateMapPosition = function () {
  * @param {number} [height]
  */
 ve.ce.MWMapsNode.prototype.updateStatic = function ( width, height ) {
-	var url, node = this;
+	var bgcss, url, node = this;
 
 	if ( !this.model.getCurrentDimensions().width ) {
 		return;
@@ -261,13 +270,18 @@ ve.ce.MWMapsNode.prototype.updateStatic = function ( width, height ) {
 
 	if ( this.$imageLoader ) {
 		this.$imageLoader.off();
+		this.$imageLoader.remove();
 		this.$imageLoader = null;
 	}
 
-	url = this.model.getUrl( width, height );
+	bgcss = this.model.getUrl( width, height );
+	url = bgcss['background-image'].match( /url\(([^\)]*)\)$/ )[1];
 
 	this.$imageLoader = $( '<img>' ).on( 'load', function () {
-		node.$map.css( 'backgroundImage', 'url(' + url + ')' );
+		if ( this.$imageLoader ) {
+			this.$imageLoader.remove();
+		}
+		node.$map.css( bgcss );
 	} ).attr( 'src', url );
 };
 
@@ -303,7 +317,7 @@ ve.ce.MWMapsNode.prototype.getAttributeChanges = function ( width, height ) {
 ve.ce.MWMapsNode.prototype.onMapFocus = function () {
 	if ( !this.requiresInteractive() ) {
 		// Preload larger static map for resizing
-		$( '<img>' ).attr( 'src', this.model.getUrl( 1000, 1000 ) );
+		// $( '<img>' ).attr( 'src', this.model.getUrl( 1000, 1000 ) );
 	}
 };
 

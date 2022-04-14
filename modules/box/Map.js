@@ -1084,7 +1084,11 @@ KartographerMap = KartographerMap.extend({
         this.loadBaseMap(mapID);
 
         if (plane === undefined) {
-          plane = this._baseMaps[mapID].defaultPlane || 0
+          if (this._baseMaps[mapID]) {
+            plane = this._baseMaps[mapID].defaultPlane || 0
+          } else {
+          	plane = 0
+          }
         }
         if (this.fullscreen) {
           this._controllers.mapSelect._changeSelectedOption(mapID)
@@ -1097,8 +1101,13 @@ KartographerMap = KartographerMap.extend({
         }
         if (location === undefined) {
             // TODO: ???
-          location = [ this._baseMaps[mapID].center[1],
-              this._baseMaps[mapID].center[0] ]
+          if (this._baseMaps[mapID]) {
+          	location = [ this._baseMaps[mapID].center[1],
+              	this._baseMaps[mapID].center[0] ]
+          } else {
+          	location = [ 3200, 3200 ]
+          }
+
         }
         this.setView(location, zoom)
     },

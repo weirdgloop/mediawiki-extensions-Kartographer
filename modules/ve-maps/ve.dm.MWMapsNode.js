@@ -56,17 +56,83 @@ ve.dm.MWMapsNode.static.toDataElement = function () {
  */
 ve.dm.MWMapsNode.static.getUrl = function ( dataElement, width, height ) {
 	var mwAttrs = dataElement.attributes.mw.attrs,
+		_tileSize = 256,
 		util = require( 'ext.kartographer.util' ),
-		lang = mwAttrs.lang || util.getDefaultLanguage();
+		lang = mwAttrs.lang || util.getDefaultLanguage(),
+		width = +mwAttrs.width,
+		height = +mwAttrs.height;
 
-	return mw.config.get( 'wgKartographerMapServer' ) + '/img/' +
-		mw.config.get( 'wgKartographerDfltStyle' ) + ',' +
-		mwAttrs.zoom + ',' +
-		mwAttrs.latitude + ',' +
-		mwAttrs.longitude + ',' +
-		( width || mwAttrs.width ) + 'x' +
-		( height || mwAttrs.height ) +
-		'.jpeg?' + $.param( { lang: lang } );
+	var toCoord = function ( point, scale ) {
+		return ( ( point / scale - 0 ) / 1 );
+	};
+	var toPoint = function ( coord, scale ) {
+		return ( scale * ( 1 * coord + 0 ) );
+	};
+	var scale = Math.pow( 2, +mwAttrs.zoom ),
+		tileSize = toCoord( _tileSize, scale );
+
+	// Map size
+	var mapWidth = toCoord( width, scale ),
+		mapHeight = toCoord( height, scale ),
+		// Corner low coords
+		lowX = +mwAttrs.longitude - (mapWidth / 2),
+		lowY = +mwAttrs.latitude - (mapHeight / 2),
+		// Corner high coords
+		highX = +mwAttrs.longitude + (mapWidth / 2),
+		highY = +mwAttrs.latitude + (mapHeight / 2),
+		// Tile low
+		tileLowX = Math.floor( lowX / tileSize ),
+		tileLowY = Math.floor( lowY / tileSize ),
+		// Tile high
+		tileHighX = Math.floor( highX / tileSize ),
+		tileHighY = Math.floor( highY / tileSize );
+	// Initial offset
+	var initOffX = lowX - (tileLowX * tileSize);
+	initOffX = -( toPoint(initOffX, scale) );
+	var initOffY = highY - (tileHighY * tileSize);
+	initOffY = toPoint(initOffY, scale) - _tileSize;
+
+	var mapsConfig = mw.config.get( 'wgKartographerDataConfig' ),
+		mapVers = mapsConfig.mapVersion,
+		mesVers = mw.message('kartographer-map-version');
+	if (mesVers.exists()) {
+		mapVers = mesVers.text();
+	}
+
+	var  baseUrl = mapsConfig.baseTileURL + mapsConfig.tileURLFormat;
+	baseUrl = baseUrl.replace( '{mapVersion}', mapVers );
+
+	var getTileUrl = function ( mapID, zoom, plane, x, y ) {
+		var url = baseUrl.replace( '{mapID}', mapID )
+			.replace( '{z}', zoom )
+			.replace( '{p}', plane )
+			.replace( '{x}', x )
+			.replace( '{y}', y ).replace( '{-y}', y )
+		return url;
+	}
+
+	// Make tiles
+	var bgImages = [],
+		bgPos = [],
+		yCount = 0;
+	for (let y = tileHighY; y >= tileLowY; y -= 1) {
+		var yOff = initOffY + (yCount * _tileSize);
+		yCount += 1;
+		var xCount = 0;
+		for (let x = tileLowX; x <= tileHighX; x += 1) {
+			var xOff = initOffX + (xCount * _tileSize);
+			xCount += 1;
+			var tileUrl = getTileUrl( mwAttrs.mapID, mwAttrs.zoom, mwAttrs.plane, x, y );
+			bgImages.push( "url("+tileUrl+")" );
+			bgPos.push( xOff+"px "+yOff+"px" );
+		}
+	}
+
+	return {
+		'background-image': bgImages.join(', '),
+		'background-position': bgPos.join(', '),
+		'background-repeat': 'no-repeat'
+	}
 };
 
 ve.dm.MWMapsNode.static.createScalable = function ( dimensions ) {
