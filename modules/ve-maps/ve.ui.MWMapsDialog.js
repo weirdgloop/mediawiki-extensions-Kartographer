@@ -458,7 +458,7 @@ ve.ui.MWMapsDialog.prototype.insertOrUpdateNode = function () {
  * @inheritdoc ve.ui.MWExtensionWindow
  */
 ve.ui.MWMapsDialog.prototype.updateMwData = function ( mwData ) {
-	var mapID, plae, latitude, longitude, zoom,
+	var mapID, plane, latitude, longitude, zoom,
 		lang = this.language.getLang(),
 		util = require( 'ext.kartographer.util' ),
 		dimensions = this.scalable.getBoundedDimensions(
