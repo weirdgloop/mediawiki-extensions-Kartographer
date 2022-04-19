@@ -38,10 +38,6 @@ function bracketDevicePixelRatio() {
 	return brackets[ brackets.length - 1 ];
 }
 
-if ( !mapServer ) {
-	throw new Error( 'wgKartographerMapServer must be configured.' );
-}
-
 scale = bracketDevicePixelRatio();
 scale = ( scale === 1 ) ? '' : ( '@' + scale + 'x' );
 
