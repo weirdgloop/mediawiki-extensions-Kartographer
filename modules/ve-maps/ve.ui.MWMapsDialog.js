@@ -692,10 +692,11 @@ ve.ui.MWMapsDialog.prototype.setupMap = function () {
 
 			geoJsonLayer = editing.getKartographerLayer( dialog.map );
 			dialog.contentsDraw = new L.Control.Draw( {
+				position: 'bottomleft',
 				edit: { featureGroup: geoJsonLayer },
 				draw: {
-					circle: false,
-					circlemarker: false,
+					circle: defaultShapeOptions,
+					circlemarker: defaultShapeOptions,
 					// TODO: Determine metric preference from locale information
 					polyline: defaultShapeOptions,
 					polygon: defaultShapeOptions,
@@ -798,7 +799,8 @@ ve.ui.MWMapsDialog.prototype.updateMapContents = function () {
 		.done( function () {
 			self.input.setValidityFlag( true );
 		} )
-		.fail( function () {
+		.fail( function (er) {
+			console.error(er);
 			self.input.setValidityFlag( false );
 		} )
 		.always( function () {

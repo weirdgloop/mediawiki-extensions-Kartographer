@@ -131,7 +131,9 @@ ve.ce.MWMapsNode.prototype.update = function () {
 		} else if ( this.map ) {
 			this.updateGeoJson();
 			this.updateMapPosition();
-			this.map.setLang( this.model.getLanguage() );
+			if ( this.model.getLanguage && this.map.setLang ) {
+				this.map.setLang( this.model.getLanguage() );
+			}
 		}
 	} else {
 		if ( this.map ) {
