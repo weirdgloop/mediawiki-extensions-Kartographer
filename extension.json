@@ -1,10 +1,13 @@
 {
+
 	"name": "Kartographer",
 	"author": [
 		"Yuri Astrakhan",
 		"Max Semenik",
 		"Ed Sanders",
-		"Julien Girault"
+		"Julien Girault",
+		"Jonathan Lee",
+		"Jonas Doggart"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:Kartographer",
 	"descriptionmsg": "kartographer-desc",
@@ -49,6 +52,7 @@
 		"ext.kartographer.style": {
 			"styles": [
 				"styles/kartographer.less",
+				"styles/mapElements.less",
 				"styles/link.less",
 				"styles/control-attribution.less",
 				"styles/control-scale.less",
@@ -174,23 +178,56 @@
 				"mediawiki.Uri",
 				"oojs-ui.styles.icons-media",
 				"mapbox",
-				"ext.kartographer.lib.topojson",
 				"ext.kartographer",
 				"ext.kartographer.style",
 				"ext.kartographer.site",
 				"ext.kartographer.data",
-				"ext.kartographer.util"
+				"ext.kartographer.util",
+				"ext.kartographer.controls"
 			],
 			"packageFiles": [
 				"index.js",
 				{ "name": "leaflet.sleep.js", "file": "../../lib/external/leaflet.sleep.js" },
-				{ "name": "mapbox-settings.js", "file": "../settings/settings.js" },
 				"openfullscreen_control.js",
-				"scale_control.js",
 				"dataLayerOpts.js",
 				"data.js",
 				"Map.js",
-				"enablePreview.js"
+				"enablePreview.js",
+				"MapTileLayer.js"
+			],
+			"messages": [
+				"kartographer-attribution",
+				"kartographer-map-version"
+			],
+			"targets": [
+				"mobile",
+				"desktop"
+			]
+		},
+		"ext.kartographer.controls": {
+			"dependencies": [
+				"mediawiki.api",
+				"mediawiki.Uri",
+				"oojs-ui.styles.icons-media",
+				"jquery.throttle-debounce",
+				"mapbox",
+				"ext.kartographer",
+				"ext.kartographer.style",
+				"ext.kartographer.site",
+				"ext.kartographer.data"
+			],
+			"scripts": [
+				"modules/controls/uiElements.js",
+				"modules/controls/Help.js",
+				"modules/controls/Icons.js",
+				"modules/controls/CustomZoom.js",
+				"modules/controls/MapSelect.js",
+				"modules/controls/Options.js",
+				"modules/controls/Plane.js",
+				"modules/controls/index.js"
+			],
+			"styles": [
+				"modules/controls/style.css"
 			],
 			"messages": [
 				"kartographer-attribution"
@@ -253,38 +290,6 @@
 				"desktop"
 			]
 		},
-		"ext.kartographer.dialog.sidebar": {
-			"localBasePath": "modules/dialog-sidebar",
-			"dependencies": [
-				"mediawiki.storage",
-				"oojs-ui.styles.icons-interactions",
-				"oojs-ui.styles.icons-movement"
-			],
-			"packageFiles": [
-				"sidebar.js",
-				{
-					"name": "externalLinks.json",
-					"callback": "Kartographer\\ExternalLinksProvider::getData"
-				}
-			],
-			"messages": [
-				"kartographer-fullscreen-close",
-				"kartographer-fullscreen-collapse",
-				"kartographer-sidebar-coordinates",
-				"kartographer-sidebar-filterdropdown",
-				"kartographer-sidebar-externalservices",
-				"kartographer-sidebar-externalservices-show-featured",
-				"kartographer-sidebar-externalservices-show-all",
-				"kartographer-sidebar-latitude",
-				"kartographer-sidebar-longitude",
-				"kartographer-sidebar-mapdetails",
-				"kartographer-sidebar-service"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
 		"ext.kartographer.util": {
 			"scripts": [
 				"modules/util/util.js"
@@ -337,7 +342,8 @@
 			"messages": [
 				"visualeditor-mwmapsdialog-position-lat",
 				"visualeditor-mwmapsdialog-position-lon",
-				"visualeditor-mwmapsdialog-position-zoom"
+				"visualeditor-mwmapsdialog-position-zoom",
+				"visualeditor-mwmapsdialog-position-plane"
 			],
 			"targets": [
 				"mobile",
@@ -380,6 +386,7 @@
 				"modules/ve-maps/ve.ui.MWMaps.css"
 			],
 			"messages": [
+				"kartographer-map-version",
 				"visualeditor-mwmapscontextitem-nosupport",
 				"visualeditor-mwmapscontextitem-title",
 				"visualeditor-mwmapsdialog-area",
@@ -387,11 +394,16 @@
 				"visualeditor-mwmapsdialog-options",
 				"visualeditor-mwmapsdialog-align",
 				"visualeditor-mwmapsdialog-geojson",
+				"visualeditor-mwmapsdialog-loadingname",
+				"visualeditor-mwmapsdialog-mapselect",
+				"visualeditor-mwmapsdialog-planeselect",
 				"visualeditor-mwmapsdialog-language",
 				"visualeditor-mwmapsdialog-help-title",
 				"visualeditor-mwmapsdialog-position-lat",
 				"visualeditor-mwmapsdialog-position-lon",
 				"visualeditor-mwmapsdialog-position-zoom",
+				"visualeditor-mwmapsdialog-position-plane",
+				"visualeditor-mwmapsdialog-position-mapid",
 				"visualeditor-mwmapsdialog-size",
 				"visualeditor-mwmapsdialog-title"
 			],
@@ -417,19 +429,6 @@
 			],
 			"styles": [
 				"lib/external/prunecluster/LeafletStyleSheet.css"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
-		"ext.kartographer.lib.topojson": {
-			"dependencies": [
-				"mapbox"
-			],
-			"scripts": [
-				"lib/topojson/topojson.js",
-				"lib/topojson/loader.js"
 			],
 			"targets": [
 				"mobile",
@@ -487,6 +486,7 @@
 	},
 	"Hooks": {
 		"ParserTestGlobals": "Kartographer\\Hooks::onParserTestGlobals",
+		"PageSaveComplete": "Kartographer\\Hooks::onPageSaveComplete",
 		"ParserFirstCallInit": "Kartographer\\Hooks::onParserFirstCallInit",
 		"ParserAfterParse": "Kartographer\\Hooks::onParserAfterParse"
 	},
@@ -509,11 +509,11 @@
 		},
 		"KartographerDfltStyle": {
 			"description": "Default map style to be used. Must be one of the values from KartographerStyles.",
-			"value": "osm-intl"
+			"value": "0"
 		},
 		"KartographerStyles": {
 			"description": "Available map styles on KartographerMapServer",
-			"value": [ "osm-intl", "osm" ]
+			"value": [ "0", "osm" ]
 		},
 		"KartographerSrcsetScales": {
 			"description": "Set of allowed hidpi pixelratios supported by the map tile server",
@@ -537,7 +537,19 @@
 		},
 		"KartographerFallbackZoom": {
 			"description": "Fallback zoom value when zoom is undefined",
-			"value": 13
+			"value": 1
+		},
+		"KartographerDataConfig": {
+			"description": "RuneScape data config for Kartographer.",
+			"value": {
+				"baseTileURL": "https://maps.runescape.wiki/osrs/",
+				"basePlainTileURL": "https://maps.runescape.wiki/osrs/",
+				"tileURLFormat": "rendered/{mapID}/{z}/{p}_{x}_{-y}.png",
+				"attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
+				"baseMapsFile": "https://maps.runescape.wiki/osrs/data/basemaps.json",
+				"wikiImageURL": "https://oldschool.runescape.wiki/images/",
+				"mapVersion": "2021-04-19_a"
+			}
 		}
 	},
 	"TrackingCategories": [

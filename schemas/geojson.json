@@ -272,6 +272,12 @@
 			"properties": {
 				"title": { "type": "string" },
 				"description": { "type": "string" },
+				"label": { "type": "string" },
+				"radius": { "type": "number", "minimum": 0 },
+				"class": { "type": "string", "pattern": "^(|[a-zA-Z][a-zA-z0-9 -]+)$" },
+				"iconSize": { "$ref": "#/definitions/position" },
+				"iconAnchor": { "$ref": "#/definitions/position" },
+				"popupAnchor": { "$ref": "#/definitions/position" },
 				"marker-size": { "enum": [ "small", "medium", "large" ] },
 				"marker-symbol": { "type": "string", "pattern": "^(|[0-9][0-9]?|[a-z-]+)$" },
 				"marker-color": { "$ref": "#/definitions/color" },

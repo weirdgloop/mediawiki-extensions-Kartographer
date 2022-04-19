@@ -13,12 +13,6 @@ L.kartographer = module.exports = {
 	OpenFullScreenControl: require( './openfullscreen_control.js' ),
 
 	/**
-	 * @type {Kartographer.Box.ScaleControl}
-	 * @ignore
-	 */
-	ScaleControl: require( './scale_control.js' ),
-
-	/**
 	 * @type {Kartographer.Box.MWMap}
 	 * @ignore
 	 */

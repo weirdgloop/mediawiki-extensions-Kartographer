@@ -26,36 +26,10 @@ var OpenFullScreenControl = L.Control.extend( {
 		this.link = L.DomUtil.create( 'a', 'oo-ui-icon-fullScreen', container );
 		this.link.title = mw.msg( 'kartographer-fullscreen-text' );
 
-		if ( this._map.useRouter ) {
-			this.updateHash();
-			this._map.on( 'moveend', this.onMapMove, this );
-		} else {
-			// the router will handle it otherwise
-			L.DomEvent.addListener( this.link, 'click', this.openFullScreen, this );
-		}
+		L.DomEvent.addListener( this.link, 'click', this.openFullScreen, this );
 		L.DomEvent.disableClickPropagation( container );
 
 		return container;
-	},
-
-	/**
-	 * Updates the hash on `moveend`.
-	 *
-	 * @override
-	 * @protected
-	 */
-	onMapMove: function () {
-		if ( !this._map._loaded ) {
-			return false;
-		}
-		this.updateHash();
-	},
-
-	/**
-	 * Updates the link with the latest map hash.
-	 */
-	updateHash: function () {
-		this.link.href = '#' + this._map.getHash();
 	},
 
 	/**

@@ -18,7 +18,7 @@ use stdClass;
  */
 class SimpleStyleParser {
 
-	private const PARSED_PROPS = [ 'title', 'description' ];
+	private const PARSED_PROPS = [ 'title', 'label', 'description' ];
 
 	/** @var Parser */
 	private $parser;
@@ -57,7 +57,7 @@ class SimpleStyleParser {
 	public function parse( $input ) {
 		$input = trim( $input );
 		$status = Status::newGood( [] );
-		if ( $input !== '' && $input !== null ) {
+		if ( $input !== '' ) {
 			$status = FormatJson::parse( $input, FormatJson::TRY_FIXING | FormatJson::STRIP_COMMENTS );
 			if ( $status->isOK() ) {
 				$status = $this->parseObject( $status->value );
