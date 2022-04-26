@@ -13,6 +13,7 @@
 			"Önni"
 		]
 	},
+	"drawmap":"Desenhar mapa",
 	"kartographer-attribution": "[https://weirdgloop.org/licensing/ Licença]",
 	"kartographer-broken-category": "Páginas com mapas inválidos",
 	"kartographer-broken-category-desc": "A página inclui uma utilização inválida de mapas",
@@ -103,6 +104,8 @@
 	"kartographer-coord-decimal": "$1,$2",
 	"kartographer-map-addinfo": "$2 (mapID: $1)<br />Ampliação: $3  Nível: $4",
 	"kartographer-specialmap-note": "Url usa o formato: Especial:Mapa/''mapID''/''ampliação''/''nível''/''x''/''y''",
+	"kartographer-specialdrawmap-jsnote": "Js deve estar habilitado para usar esta página corretamente!",
+	"kartographer-specialdrawmap-urlnote": "Url usa o formato opcional: Especial:DesenharMapa/''mapID''/''ampliação''/''nível''/''x''/''y''",
 	"kartographer-link-doogle-maps": "Doogle Mapas",
 	"kartographer-link-openscapemap": "OpenScapeMapa",
 	"leafletdraw-draw-handlers-circlemarker-tooltip-start": "Clique no mapa para colocar um marcador circular",
