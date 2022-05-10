@@ -217,9 +217,8 @@ abstract class TagHandler {
 
 	/**
 	 * @param string $name
-	 * @param string|bool|null $default
-	 *
-	 * @return int|bool|null
+	 * @param string|false|null $default
+	 * @return int|false|null
 	 */
 	protected function getInt( $name, $default = false ) {
 		$value = $this->getText( $name, $default, '/^-?[0-9]+$/' );
@@ -232,8 +231,8 @@ abstract class TagHandler {
 
 	/**
 	 * @param string $name
-	 * @param string|bool|null $default
-	 * @return float|bool|null
+	 * @param string|false|null $default
+	 * @return float|false|null
 	 */
 	private function getFloat( $name, $default = false ) {
 		$value = $this->getText( $name, $default, '/^-?[0-9]*\.?[0-9]+$/' );
@@ -248,9 +247,9 @@ abstract class TagHandler {
 	 * Returns value of a named tag attribute with optional validation
 	 *
 	 * @param string $name Attribute name
-	 * @param string|bool|null $default Default value or false to trigger error if absent
+	 * @param string|false|null $default Default value or false to trigger error if absent
 	 * @param string|false $regexp Regular expression to validate against or false to not validate
-	 * @return string|bool|null
+	 * @return string|false|null
 	 */
 	protected function getText( $name, $default, $regexp = false ) {
 		if ( !isset( $this->args[$name] ) ) {
