@@ -7,7 +7,6 @@ use JsonSchema\Validator;
 use LogicException;
 use MediaWiki\MediaWikiServices;
 use Parser;
-use PPFrame;
 use Status;
 use stdClass;
 
@@ -18,24 +17,20 @@ class SimpleStyleParser {
 
 	private const PARSED_PROPS = [ 'title', 'label', 'description' ];
 
-	/** @var Parser */
+	/** @var MediaWikiWikitextParser */
 	private $parser;
-
-	/** @var PPFrame|null */
-	private $frame;
 
 	/** @var array */
 	private $options;
 
 	/**
-	 * @param Parser $parser Parser used for wikitext processing
-	 * @param PPFrame|null $frame
+	 * @param MediaWikiWikitextParser|Parser $parser
 	 * @param array $options Set ['saveUnparsed' => true] to back up the original values of title
 	 *                       and description in _origtitle and _origdescription
 	 */
-	public function __construct( Parser $parser, PPFrame $frame = null, array $options = [] ) {
-		$this->parser = $parser;
-		$this->frame = $frame;
+	public function __construct( $parser, array $options = [] ) {
+		// TODO: Temporary compatibility, remove when not needed any more
+		$this->parser = $parser instanceof Parser ? new MediaWikiWikitextParser( $parser ) : $parser;
 		$this->options = $options;
 	}
 
@@ -227,7 +222,7 @@ class SimpleStyleParser {
 					if ( $saveUnparsed ) {
 						$properties->{"_orig$prop"} = $property;
 					}
-					$property = $this->parseText( $property );
+					$property = $this->parser->parseWikitext( $property );
 				} elseif ( is_object( $property ) ) {
 					// Delete empty localizations
 					if ( !count( get_object_vars( $property ) ) ) {
@@ -240,7 +235,7 @@ class SimpleStyleParser {
 							if ( !is_string( $text ) ) {
 								unset( $property->$language );
 							} else {
-								$text = $this->parseText( $text );
+								$text = $this->parser->parseWikitext( $text );
 							}
 						}
 					}
@@ -249,17 +244,6 @@ class SimpleStyleParser {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Parses property wikitext into HTML
-	 *
-	 * @param string $text
-	 * @return string
-	 */
-	private function parseText( $text ): string {
-		$text = $this->parser->recursiveTagParseFully( $text, $this->frame ?: false );
-		return trim( Parser::stripOuterParagraph( $text ) );
 	}
 
 	/**
