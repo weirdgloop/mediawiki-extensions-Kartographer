@@ -74,21 +74,10 @@ MapDialog.prototype.setMap = function ( map ) {
 		.attr( 'title', dialog.map.captionText )
 		.text( dialog.map.captionText );
 
-	// The button exists, the sidebar was open, call `tearDown` and reopen it.
-	if ( dialog.sideBar ) {
-		dialog.sideBar.tearDown();
-		dialog.map.doWhenReady( function () {
-			dialog.offsetMap( true );
-			dialog.toggleSideBar( true );
-		} );
-	} else {
-		// The button exists, the sidebar was not open, simply run `offsetMap`
-		dialog.map.doWhenReady( function () {
-			dialog.offsetMap( false );
-			// preload the sidebar, we finished doing all the other stuff
-			mw.loader.load( 'ext.kartographer.dialog.sidebar' );
-		} );
-	}
+	// The button exists, the sidebar was not open, simply run `offsetMap`
+	dialog.map.doWhenReady( function () {
+		dialog.offsetMap( false );
+	} );
 	// If the window was already open, trigger wikipage.maps
 	// otherwise let the ready() of the window handle this.
 	if ( dialog.isOpened() ) {
@@ -111,7 +100,7 @@ MapDialog.prototype.addFooterButton = function () {
 			icon: 'newWindow',
 			title: mw.msg( 'kartographer-sidebar-togglebutton' )
 		} );
-		dialog.mapDetailsButton.connect( dialog, { change: 'toggleSideBar' } );
+		dialog.mapDetailsButton.connect( dialog, { change: 'openURL' } );
 	}
 
 	if ( !dialog.$captionContainer.length ) {
@@ -143,31 +132,39 @@ MapDialog.prototype.addFooterButton = function () {
 	}
 };
 
-MapDialog.prototype.toggleSideBar = function ( open ) {
-	var dialog = this;
+MapDialog.prototype.openURL = function ( ) {
+  var url = this.createURL();
+  window.open(url, '_blank');
+};
 
-	mw.loader.using( 'ext.kartographer.dialog.sidebar' ).then( function () {
-		var SideBar;
-		if ( !dialog.sideBar ) {
-			SideBar = require( 'ext.kartographer.dialog.sidebar' );
-			dialog.sideBar = new SideBar( { dialog: dialog } );
-			dialog.sideBar.toggle( true );
-		}
+/*
+ * Added for direct link creation, no sidebar needed.
+ */
+MapDialog.prototype.createURL = function ( ) {
+  var externalLinks = mw.config.get( 'wgKartographerExternalLinks' );
+  // select first url in list
+  var url = mw.config.get( 'wgKartographerDataConfig' ).standaloneURL;
+  // Replace parts
+  var view; // = this.map.getInitialMapPosition();
+  view = {
+    center: this.map.getCenter(),
+    zoom: this.map.getZoom(),
+    mapID: this.map.getMapID(),
+    plane: this.map.getPlane(),
+  };
+  var scale = Math.round( Math.pow( 2, Math.min( 3, Math.max( 0, 18 - view.zoom ) ) ) * 1000 );
+  url = url.replace( new RegExp( '{latitude}', 'g' ), view.center.lat );
+  url = url.replace( new RegExp( '{longitude}', 'g' ), view.center.lng );
+  url = url.replace( new RegExp( '{x}', 'g' ), Math.floor(view.center.lat) );
+  url = url.replace( new RegExp( '{y}', 'g' ), Math.floor(view.center.lng) );
+  url = url.replace( new RegExp( '{zoom}', 'g' ), view.zoom );
+  url = url.replace( new RegExp( '{title}', 'g' ), mw.config.get( 'wgTitle' ) );
+  url = url.replace( new RegExp( '{language}', 'g' ), this.map.lang );
+  url = url.replace( new RegExp( '{scale}', 'g' ), scale );
+  url = url.replace( new RegExp( '{mapID}', 'g' ), view.mapID );
+  url = url.replace( new RegExp( '{plane}', 'g' ), view.plane );
 
-		open = ( typeof open === 'undefined' ) ? !dialog.mapDetailsButton.value : open;
-
-		if ( dialog.mapDetailsButton.value !== open ) {
-			dialog.mapDetailsButton.setValue( open );
-			// This `change` event callback is fired again, so skip here.
-			return;
-		}
-
-		// dialog.sideBar.toggle( open );
-		setTimeout( function () {
-			dialog.$body.toggleClass( 'mw-kartographer-mapDialog-sidebar-opened', open );
-		} );
-
-	} );
+  return url;
 };
 
 MapDialog.prototype.getActionProcess = function ( action ) {
@@ -257,15 +254,6 @@ MapDialog.prototype.getReadyProcess = function ( data ) {
 				return;
 			}
 			this.map.doWhenReady( function () {
-				// T141750
-				// not needed in newer versions of leaflet ?
-				this.map.$container.find( '.leaflet-marker-icon' ).each( function () {
-					var height = $( this ).height();
-					$( this ).css( {
-						clip: 'rect(auto auto ' + ( ( height / 2 ) + 10 ) + 'px auto)'
-					} );
-				} );
-
 				mw.hook( 'wikipage.maps' ).fire( this.map, true /* isFullScreen */ );
 			}, this );
 		}, this );

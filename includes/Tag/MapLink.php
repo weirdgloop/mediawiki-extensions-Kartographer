@@ -41,12 +41,16 @@ class MapLink extends TagHandler {
 		}
 		$text = $this->parser->recursiveTagParse( $text, $this->frame );
 
+		// For RS, default is Lumbridge
+		if ( $this->lat == null || $this->lon == null ) {
+			$this->lat = 3200;
+			$this->lon = 3200;
+		}
+
 		$attrs = [
 			'class' => 'mw-kartographer-maplink',
 			'data-mw' => 'interface',
-			'data-style' => $this->mapStyle,
-			'href' => SpecialMap::link( $this->lat, $this->lon, $this->zoom, $this->resolvedLangCode )
-				->getLocalURL()
+			'href' => SpecialMap::link( $this->lon, $this->lat, $this->zoom, $this->mapid, $this->plane )->getLocalURL()
 		];
 
 		if ( $this->zoom !== null ) {
@@ -59,11 +63,24 @@ class MapLink extends TagHandler {
 		if ( $this->specifiedLangCode !== null ) {
 			$attrs['data-lang'] = $this->specifiedLangCode;
 		}
-		$style = $this->extractMarkerCss();
-		if ( $style ) {
-			$attrs['class'] .= ' mw-kartographer-autostyled';
-			$attrs['style'] = $style;
+
+		// RS attributes
+		if ( $this->mapid !== null ) {
+			$attrs['data-mapid'] = $this->mapid;
 		}
+		// RS attributes
+		if ( $this->plane !== null ) {
+			$attrs['data-plane'] = $this->plane;
+		}
+		// RS attributes
+		if ( $this->mapVersion !== null ) {
+			$attrs['data-mapversion'] = $this->mapVersion;
+		}
+		// RS attributes
+		if ( $this->plainTiles !== null) {
+			$attrs['data-plaintiles'] = $this->plainTiles;
+		}
+
 		if ( $this->cssClass !== '' ) {
 			$attrs['class'] .= ' ' . $this->cssClass;
 		}
@@ -72,23 +89,5 @@ class MapLink extends TagHandler {
 				FormatJson::ALL_OK );
 		}
 		return Html::rawElement( 'a', $attrs, $text );
-	}
-
-	/**
-	 * Extracts CSS style to be used by the link from GeoJSON
-	 * @return string
-	 */
-	private function extractMarkerCss(): string {
-		if ( $this->config->get( 'KartographerUseMarkerStyle' )
-			&& $this->markerProperties
-			&& isset( $this->markerProperties->{'marker-color'} )
-			// JsonSchema already validates this value for us, however this regex will also fail
-			// if the color is invalid
-			&& preg_match( '/^#?((?:[\da-f]{3}){1,2})$/i', $this->markerProperties->{'marker-color'}, $m )
-		) {
-			return "background: #{$m[1]};";
-		}
-
-		return '';
 	}
 }

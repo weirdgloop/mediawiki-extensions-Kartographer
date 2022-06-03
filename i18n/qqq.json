@@ -12,7 +12,6 @@
 			"Yuri Astrakhan"
 		]
 	},
-	"apierror-kartographer-conflicting-revids": "{{doc-apierror}}\nError message when attempting to use the mapdata query API with multiple revision IDs that belong to the same page.",
 	"kartographer-attribution": "Attribution text shown at the bottom of the map.",
 	"kartographer-attribution-externaldata": "{{optional}}\nFormats external data layer attribution: $1 is external data service (e.g. Wikidata), $2 is link to external data link (e.g. query).",
 	"kartographer-attribution-short": "{{optional}}\nShorter version of the attribution text shown at the bottom of the map, for static maps embedded in the article.",
@@ -127,5 +126,24 @@
 	"visualeditor-mwmapsdialog-size": "Label for map size\n{{Identical|Size}}",
 	"visualeditor-mwmapsdialog-title": "Title of the map dialog\n{{Identical|Map}}",
 	"visualeditor-mwmapscontextitem-nosupport": "Description that visual editing is disabled because the map contains dynamic features not supported by the visual editor.",
-	"visualeditor-mwmapscontextitem-title": "Title of the map context item\n{{Identical|Map}}"
+	"visualeditor-mwmapscontextitem-title": "Title of the map context item\n{{Identical|Map}}",
+	"kartographer-coord-decimal": "{{optional}}\nFormats geographical latitude or longitude into a decimal.\nParameters:\n* $1 - integer number\n* $2 - decimal number to 2 descimal places",
+	"kartographer-coord-lat-decimal": "{{optional}}\nNorth-South latitude suffix for geographical coordinates. $1 is decimal value (with leading -) to 2 places, see {{msg-mw|kartographer-coord-decimal}}",
+	"kartographer-coord-lon-decimal": "{{optional}}\nEast-West latitude suffix for geographical coordinates. $1 is decimal value (with leading -) to 2 places, see {{msg-mw|kartographer-coord-decimal}}",
+	"kartographer-map-addinfo": "{{optional}}\nDisplay additional map info (Special:Map). $1 is the mapID, $2 is the map name, $3 is the zoom level and $4 is the plane",
+	"kartographer-specialmap-note": "Displayed at the top of the Special:Map page, should give description of url format: /mapID/zoom/plane/x/y",
+	"kartographer-link-doogle-maps": "{{optional}}Full screen map info sidebar - external service name",
+	"kartographer-link-openscapemap": "{{optional}}Full screen map info sidebar - external service name",
+	"leafletdraw-draw-handlers-circlemarker-tooltip-start": "Tooltip for how to place a circle marker",
+	"leafletdraw-draw-toolbar-buttons-circlemarker": "Tooltip for draw a circle marker button",
+	"leafletdraw-draw-toolbar-finish-text": "Tooltip for finishing an element",
+	"leafletdraw-edit-toolbar-actions-clearall-text": "Label for session clear all action",
+	"leafletdraw-edit-toolbar-actions-clearall-title": "Tooltip for session clear all action",
+	"leafletdraw-draw-toolbar-finish-text": "Label for the button to complete the current drawing\n{{Identical|Complete}}",
+	"leafletdraw-draw-toolbar-finish-title": "Tooltip for the button to complete the current drawing",
+	"visualeditor-mwmapsdialog-loadingname": "Loading text for mapname label",
+	"visualeditor-mwmapsdialog-mapselect": "Label for the map selection fields",
+	"visualeditor-mwmapsdialog-planeselect": "Label for the map plane selection field",
+	"visualeditor-mwmapsdialog-position-plane": "Label for zoom within current position popup\n{{Identical|Plane}}",
+	"visualeditor-mwmapsdialog-position-mapid": "Label for zoom within current position popup\n{{Identical|mapID}}"
 }

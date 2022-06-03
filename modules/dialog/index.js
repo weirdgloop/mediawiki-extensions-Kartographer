@@ -72,7 +72,7 @@ module.exports = {
 
 	/**
 	 * Opens the map dialog, creates the map and renders it.
-	 * Used by staticframe and maplink.
+	 * Used by maplink.
 	 *
 	 * @param {Object} mapObject
 	 * @return {jQuery.Promise} Promise which resolves when the map has been created from mapObject.

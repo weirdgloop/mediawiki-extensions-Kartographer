@@ -55,4 +55,42 @@ class CoordFormatter {
 			->inLanguage( $language )
 			->plain();
 	}
+
+	/**
+	 * Formats coordinates as a decimal
+	 *
+	 * @param float $lat
+	 * @param float $lon
+	 * @param Language $language
+	 * @return string
+	 */
+	public static function formatDecimal( $lat, $lon, Language $language ) {
+		$latStr = self::formatOneCoordDecimal( $lat, 'lat', $language );
+		$lonStr = self::formatOneCoordDecimal( $lon, 'lon', $language );
+
+		return wfMessage( 'kartographer-coord-combined' )
+			->params( $latStr, $lonStr )
+			->inLanguage( $language )
+			->plain();
+	}
+
+	/**
+	 * @param float $coord
+	 * @param string $latLon 'lat' or 'lon'
+	 * @param Language $language
+	 * @return string
+	 */
+	private static function formatOneCoordDecimal( $coord, $latLon, Language $language ) {
+		$integ = floor( $coord );
+		$decim = round( ($coord - $integ) * 100 );
+		$text = wfMessage( 'kartographer-coord-decimal' )
+			->params( $integ, $decim )
+			->inLanguage( $language )
+			->plain();
+
+		return wfMessage( "kartographer-coord-$latLon-decimal" )
+			->params( $text )
+			->inLanguage( $language )
+			->plain();
+	}
 }

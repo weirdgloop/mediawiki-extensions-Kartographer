@@ -42,13 +42,22 @@ function Link( options ) {
 	link.$container = $( link.container );
 	link.$container.addClass( 'mw-kartographer-link' );
 
+	link.mapID = 'auto';
+	if ( !isNaN(options.mapID) ) {
+		link.mapID = options.mapID;
+	}
+	link.plane = 'auto';
+	if ( !isNaN(options.plane) ) {
+		link.plane = options.plane;
+	}
+	link.mapVersion = options.mapVersion || null;
+	link.plainTiles = options.plainTiles || false;
 	link.center = options.center || 'auto';
 	link.zoom = options.zoom || 'auto';
 	link.lang = options.lang || require( 'ext.kartographer.util' ).getDefaultLanguage();
 
 	link.opened = false;
-
-	link.useRouter = !!options.fullScreenRoute;
+	link.useRouter = false;
 	link.fullScreenRoute = options.fullScreenRoute || null;
 	link.captionText = options.captionText || '';
 	link.dataGroups = options.dataGroups;
@@ -61,14 +70,9 @@ function Link( options ) {
 	 * @protected
 	 */
 	link.fullScreenMap = null;
-
-	if ( link.useRouter && link.container.tagName === 'A' ) {
-		link.container.href = '#' + link.fullScreenRoute;
-	} else {
-		link.$container.on( 'click.kartographer', function () {
-			link.openFullScreen();
-		} );
-	}
+	link.$container.on( 'click.kartographer', function () {
+		link.openFullScreen();
+	} );
 }
 
 /**
@@ -89,7 +93,14 @@ Link.prototype.openFullScreen = function ( position ) {
 	position = position || {};
 	position.center = position.center || link.center;
 	position.zoom = typeof position.zoom === 'number' ? position.zoom : link.zoom;
-
+	if ( isNaN(position.mapID) ) {
+		position.mapID = link.mapID;
+	}
+	if ( isNaN(position.plane) ) {
+		position.plane = link.plane;
+	}
+	position.mapVersion = position.mapVersion || link.mapVersion || null;
+	position.plainTiles = position.plainTiles || link.plainTiles || false;
 	/* eslint-disable no-underscore-dangle */
 	if ( map && map._updatingHash ) {
 		// Skip - there is nothing to do.
@@ -116,6 +127,10 @@ Link.prototype.openFullScreen = function ( position ) {
 			fullscreen: true,
 			link: true,
 			parentLink: this,
+			mapID: position.mapID,
+			plane: position.plane,
+			mapVersion: position.mapVersion,
+			plainTiles: position.plainTiles,
 			center: position.center,
 			zoom: position.zoom,
 			lang: link.lang,

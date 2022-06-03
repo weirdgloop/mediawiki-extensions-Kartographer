@@ -3,8 +3,6 @@
 namespace Kartographer;
 
 use FormatJson;
-use JsonConfig\JCMapDataContent;
-use JsonConfig\JCSingleton;
 use JsonSchema\Validator;
 use LogicException;
 use MediaWiki\MediaWikiServices;
@@ -18,7 +16,7 @@ use stdClass;
  */
 class SimpleStyleParser {
 
-	private const PARSED_PROPS = [ 'title', 'description' ];
+	private const PARSED_PROPS = [ 'title', 'label', 'description' ];
 
 	/** @var Parser */
 	private $parser;
@@ -28,9 +26,6 @@ class SimpleStyleParser {
 
 	/** @var array */
 	private $options;
-
-	/** @var string */
-	private $mapService;
 
 	/**
 	 * @param Parser $parser Parser used for wikitext processing
@@ -42,10 +37,6 @@ class SimpleStyleParser {
 		$this->parser = $parser;
 		$this->frame = $frame;
 		$this->options = $options;
-		// @fixme: More precise config?
-		$this->mapService = MediaWikiServices::getInstance()
-			->getMainConfig()
-			->get( 'KartographerMapServer' );
 	}
 
 	/**
@@ -211,70 +202,11 @@ class SimpleStyleParser {
 				$this->normalize( $element );
 			}
 		} elseif ( is_object( $json ) && $json->type === 'ExternalData' ) {
-			$status->merge( $this->normalizeExternalData( $json ) );
+			throw new LogicException( "Unexpected service name '{$json->service}'" );
 		}
 		$status->value = $json;
 
 		return $status;
-	}
-
-	/**
-	 * Canonicalizes an ExternalData object
-	 *
-	 * @param stdClass &$object
-	 * @return Status
-	 */
-	private function normalizeExternalData( &$object ): Status {
-		$ret = (object)[
-			'type' => 'ExternalData',
-			'service' => $object->service,
-		];
-
-		switch ( $object->service ) {
-			case 'geoshape':
-			case 'geoline':
-			case 'geomask':
-				$query = [ 'getgeojson' => 1 ];
-				if ( isset( $object->ids ) ) {
-					$query['ids'] =
-						is_array( $object->ids ) ? implode( ',', $object->ids )
-							: preg_replace( '/\s*,\s*/', ',', $object->ids );
-				}
-				if ( isset( $object->query ) ) {
-					$query['query'] = $object->query;
-				}
-				// 'geomask' service is the same as inverted geoshape service
-				// Kartotherian does not support it, request it as geoshape
-				$service = $object->service === 'geomask' ? 'geoshape' : $object->service;
-
-				$ret->url = "{$this->mapService}/{$service}?" . wfArrayToCgi( $query );
-				if ( isset( $object->properties ) ) {
-					$ret->properties = $object->properties;
-				}
-				break;
-
-			case 'page':
-				$jct = JCSingleton::parseTitle( $object->title, NS_DATA );
-				if ( !$jct || JCSingleton::getContentClass( $jct->getConfig()->model ) !==
-							  JCMapDataContent::class
-				) {
-					return Status::newFatal( 'kartographer-error-title', $object->title );
-				}
-				$query = [
-					'format' => 'json',
-					'formatversion' => '2',
-					'action' => 'jsondata',
-					'title' => $jct->getText(),
-				];
-				$ret->url = wfScript( 'api' ) . '?' . wfArrayToCgi( $query );
-				break;
-
-			default:
-				throw new LogicException( "Unexpected service name '{$object->service}'" );
-		}
-
-		$object = $ret;
-		return Status::newGood();
 	}
 
 	/**

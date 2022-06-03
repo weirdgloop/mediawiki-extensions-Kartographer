@@ -1,0 +1,32 @@
+/**
+ * CSS Classes for special map elements
+ */
+.mw-kartographer-interactive {
+	// Dot type icons
+	.leaflet-div-dot {
+		div {
+			width: 100%;
+			height: 100%;
+		}
+
+		.leaflet-dot {
+			background-color: #fff;
+			border-radius: 50%;
+		}
+
+		.leaflet-sqdot {
+			background-color: #fff;
+		}
+	}
+
+	// Visible text labels
+	.leaflet-vis-tooltip {
+		color: #fff;
+		background: none;
+		border: none;
+
+		&:before {
+			display: none;
+		}
+	}
+}

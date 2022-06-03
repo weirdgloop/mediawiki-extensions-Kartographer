@@ -44,6 +44,5 @@ module.exports = DataManager( {
 		return new mw.Uri( data );
 	},
 	clientStore: mw.config.get( 'wgKartographerLiveData' ),
-	title: mw.config.get( 'wgPageName' ),
-	revid: mw.config.get( 'wgKartographerVersionedLiveMaps' ) && mw.config.get( 'wgRevisionId' )
+	title: mw.config.get( 'wgPageName' )
 } );

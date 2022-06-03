@@ -1,26 +1,25 @@
 {
+
 	"name": "Kartographer",
 	"author": [
 		"Yuri Astrakhan",
 		"Max Semenik",
 		"Ed Sanders",
-		"Julien Girault"
+		"Julien Girault",
+		"Jonathan Lee",
+		"Jonas Doggart"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:Kartographer",
 	"descriptionmsg": "kartographer-desc",
 	"license-name": "MIT",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.38.0",
-		"extensions": {
-			"JsonConfig": "*"
-		}
+		"MediaWiki": ">= 1.38.0"
 	},
 	"MessagesDirs": {
 		"Kartographer": [
 			"i18n",
-			"i18n/api",
-			"modules/wikivoyage/i18n"
+			"i18n/api"
 		]
 	},
 	"ExtensionMessagesFiles": {
@@ -59,6 +58,7 @@
 		"ext.kartographer.style": {
 			"styles": [
 				"styles/kartographer.less",
+				"styles/mapElements.less",
 				"styles/link.less",
 				"styles/control-attribution.less",
 				"styles/control-scale.less",
@@ -183,23 +183,56 @@
 				"mediawiki.Uri",
 				"oojs-ui.styles.icons-media",
 				"mapbox",
-				"ext.kartographer.lib.topojson",
 				"ext.kartographer",
 				"ext.kartographer.style",
 				"ext.kartographer.site",
 				"ext.kartographer.data",
-				"ext.kartographer.util"
+				"ext.kartographer.util",
+				"ext.kartographer.controls"
 			],
 			"packageFiles": [
 				"index.js",
 				{ "name": "leaflet.sleep.js", "file": "../../lib/external/leaflet.sleep.js" },
-				{ "name": "mapbox-settings.js", "file": "../settings/settings.js" },
 				"openfullscreen_control.js",
-				"scale_control.js",
 				"dataLayerOpts.js",
 				"data.js",
 				"Map.js",
-				"enablePreview.js"
+				"enablePreview.js",
+				"MapTileLayer.js"
+			],
+			"messages": [
+				"kartographer-attribution",
+				"kartographer-map-version"
+			],
+			"targets": [
+				"mobile",
+				"desktop"
+			]
+		},
+		"ext.kartographer.controls": {
+			"dependencies": [
+				"mediawiki.api",
+				"mediawiki.Uri",
+				"oojs-ui.styles.icons-media",
+				"jquery.throttle-debounce",
+				"mapbox",
+				"ext.kartographer",
+				"ext.kartographer.style",
+				"ext.kartographer.site",
+				"ext.kartographer.data"
+			],
+			"scripts": [
+				"modules/controls/uiElements.js",
+				"modules/controls/Help.js",
+				"modules/controls/Icons.js",
+				"modules/controls/CustomZoom.js",
+				"modules/controls/MapSelect.js",
+				"modules/controls/Options.js",
+				"modules/controls/Plane.js",
+				"modules/controls/index.js"
+			],
+			"styles": [
+				"modules/controls/style.css"
 			],
 			"messages": [
 				"kartographer-attribution"
@@ -262,38 +295,6 @@
 				"desktop"
 			]
 		},
-		"ext.kartographer.dialog.sidebar": {
-			"localBasePath": "modules/dialog-sidebar",
-			"dependencies": [
-				"mediawiki.storage",
-				"oojs-ui.styles.icons-interactions",
-				"oojs-ui.styles.icons-movement"
-			],
-			"packageFiles": [
-				"sidebar.js",
-				{
-					"name": "externalLinks.json",
-					"callback": "Kartographer\\ExternalLinksProvider::getData"
-				}
-			],
-			"messages": [
-				"kartographer-fullscreen-close",
-				"kartographer-fullscreen-collapse",
-				"kartographer-sidebar-coordinates",
-				"kartographer-sidebar-filterdropdown",
-				"kartographer-sidebar-externalservices",
-				"kartographer-sidebar-externalservices-show-featured",
-				"kartographer-sidebar-externalservices-show-all",
-				"kartographer-sidebar-latitude",
-				"kartographer-sidebar-longitude",
-				"kartographer-sidebar-mapdetails",
-				"kartographer-sidebar-service"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
 		"ext.kartographer.util": {
 			"scripts": [
 				"modules/util/util.js"
@@ -320,25 +321,6 @@
 				"desktop"
 			]
 		},
-		"ext.kartographer.staticframe": {
-			"dependencies": [
-				"mediawiki.router",
-				"oojs-ui.styles.icons-media",
-				"ext.kartographer.linkbox",
-				"ext.kartographer.util"
-			],
-			"packageFiles": [
-				"modules/staticframe/staticframe.js"
-			],
-			"messages": [
-				"kartographer-attribution-short",
-				"kartographer-fullscreen-text"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
 		"ext.kartographer.preview": {
 			"packageFiles": [
 				"modules/preview/preview.js"
@@ -346,7 +328,8 @@
 			"messages": [
 				"visualeditor-mwmapsdialog-position-lat",
 				"visualeditor-mwmapsdialog-position-lon",
-				"visualeditor-mwmapsdialog-position-zoom"
+				"visualeditor-mwmapsdialog-position-zoom",
+				"visualeditor-mwmapsdialog-position-plane"
 			],
 			"targets": [
 				"mobile",
@@ -389,6 +372,7 @@
 				"modules/ve-maps/ve.ui.MWMaps.css"
 			],
 			"messages": [
+				"kartographer-map-version",
 				"visualeditor-mwmapscontextitem-nosupport",
 				"visualeditor-mwmapscontextitem-title",
 				"visualeditor-mwmapsdialog-area",
@@ -396,11 +380,16 @@
 				"visualeditor-mwmapsdialog-options",
 				"visualeditor-mwmapsdialog-align",
 				"visualeditor-mwmapsdialog-geojson",
+				"visualeditor-mwmapsdialog-loadingname",
+				"visualeditor-mwmapsdialog-mapselect",
+				"visualeditor-mwmapsdialog-planeselect",
 				"visualeditor-mwmapsdialog-language",
 				"visualeditor-mwmapsdialog-help-title",
 				"visualeditor-mwmapsdialog-position-lat",
 				"visualeditor-mwmapsdialog-position-lon",
 				"visualeditor-mwmapsdialog-position-zoom",
+				"visualeditor-mwmapsdialog-position-plane",
+				"visualeditor-mwmapsdialog-position-mapid",
 				"visualeditor-mwmapsdialog-size",
 				"visualeditor-mwmapsdialog-title"
 			],
@@ -410,70 +399,6 @@
 				"ext.visualEditor.mwcore",
 				"ext.kartographer",
 				"ext.kartographer.util"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
-		"ext.kartographer.lib.prunecluster": {
-			"dependencies": [
-				"mapbox"
-			],
-			"scripts": [
-				"lib/external/prunecluster/PruneCluster.js",
-				"modules/prunecluster/prunecluster.js"
-			],
-			"styles": [
-				"lib/external/prunecluster/LeafletStyleSheet.css"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
-		"ext.kartographer.lib.topojson": {
-			"dependencies": [
-				"mapbox"
-			],
-			"scripts": [
-				"lib/topojson/topojson.js",
-				"lib/topojson/loader.js"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
-		"ext.kartographer.wv": {
-			"dependencies": [
-				"oojs-ui.styles.icons-editing-core",
-				"mapbox",
-				"ext.kartographer.lib.prunecluster"
-			],
-			"packageFiles": [
-				"modules/wikivoyage/index.js",
-				"modules/wikivoyage/wikivoyage.js",
-				"modules/wikivoyage/NearbyArticles.js",
-				"modules/wikivoyage/ControlLayers.js",
-				"modules/wikivoyage/ControlNearby.js",
-				"modules/wikivoyage/WVMapLayers.js",
-				"modules/wikivoyage/WVMap.js"
-			],
-			"styles": [
-				"modules/wikivoyage/styles/wv-leaflet.less",
-				"modules/wikivoyage/styles/control-layers.less",
-				"modules/wikivoyage/styles/control-nearby.less"
-			],
-			"messages": [
-				"kartographer-wv-group",
-				"kartographer-wv-layer-nearby-articles",
-				"kartographer-wv-layer-wikimedia",
-				"kartographer-wv-nearby-articles-control",
-				"kartographer-wv-warning-external-source-title",
-				"kartographer-wv-warning-external-source-message",
-				"kartographer-wv-warning-external-source-agree",
-				"kartographer-wv-warning-external-source-disagree"
 			],
 			"targets": [
 				"mobile",
@@ -495,6 +420,7 @@
 		"remoteExtPath": "Kartographer"
 	},
 	"Hooks": {
+		"PageSaveComplete": "KartographerHooks",
 		"ParserTestGlobals": "KartographerHooks",
 		"ParserFirstCallInit": "KartographerHooks",
 		"ParserAfterParse": "KartographerHooks"
@@ -516,63 +442,21 @@
 		}
 	},
 	"config": {
-		"KartographerStaticMapframe": {
-			"description": "Disables the module that turns <mapframe> tags into interactive mini-maps that can be panned and zoomed without leaving the page. Static maps are recommended on high-traffic wikis where your KartographerMapServer couldn't keep up. Clicking <maplink> and <mapframe> tags to open a fullscreen interactive map is always possible.",
-			"value": false
-		},
-		"KartographerWikivoyageMode": {
-			"description": "Enables the group feature where different <maplink> and <mapframe> tags can access each others data via group=\"…\" and show=\"…\" attributes. See [[mw:Help:Extension:Kartographer#Groups]]. Disabled by default. Meant to be enabled on Wikivoyage.",
-			"value": false
-		},
-		"KartographerDfltStyle": {
-			"description": "Default map style to be used. Must be one of the values from KartographerStyles.",
-			"value": "osm-intl"
-		},
-		"KartographerStyles": {
-			"description": "Available map styles users can request from your KartographerMapServer via mapstyle=\"…\".",
-			"value": [ "osm-intl", "osm" ],
-			"merge_strategy": "provide_default"
-		},
-		"KartographerSrcsetScales": {
-			"description": "Set of allowed high-DPI pixelratios supported by your KartographerMapServer, to be used in <img srcset=\"…\"> and KartographerMapServer URLs. Must be in incremental order. Doesn't need to start with 1, this happens automatically.",
-			"value": [ 1.3, 1.5, 2, 2.6, 3 ],
-			"merge_strategy": "provide_default"
-		},
 		"KartographerMapServer": {
 			"description": "Server providing the map tiles. This is the only setting that doesn't have a default. You must provide a value. Note that the Wikimedia tile server \"https://maps.wikimedia.org\" can't be used outside of the Wikimedia cluster.",
 			"value": null
 		},
-		"KartographerVersionedLiveMaps": {
-			"description": "Temporary feature flag to allow Kartographer to render versioned live mapframes.",
-			"value": false
-		},
-		"KartographerVersionedMapdata": {
-			"description": "Temporary feature flag to disable serving versioned mapdata from the API.",
-			"value": false
-		},
-		"KartographerVersionedStaticMaps": {
-			"description": "Do not enable in production until varnish rules are merged. Temporary feature flag to allow Kartographer to render versioned mapframe images.",
-			"value": false
-		},
-		"KartographerUseMarkerStyle": {
-			"description": "Allows Kartographer to extract marker styles from the GeoJSON to style a <maplink> accordingly. Currently only the \"marker-color\" is considered.",
-			"value": false
-		},
-		"KartographerEnableMapFrame": {
-			"description": "Enables the <mapframe> tag to embed mini-maps directly into pages. The <maplink> tag is always enabled.",
-			"value": true
-		},
-		"KartographerUsePageLanguage": {
-			"description": "Use the language of the page to render the map labels, instead of the language of the territory of the map (lang=local).",
-			"value": true
-		},
-		"KartographerFallbackZoom": {
-			"description": "Fallback zoom value when no zoom=\"…\" is given. Must be an integer between 0 (map shows the entire earth) and 19 (as close as possible). Currently only works with dynamic maps.",
-			"value": 13
-		},
-		"KartographerSimpleStyleMarkers": {
-			"description": "Use an api to generate markers using the simplestyle-spec for features.",
-			"value": true
+		"KartographerDataConfig": {
+			"description": "RuneScape data config for Kartographer.",
+			"value": {
+				"baseTileURL": "https://maps.runescape.wiki/osrs/",
+				"basePlainTileURL": "https://maps.runescape.wiki/osrs/",
+				"tileURLFormat": "rendered/{mapID}/{z}/{p}_{x}_{-y}.png",
+				"attribution": "<a href=\"https://weirdgloop.org/licensing/\" target=\"_blank\">License</a>",
+				"baseMapsFile": "https://maps.runescape.wiki/osrs/data/basemaps.json",
+				"wikiImageURL": "https://oldschool.runescape.wiki/images/",
+				"mapVersion": "2021-04-19_a"
+			}
 		}
 	},
 	"TrackingCategories": [

@@ -9,47 +9,25 @@
  * @class Kartographer.Box.MapClass
  * @extends L.Map
  */
-var util = require( 'ext.kartographer.util' ),
-	OpenFullScreenControl = require( './openfullscreen_control.js' ),
+var OpenFullScreenControl = require( './openfullscreen_control.js' ),
 	dataLayerOpts = require( './dataLayerOpts.js' ),
-	ScaleControl = require( './scale_control.js' ),
 	DataManager = require( './data.js' ),
-	scale, urlFormat,
-	mapServer = mw.config.get( 'wgKartographerMapServer' ),
-	worldLatLng = new L.LatLngBounds( [ -90, -180 ], [ 90, 180 ] ),
+	MapTileLayer = require('./MapTileLayer.js'),
+	controls = require('ext.kartographer.controls'),
+	worldLatLng = new L.LatLngBounds([0, 0], [128000, 128000]),
 	KartographerMap,
 	precisionPerZoom = [ 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5 ],
 	inlineDataLayerKey = 'kartographer-inline-data-layer',
 	inlineDataLayerId = 0;
 
-function bracketDevicePixelRatio() {
-	var i, scale,
-		brackets = mw.config.get( 'wgKartographerSrcsetScales' ),
-		baseRatio = window.devicePixelRatio || 1;
-	if ( !brackets ) {
-		return 1;
-	}
-	brackets.unshift( 1 );
-	for ( i = 0; i < brackets.length; i++ ) {
-		scale = brackets[ i ];
-		if ( scale >= baseRatio || ( baseRatio - scale ) < 0.1 ) {
-			return scale;
-		}
-	}
-	return brackets[ brackets.length - 1 ];
-}
-
-if ( !mapServer ) {
-	throw new Error( 'wgKartographerMapServer must be configured.' );
-}
-
-scale = bracketDevicePixelRatio();
-scale = ( scale === 1 ) ? '' : ( '@' + scale + 'x' );
-urlFormat = '/{z}/{x}/{y}' + scale + '.png';
-
 require( './leaflet.sleep.js' );
-require( './mapbox-settings.js' ).configure();
 require( './enablePreview.js' );
+
+L.CRS.Simple.infinite = false;
+L.CRS.Simple.projection.bounds = new L.Bounds([
+    [-12800, -12800],
+    [12800, 12800]
+]);
 
 L.Map.mergeOptions( {
 	sleepTime: 250,
@@ -58,7 +36,17 @@ L.Map.mergeOptions( {
 	sleepOpacity: 1,
 	// the default zoom applied when `longitude` and `latitude` were
 	// specified, but zoom was not.
-	fallbackZoom: mw.config.get( 'wgKartographerFallbackZoom' )
+	fallbackZoom: 1,
+ 	crs: L.CRS.Simple,
+ 	maxBounds: [
+ 	    [0, 0],
+ 	    [128000, 128000]
+ 	],
+ 	attributionControl: false,
+ 	fullscreen: false,
+ 	maxZoom: 5,
+ 	minZoom: -3,
+ 	zoomControl: false // Replace default zoom controls with our own
 } );
 
 L.Popup.mergeOptions( {
@@ -141,8 +129,6 @@ KartographerMap = L.Map.extend( {
 	 * @param {Array|L.LatLng|string} [options.center] **Initial map center.**
 	 * @param {number|string} [options.zoom] **Initial map zoom.**
 	 * @param {string} [options.lang] Language for map labels
-	 * @param {string} [options.style] Map style. _Defaults to
-	 *  `mw.config.get( 'wgKartographerDfltStyle' )`._
 	 * @param {Kartographer.Box.MapClass} [options.parentMap] Parent map
 	 *   _(internal, used by the full screen map to refer its parent map)_.
 	 * @param {boolean} [options.fullscreen=false] Whether the map is a map
@@ -154,10 +140,17 @@ KartographerMap = L.Map.extend( {
 	 */
 	initialize: function ( options ) {
 		var args,
-			defaultStyle = mw.config.get( 'wgKartographerDfltStyle' ),
-			style = options.style || defaultStyle,
 			map = this;
 
+		// Set properties from arguments
+		if (options.mapID === 'auto') {
+		    options.mapID = -1;
+		}
+		this._mapID = options.mapID;
+		if (options.plane === 'auto') {
+		    options.plane = 0;
+		}
+		this._plane = options.plane;
 		if ( options.center === 'auto' ) {
 			options.center = undefined;
 		}
@@ -165,6 +158,7 @@ KartographerMap = L.Map.extend( {
 			options.zoom = undefined;
 		}
 
+		this.ready = {};
 		$( options.container ).addClass( 'mw-kartographer-interactive' );
 
 		args = L.extend( {}, L.Map.prototype.options, options, {
@@ -188,6 +182,17 @@ KartographerMap = L.Map.extend( {
 			// eslint-disable-next-line camelcase
 			map._kartographer_ready = true;
 		} );
+
+		this.readyFunction = function() {
+		    if (map.ready.dataloader && map.ready.datalayers) {
+		        map.initView(options.mapID, options.plane, options.center, options.zoom);
+		        map.fire('kartographerisready');
+		    }
+			map.dragging.enable();
+			map.touchZoom.enable();
+		}
+
+		this.rsMapInitialize(options, controls);
 
 		/**
 		 * @property {Kartographer.Box.MapClass} [parentMap=null] Reference
@@ -220,7 +225,7 @@ KartographerMap = L.Map.extend( {
 		 * @property {boolean} useRouter Whether the map uses the Mediawiki Router.
 		 * @protected
 		 */
-		this.useRouter = !!options.fullScreenRoute;
+		this.useRouter = false;
 
 		/**
 		 * @property {string} [fullScreenRoute=null] Route associated to this map.
@@ -238,34 +243,13 @@ KartographerMap = L.Map.extend( {
 		 * @property {string} lang Language code to use for labels
 		 * @type {string}
 		 */
-		this.lang = options.lang || util.getDefaultLanguage();
+		this.lang = options.lang || mw.config.get( 'wgPageContentLanguage' );
 
 		/**
 		 * @property {Object} dataLayers References to the data layers.
 		 * @protected
 		 */
 		this.dataLayers = {};
-
-		/* Add base layer */
-
-		/**
-		 * @property {string} layerUrl Base URL for the tile layer
-		 * @protected
-		 */
-		this.layerUrl = mapServer + ( style ? '/' + style : '' ) + urlFormat;
-
-		/**
-		 * @property {L.TileLayer} wikimediaLayer Reference to `Wikimedia`
-		 *   tile layer.
-		 * @protected
-		 */
-		this.wikimediaLayer = L.tileLayer(
-			this.getLayerUrl(),
-			{
-				maxZoom: 19,
-				attribution: mw.message( 'kartographer-attribution' ).parse()
-			}
-		).addTo( this );
 
 		/* Add map controls */
 
@@ -274,12 +258,6 @@ KartographerMap = L.Map.extend( {
 		 *   to attribution control.
 		 */
 		this.attributionControl.setPrefix( '' );
-
-		/**
-		 * @property {Kartographer.Box.ScaleControl} scaleControl Reference
-		 *   to scale control.
-		 */
-		this.scaleControl = new ScaleControl( { position: 'bottomright' } ).addTo( this );
 
 		if ( options.allowFullScreen ) {
 			// embed maps, and full screen is allowed
@@ -313,38 +291,29 @@ KartographerMap = L.Map.extend( {
 		map.dragging.disable();
 		map.touchZoom.disable();
 
-		function ready() {
-			map.initView( options.center, options.zoom );
-			map.dragging.enable();
-			map.touchZoom.enable();
-			map.fire(
-				/**
-				 * @event
-				 * Fired when the Kartographer Map object is ready.
-				 */
-				'kartographerisready' );
-		}
-
 		if ( this.parentMap ) {
 			// eslint-disable-next-line no-jquery/no-each-util
 			$.each( this.parentMap.dataLayers, function ( groupId, layer ) {
 				map.addGeoJSONLayer( groupId, layer.getGeoJSON(), layer.options );
 			} );
-			ready();
+			map.ready.datalayers = true;
+			map.readyFunction();
 			return;
 		}
 
 		this.addDataGroups( options.dataGroups ).then( function () {
 			if ( typeof options.data === 'object' ) {
 				map.addDataLayer( options.data ).then( function () {
-					ready();
+					map.ready.datalayers = true;
+					map.readyFunction();
+
 				} );
 			} else {
-				ready();
+				map.ready.datalayers = true;
+				map.readyFunction();
 			}
 		}, function () {
 			// T25787
-			ready();
 			mw.log.error( 'Unable to add datalayers to map.' );
 		} );
 	},
@@ -376,7 +345,7 @@ KartographerMap = L.Map.extend( {
 	 * @param {boolean} [setView=true]
 	 * @chainable
 	 */
-	initView: function ( center, zoom, setView ) {
+	initView: function ( mapID, plane, center, zoom ) {
 		if ( Array.isArray( center ) ) {
 			if ( !isNaN( center[ 0 ] ) && !isNaN( center[ 1 ] ) ) {
 				center = L.latLng( center );
@@ -387,12 +356,16 @@ KartographerMap = L.Map.extend( {
 
 		zoom = isNaN( zoom ) ? undefined : zoom;
 		this._initialPosition = {
+			mapID: mapID,
+			plane: plane,
 			center: center,
 			zoom: zoom
 		};
-		if ( setView !== false ) {
-			this.setView( center, zoom, null, true );
+		let location = center;
+		if (center != undefined) {
+			location = [center.lat, center.lng];
 		}
+		this.setMapID(mapID, plane, zoom, location);
 		return this;
 	},
 
@@ -469,19 +442,116 @@ KartographerMap = L.Map.extend( {
 	 *   was invalid
 	 */
 	addGeoJSONLayer: function ( groupId, geoJson, options ) {
-		var layer;
-		try {
-			layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) ).addTo( this );
-			layer.getAttribution = function () {
-				return this.options.attribution;
-			};
-			this.attributionControl.addAttribution( layer.getAttribution() );
-			this.dataLayers[ groupId ] = layer;
+	    let map = this;
+	    var layer;
+	    try {
+	        options.pointToLayer = function (feature, latlng) {
+	            if (feature.properties.shape) {
+	                let shp = feature.properties.shape.toLowerCase()
+	                if (shp == 'circlemarker' || shp == 'circle') {
+	                    // Cricles and circle markers
+	                    if (isNaN(feature.properties.radius)) {
+	                        feature.properties.radius = 10
+	                    }
+	                    let opts = {
+	                        radius: feature.properties.radius || 10,
+	                        color: feature.properties.stroke || '#3388ff',
+	                        weight: feature.properties['stroke-width'] || 3,
+	                        opacity: feature.properties['stroke-opacity'] || 1,
+	                        fillColor: feature.properties.fill || '#3388ff',
+	                        fillOpacity: feature.properties['fill-opacity'] || 0.2,
+	                    }
+	                    if (shp == 'circlemarker') {
+	                        return L.circleMarker(latlng, opts)
+	                    }
+	                    return L.circle(latlng, opts)
+	                } else if (shp == 'text') {
+	                    // Text only markers
+	                    let mk = L.marker(latlng, { opacity:0.5, keyboard:false, interactive: false,
+	                        icon:L.icon({ iconUrl:map.config.iconURL + "pin_grey.svg", iconSize:[1,1], iconAnchor:[0.5,1] })
+	                    })
+	                    let cl = 'leaflet-vis-tooltip'
+	                    if (feature.properties.class) {
+	                        cl = cl + ' ' + feature.properties.class
+	                    }
+	                    mk.bindTooltip(feature.properties.label || 'Label', {
+	                        permanent: true,
+	                        className: cl,
+	                        direction: feature.properties.direction || 'auto',
+	                        opacity: 1,
+	                        interactive: true,
+	                    })
+	                    return mk
+	                } else if (shp == 'dot' || shp == 'squaredot') {
+	                    // Dot and square dot markers
+	                    let iclass = 'leaflet-dot'
+	                    if (shp == 'squaredot') {
+	                        iclass = 'leaflet-sqdot'
+	                    }
+	                    let istyle = ''
+	                    if (feature.properties.fill) {
+	                        istyle = ' style="background-color:'+feature.properties.fill+';"'
+	                    }
+	                    let html = '<div class="'+iclass+'"'+istyle+'></div>'
+	                    let icon = L.divIcon({
+	                        className: 'leaflet-div-dot',
+	                        html: html,
+	                        iconSize: feature.properties.iconSize || [12, 12],
+	                    })
+	                    return L.marker(latlng, {icon: icon})
+	                }
+	            } else if (feature.properties.radius) {
+	                if (isNaN(feature.properties.radius)) {
+	                    feature.properties.radius = 10
+	                }
+	                let opts = {
+	                    radius: feature.properties.radius || 10,
+	                    color: feature.properties.stroke || '#3388ff',
+	                    weight: feature.properties['stroke-width'] || 3,
+	                    opacity: feature.properties['stroke-opacity'] || 1,
+	                    fillColor: feature.properties.fill || '#3388ff',
+	                    fillOpacity: feature.properties['fill-opacity'] || 0.2,
+	                }
+	                return L.circleMarker(latlng, opts)
+	            } else {
+	                let iconUrl = map.config.iconURL + "pin_grey.svg"
+	                let iconSize = [26, 42]
+	                let iconAnchor = [13, 42]
+	                let popupAnchor = [0, -42]
+	                if (map.markerIcons[feature.properties.icon]) {
+	                    iconUrl = map.config.iconURL + map.markerIcons[feature.properties.icon]
+	                }
+	                if (feature.properties.iconSize) {
+	                    iconSize = feature.properties.iconSize
+	                }
+	                if (feature.properties.iconWikiLink) {
+	                    iconSize = feature.properties.iconSize
+	                    iconAnchor = feature.properties.iconAnchor
+	                    popupAnchor = feature.properties.popupAnchor
+	                    if (feature.properties.iconWikiLink.startsWith(map.config.wikiImageURL)) {
+	                        iconUrl = feature.properties.iconWikiLink;
+	                    } else {
+	                        let filename = feature.properties.iconWikiLink
+	                        iconUrl = '/images/' + filename;
+	                    }
+	                }
+	                let icon = L.icon({iconUrl: iconUrl, iconSize: iconSize, iconAnchor: iconAnchor, popupAnchor: popupAnchor})
+	                return L.marker(latlng, {icon: icon})
+	            }
+	        };
+	        layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) ).setFilter(function(feature){
+	            return (feature.properties.mapID == map._mapID) && (feature.properties.plane == map._plane)
+	        }).addTo( this );
+	        layer.getAttribution = function () {
+	            return this.options.attribution;
+	        };
+	        this.attributionControl.addAttribution( layer.getAttribution() );
+	        this.dataLayers[ groupId ] = layer;
 			layer.dataGroup = groupId;
-			return layer;
-		} catch ( e ) {
-			mw.log( e );
-		}
+	        return layer;
+	    } catch ( e ) {
+	        mw.log( e );
+	    }
 	},
 
 	/**
@@ -493,13 +563,14 @@ KartographerMap = L.Map.extend( {
 	 */
 	openFullScreen: function ( position ) {
 		this.doWhenReady( function () {
-
 			var map = this.options.link ? this : this.fullScreenMap;
 			position = position || this.getMapPosition();
 
 			if ( !map ) {
 				map = this.fullScreenMap = new KartographerMap( {
 					container: L.DomUtil.create( 'div', 'mw-kartographer-mapDialog-map' ),
+					mapID: position.mapID,
+					plane: position.plane,
 					center: position.center,
 					zoom: position.zoom,
 					lang: this.lang,
@@ -507,13 +578,15 @@ KartographerMap = L.Map.extend( {
 					fullscreen: true,
 					captionText: this.captionText,
 					fullScreenRoute: this.fullScreenRoute,
-					parentMap: this
+					parentMap: this,
+					zoomControl: false
 				} );
 				// resets the right initial position silently afterwards.
 				map.initView(
-					this._initialPosition.center,
-					this._initialPosition.zoom,
-					false
+					position.mapID,
+					position.plane,
+					position.center,
+					position.zoom
 				);
 			} else if ( map._updatingHash ) {
 				// Skip - there is nothing to do.
@@ -521,13 +594,14 @@ KartographerMap = L.Map.extend( {
 				return;
 			} else {
 				this.doWhenReady( function () {
-					map.setView(
+					map.initView(
+						position.mapID,
+						position.plane,
 						position.center,
 						position.zoom
 					);
 				} );
 			}
-
 			mw.loader.using( 'ext.kartographer.dialog' ).then( function () {
 				map.doWhenReady( function () {
 					require( 'ext.kartographer.dialog' ).render( map );
@@ -568,16 +642,21 @@ KartographerMap = L.Map.extend( {
 	 * @return {number} return.zoom
 	 */
 	getMapPosition: function ( options ) {
-		var center = this.getCenter().wrap(),
+		var mapID = this.getMapID(),
+			plane = this.getPlane(),
+			center = this.getCenter(),
 			zoom = this.getZoom();
 
 		if ( options && options.scaled ) {
 			center = L.latLng( this.getScaleLatLng( center.lat, center.lng, zoom ) );
 		}
+
 		return {
+			mapID: mapID,
+			plane: plane,
 			center: center,
 			zoom: zoom
-		};
+		}
 	},
 
 	/**
@@ -589,33 +668,38 @@ KartographerMap = L.Map.extend( {
 	 *
 	 * @return {string} The route to open the map in full screen mode.
 	 */
-	getHash: function () {
-		if ( !this._initialPosition ) {
-			return this.fullScreenRoute;
-		}
+	getHash: function() {
+	    if (!this._initialPosition) {
+	        return this.fullScreenRoute;
+	    }
 
-		var hash = this.fullScreenRoute,
-			currentPosition = this.getMapPosition(),
-			initialPosition = this._initialPosition,
-			newHash = currentPosition.zoom + '/' + this.getScaleLatLng(
-				currentPosition.center.lat,
-				currentPosition.center.lng,
-				currentPosition.zoom
-			).join( '/' ),
-			initialHash = initialPosition.center && (
-				initialPosition.zoom + '/' +
-				this.getScaleLatLng(
-					initialPosition.center.lat,
-					initialPosition.center.lng,
-					initialPosition.zoom
-				).join( '/' )
-			);
-
-		if ( newHash !== initialHash ) {
-			hash += '/' + newHash;
-		}
-
-		return hash;
+	    var hash = this.fullScreenRoute,
+	        currentPosition = this.getMapPosition(),
+	        initialPosition = this._initialPosition,
+	        newHash = currentPosition.zoom + '/' +
+	        currentPosition.mapID + '/' +
+	        currentPosition.plane + '/' +
+	        this.getScaleLatLng(
+	            currentPosition.center.lat,
+	            currentPosition.center.lng,
+	            currentPosition.zoom
+	        ).join('/'),
+	        initialHash = initialPosition.center && (
+	            initialPosition.zoom + '/' +
+	            initialPosition.mapID + '/' +
+	            initialPosition.plane + '/' +
+	            this.getScaleLatLng(
+	                initialPosition.center.lat,
+	                initialPosition.center.lng,
+	                initialPosition.zoom
+	            ).join('/')
+	        );
+	
+	    if (newHash !== initialHash) {
+	        hash += '/' + newHash;
+	    }
+	
+	    return hash;
 	},
 
 	/**
@@ -678,7 +762,7 @@ KartographerMap = L.Map.extend( {
 			// eslint-disable-next-line no-jquery/no-sizzle
 			if ( this.$container.is( ':visible' ) && save ) {
 				// Updates map data.
-				this.initView( this.getCenter(), this.getZoom(), false );
+				this.initView( this.getMapID(), this.getPlane(), this.getCenter(), this.getZoom() );
 				// Updates container's data attributes to avoid `NaN` errors
 				if ( !this.fullscreen ) {
 					this.$container.closest( '.mw-kartographer-interactive' ).data( {
@@ -690,30 +774,6 @@ KartographerMap = L.Map.extend( {
 			}
 		}
 		return this;
-	},
-
-	/**
-	 * Get the URL to be passed to L.TileLayer
-	 *
-	 * @private
-	 * @return {string}
-	 */
-	getLayerUrl: function () {
-		return this.layerUrl + '?' + $.param( { lang: this.lang } );
-	},
-
-	/**
-	 * Change the map's language.
-	 *
-	 * This will cause the map to be rerendered if the language is different.
-	 *
-	 * @param {string} lang New language code
-	 */
-	setLang: function ( lang ) {
-		if ( this.lang !== lang ) {
-			this.lang = lang;
-			this.wikimediaLayer.setUrl( this.getLayerUrl() );
-		}
 	},
 
 	/**
@@ -891,12 +951,222 @@ KartographerMap = L.Map.extend( {
 		this.invalidateSize();
 		if ( position ) {
 			// at rare times during load fases, position might be undefined
-			this.initView( position.center, position.zoom, true );
+			this.initView( this.getMapID(), this.getPlane(), position.center, position.zoom );
 		}
 
 		return this;
 	}
 } );
+
+KartographerMap = KartographerMap.extend({
+    // Setup map
+    rsMapInitialize: function(options, controls) {
+        this._controllers = {};
+        this.config = mw.config.get('wgKartographerDataConfig');
+        var mesVers = mw.message('kartographer-map-version');
+        if (mesVers.exists()) {
+            // Backup to be safe
+            var verstr = mesVers.text();
+            if ( verstr != '⧼kartographer-map-version⧽') {
+                this.config.mapVersion = mesVers.text();
+            }
+        }
+        var mapVers = this.config.mapVersion;
+        if (options.mapVersion) {
+            mapVers = options.mapVersion;
+        }
+        this.config.baseMapsFile = L.Util.template(this.config.baseMapsFile, {mapVersion: this.config.mapVersion});
+        this.markerIcons = {
+            "greyPin": "pin_grey.svg",
+            "redPin": "pin_red.svg",
+            "greenPin": "pin_green.svg",
+            "bluePin": "pin_blue.svg",
+            "cyanPin": "pin_cyan.svg",
+            "magentaPin": "pin_magenta.svg",
+            "yellowPin": "pin_yellow.svg",
+        };
+        this._baseMaps = {}
+
+        this.fullscreen = options.fullscreen;
+
+        this.setupControls(controls);
+        this.imageCache = {}
+        if (options.parentMap) {
+            this.ldl_load();
+            this._plane = options.parentMap._plane;
+            this._mapID = options.parentMap._mapID;
+            this._mapVersion = options.parentMap._mapVersion;
+            this._plainTiles = options.parentMap._plainTiles;
+        } else {
+            if (this._baseMaps[0]) {
+                this.ready.dataloader = true;
+            } else {
+                this.ldl_load();
+            }
+            this._plane = 0;
+            this._mapID = -1;
+            this._mapVersion = mapVers;
+            this._plainTiles = options.plainTiles || false;
+        }
+    },
+
+    getMapID: function() {
+        return this._mapID;
+    },
+
+    getPlane: function() {
+        return this._plane;
+    },
+
+    ldl_load: async function(){
+        let map = this;
+        new Promise(async function(resolve, reject) {
+          var responseData = await fetch(map.config.baseMapsFile);
+          var data = await responseData.json();
+          map.setBaseMaps(data);
+          map.ready.dataloader = true;
+          map.readyFunction();
+          resolve();
+        });
+    },
+
+    setBaseMaps: function(data){
+        let baseMaps = {}
+        for(let i in data) {
+          baseMaps[data[i].mapId] = data[i];
+        }
+        this._baseMaps = baseMaps;
+        if (this.fullscreen) {
+          this._controllers.mapSelect._resetSelect(baseMaps);
+        }
+    },
+
+    setPlane: function(plane) {
+        this._plane = plane
+        this.selectedLayer.redraw()
+        $.each( this.dataLayers, function ( groupId, layer ) {
+            layer.clearLayers();
+            layer._initialize(layer._geojson);
+        } );
+    },
+
+    setMapID: function(mapID, plane, zoom, location) {
+        this._mapID = mapID
+
+        this.loadBaseMap(mapID);
+
+        if (plane === undefined) {
+          plane = this._baseMaps[mapID].defaultPlane || 0
+        }
+        if (this.fullscreen) {
+          this._controllers.mapSelect._changeSelectedOption(mapID)
+          this._controllers.plane.setPlane(plane)
+        } else {
+            this.setPlane(plane)
+        }
+        if (zoom === undefined) {
+          zoom = 2
+        }
+        if (location === undefined) {
+            // TODO: ???
+          location = [ this._baseMaps[mapID].center[1],
+              this._baseMaps[mapID].center[0] ]
+        }
+        this.setView(location, zoom)
+    },
+
+    loadBaseMap: function(mapId){
+        // Check if there is a BaseMap displayed
+        if(this.selectedLayer !== undefined){
+          this.removeLayer(this.selectedLayer);
+        }
+
+        let data = this._baseMaps[mapId] || {}
+        let bounds = this._translateBounds(data.bounds)
+        let baseUrl = this.config.baseTileURL
+        if (this._plainTiles && this.config.basePlainTileURL) {
+            baseUrl = this.config.basePlainTileURL;
+        }
+        this.selectedLayer = new MapTileLayer(
+          baseUrl + this.config.tileURLFormat, {
+          tileSize: this.config.tileSize || 256,
+          bounds: bounds,
+          minZoom: -3,
+          maxZoom: 5,
+          maxNativeZoom: this.config.maxNativeZoom || 3,
+          mapID: mapId,
+          mapVersion: this._mapVersion,
+        });
+        this.addLayer(this.selectedLayer);
+        this.setMaxBounds(bounds);
+    },
+
+    _translateBounds: function(bounds){
+        var newbounds = [ [ -12000, -12000 ], [ 14000, 14000 ] ];
+        if(Array.isArray(bounds) && bounds.length === 2){
+          // South-West
+          if(Array.isArray(bounds[0]) && bounds[0].length === 2){
+            newbounds[0][0] = bounds[0][1];
+            newbounds[0][1] = bounds[0][0];
+          }
+          // North-East
+          if(Array.isArray(bounds[1]) && bounds[1].length === 2){
+            newbounds[1][0] = bounds[1][1];
+            newbounds[1][1] = bounds[1][0];
+          }
+        }
+        return newbounds;
+    },
+
+    setupControls: function(controls) {
+        var controller;
+        // this._map.fullscreenControl.setPosition('topright');
+        // top left
+        if (!this.fullscreen) {
+            this._controllers.zoom = new controls.CustomZoom({
+                position: 'topleft',
+                displayZoomLevel: false
+            });
+        }
+
+        // top right
+        if (this.fullscreen) {
+            this._controllers.zoom = new controls.CustomZoom({
+                position: 'topright',
+                displayZoomLevel: true
+            });
+            this._controllers.help = new controls.Help();
+            // this._controllers.icons = new controls.Icons();
+            // this._controllers.options = new controls.Options();
+        }
+
+        // bottom left
+        if (this.fullscreen) {
+            this._controllers.mapSelect = new controls.MapSelect({
+                visible: true
+            });
+        }
+        this._controllers.attribution = L.control.attribution({
+            prefix: this.config.attribution
+        });
+
+        //bottom right
+        if (this.fullscreen) {
+            this._controllers.plane = new controls.Plane({
+                visible: true
+            });
+
+        }
+
+        // add controllers to map
+        for (controller in this._controllers) {
+            this._controllers[controller].addTo(this);
+        }
+
+        // add class to bottom-right to make vertical
+        this._container.querySelector('.leaflet-control-container > .leaflet-bottom.leaflet-right').className += ' vertical';
+    }
+});
 
 function map( options ) {
 	return new KartographerMap( options );

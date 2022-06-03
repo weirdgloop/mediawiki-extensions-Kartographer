@@ -9,8 +9,7 @@
  * @class Kartographer.Link
  * @singleton
  */
-var router = require( 'mediawiki.router' ),
-	kartolink = require( 'ext.kartographer.linkbox' ),
+var kartolink = require( 'ext.kartographer.linkbox' ),
 	/**
 	 * References the maplinks of the page.
 	 *
@@ -23,6 +22,9 @@ var router = require( 'mediawiki.router' ),
  *
  * @param {HTMLElement} element Element
  * @return {Object} Map properties
+ * @return {number} return.mapID MapID in RuneScape
+ * @return {number} return.plane Plane in RuneScape
+ * @return {string} return.mapVersion Map version
  * @return {number} return.latitude
  * @return {number} return.longitude
  * @return {number} return.zoom
@@ -31,8 +33,11 @@ var router = require( 'mediawiki.router' ),
  */
 function getMapData( element ) {
 	var $el = $( element );
-
 	return {
+	    mapID: +$el.data( 'mapid' ),
+	    plane: +$el.data( 'plane' ),
+	    mapVersion: $el.data( 'mapversion' ),
+	    plainTiles: $el.data( 'plaintiles' ),
 		latitude: +$el.data( 'lat' ),
 		longitude: +$el.data( 'lon' ),
 		zoom: +$el.data( 'zoom' ),
@@ -56,47 +61,19 @@ function handleMapLinks( $content ) {
 		maplinks[ index ] = kartolink.link( {
 			featureType: 'maplink',
 			container: this,
+	        mapID: data.mapID,
+	        plane: data.plane,
+	        mapVersion: data.mapVersion,
+	        plainTiles: data.plainTiles,
 			center: [ data.latitude, data.longitude ],
 			zoom: data.zoom,
 			lang: data.lang,
 			dataGroups: data.overlays,
-			captionText: data.captionText,
-			fullScreenRoute: '/maplink/' + index
+			captionText: data.captionText
 		} );
-	} );
-
-	// Check if we need to open a map in full screen.
-	router.checkRoute();
-}
-
-/**
- * Activate the router for the full screen mode.
- */
-function activateRouter() {
-	// Opens a maplink in full screen. #/maplink(/:zoom)(/:latitude)(/:longitude)
-	// Examples:
-	//     #/maplink/0
-	//     #/maplink/0/5
-	//     #/maplink/0/16/-122.4006/37.7873
-	router.route( /maplink\/([0-9]+)(?:\/([0-9]+))?(?:\/([+-]?\d+\.?\d{0,5})?\/([+-]?\d+\.?\d{0,5})?)?/, function ( maptagId, zoom, latitude, longitude ) {
-		var link = maplinks[ maptagId ],
-			position;
-
-		if ( !link ) {
-			return;
-		}
-
-		if ( zoom !== undefined && latitude !== undefined && longitude !== undefined ) {
-			position = {
-				center: [ +latitude, +longitude ],
-				zoom: +zoom
-			};
-		}
-		link.openFullScreen( position );
+		maplinks[ index ].$container.attr('href', '#mapFullscreen')
 	} );
 }
-
-activateRouter();
 
 mw.hook( 'wikipage.indicators' ).add( handleMapLinks );
 mw.hook( 'wikipage.content' ).add( handleMapLinks );

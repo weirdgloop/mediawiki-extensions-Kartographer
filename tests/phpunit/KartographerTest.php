@@ -210,9 +210,7 @@ class KartographerTest extends MediaWikiLangTestCase {
 	public function testImagePreview() {
 		// Previews should not contain group data for the static image
 		$this->setMwGlobals( [
-			'wgKartographerStaticMapframe' => false,
 			'wgKartographerMapServer' => '',
-			'KartographerDfltStyle' => 'osm-intl',
 		] );
 		$input = '<mapframe width=700 height=400 zoom=13 longitude=-122 latitude=37>' .
 				self::WIKITEXT_JSON .

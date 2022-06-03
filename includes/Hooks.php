@@ -16,10 +16,17 @@ use Kartographer\Tag\TagHandler;
 use MediaWiki\Hook\ParserAfterParseHook;
 use MediaWiki\Hook\ParserFirstCallInitHook;
 use MediaWiki\Hook\ParserTestGlobalsHook;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Storage\EditResult;
+use MediaWiki\Storage\Hook\PageSaveCompleteHook;
+use MediaWiki\User\UserIdentity;
 use Parser;
 use StripState;
+use WikiPage;
 
 class Hooks implements
+	PageSaveCompleteHook,
 	ParserFirstCallInitHook,
 	ParserAfterParseHook,
 	ParserTestGlobalsHook
@@ -37,6 +44,22 @@ class Hooks implements
 		$this->config = $config;
 	}
 
+	// When [[MediaWiki:Kartographer-map-version]] is edited, clear the basemaps cache.
+	public function onPageSaveComplete( WikiPage $wikiPage, UserIdentity $user, string $summary, int $flags, RevisionRecord $revisionRecord, EditResult $editResult ) {
+		if ( $wikiPage->getTitle()->getPrefixedDBkey() === 'MediaWiki:Kartographer-map-version' ) {
+			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+
+			$cache->delete(
+				$cache->makeKey(
+					'Kartographer',
+					'basemaps'
+				)
+			);
+		}
+
+		return true;
+	}
+
 	/**
 	 * ParserFirstCallInit hook handler
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ParserFirstCallInit
@@ -44,9 +67,7 @@ class Hooks implements
 	 */
 	public function onParserFirstCallInit( $parser ) {
 		$parser->setHook( MapLink::TAG, [ MapLink::class, 'entryPoint' ] );
-		if ( $this->config->get( 'KartographerEnableMapFrame' ) ) {
-			$parser->setHook( MapFrame::TAG, [ MapFrame::class, 'entryPoint' ] );
-		}
+		$parser->setHook( MapFrame::TAG, [ MapFrame::class, 'entryPoint' ] );
 	}
 
 	/**

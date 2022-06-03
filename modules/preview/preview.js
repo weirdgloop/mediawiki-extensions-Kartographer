@@ -21,15 +21,17 @@
 			function onMapMenu( e ) {
 				var content = '',
 					zoom = map.getZoom(),
+					plane = map.getPlane(),
 					coords = map.getScaleLatLng(
 						e.latlng.lat,
 						e.latlng.lng
 					);
 
 				content += '<table>';
-				content += '<tr><th>' + mw.message( 'visualeditor-mwmapsdialog-position-lat' ).escaped() + '</th><td>' + coords[ 0 ] + '</td></tr>';
 				content += '<tr><th>' + mw.message( 'visualeditor-mwmapsdialog-position-lon' ).escaped() + '</th><td>' + coords[ 1 ] + '</td></tr>';
+				content += '<tr><th>' + mw.message( 'visualeditor-mwmapsdialog-position-lat' ).escaped() + '</th><td>' + coords[ 0 ] + '</td></tr>';
 				content += '<tr><th>' + mw.message( 'visualeditor-mwmapsdialog-position-zoom' ).escaped() + '</th><td>' + zoom + '</td></tr>';
+				content += '<tr><th>' + mw.message( 'visualeditor-mwmapsdialog-position-plane' ).escaped() + '</th><td>' + plane + '</td></tr>';
 				content += '</table>';
 
 				popup

@@ -59,8 +59,7 @@ ve.dm.MWMapsNode.static.getUrl = function ( dataElement, width, height ) {
 		util = require( 'ext.kartographer.util' ),
 		lang = mwAttrs.lang || util.getDefaultLanguage();
 
-	return mw.config.get( 'wgKartographerMapServer' ) + '/img/' +
-		mw.config.get( 'wgKartographerDfltStyle' ) + ',' +
+	return mw.config.get( 'wgKartographerMapServer' ) + '/img/0,' +
 		mwAttrs.zoom + ',' +
 		mwAttrs.latitude + ',' +
 		mwAttrs.longitude + ',' +

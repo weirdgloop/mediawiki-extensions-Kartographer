@@ -50,9 +50,6 @@ abstract class TagHandler {
 	/** @var int|null */
 	protected $zoom;
 
-	/** @var string One of "osm-intl" or "osm" */
-	protected $mapStyle;
-
 	/** @var string|null */
 	protected $specifiedLangCode;
 
@@ -116,9 +113,6 @@ abstract class TagHandler {
 		$parserOutput = $parser->getOutput();
 
 		$parserOutput->addModuleStyles( [ 'ext.kartographer.style' ] );
-		$parserOutput->addExtraCSPDefaultSrc(
-			$this->config->get( 'KartographerMapServer' )
-		);
 		$this->state = State::getOrCreate( $parserOutput );
 
 		$this->status = Status::newGood();
@@ -166,19 +160,23 @@ abstract class TagHandler {
 	protected function parseArgs(): void {
 		$services = MediaWikiServices::getInstance();
 
-		$this->lat = $this->getFloat( 'latitude', null );
-		$this->lon = $this->getFloat( 'longitude', null );
+		// RS attributes
+		$this->mapid = $this->getInt( 'mapid', -1 );
+		$this->plane = $this->getInt( 'plane', 0 );
+		$this->mapVersion = $this->getText( 'mapversion', null, '/^[a-zA-Z0-9\-_]+$/' );
+		$this->plainTiles = $this->getText( 'plaintiles', null, '/^(true|false)$/' );
+
+		// For RS coordinates are changed to Int
+		$this->lat = $this->getInt( 'y', null );
+		$this->lon = $this->getInt( 'x', null );
+
 		if ( ( $this->lat === null ) xor ( $this->lon === null ) ) {
 			$this->status->fatal( 'kartographer-error-latlon' );
 		}
 
 		$this->zoom = $this->getInt( 'zoom', null );
-		$regexp = '/^(' . implode( '|', $this->config->get( 'KartographerStyles' ) ) . ')$/';
-		$this->mapStyle = $this->getText( 'mapstyle', $this->config->get( 'KartographerDfltStyle' ), $regexp );
 
-		$defaultLangCode = $this->config->get( 'KartographerUsePageLanguage' ) ?
-			$this->getLanguage()->getCode() :
-			'local';
+		$defaultLangCode = $this->getLanguage()->getCode();
 		// Language code specified by the user (null if none)
 		$this->specifiedLangCode = $this->getText( 'lang', null );
 		// Language code we're going to use
@@ -200,12 +198,6 @@ abstract class TagHandler {
 	abstract protected function render(): string;
 
 	private function parseGroups() {
-		if ( !$this->config->get( 'KartographerWikivoyageMode' ) ) {
-			// if we ignore all the 'group' and 'show' parameters,
-			// each tag stays private, and will be unable to share data
-			return;
-		}
-
 		$this->groupId = $this->getText( 'group', null, '/^(\w| )+$/u' );
 
 		$text = $this->getText( 'show', null, '/^(|(\w| )+(\s*,\s*(\w| )+)*)$/u' );
@@ -337,10 +329,6 @@ abstract class TagHandler {
 		$data = $state->getData();
 		if ( $data && $isPreview ) {
 			$parserOutput->setJsConfigVar( 'wgKartographerLiveData', $data );
-			if ( MediaWikiServices::getInstance()->getMainConfig()->get( 'KartographerStaticMapframe' ) ) {
-				// Preview generates HTML that is different from normal
-				$parserOutput->updateCacheExpiry( 0 );
-			}
 		} else {
 			$interact = $state->getInteractiveGroups();
 			$requested = array_keys( $state->getRequestedGroups() );
