@@ -445,6 +445,13 @@ KartographerMap = L.Map.extend( {
 	    let map = this;
 	    var layer;
 	    try {
+	    	/**
+	    	 * In theory this can be removed as it now duplicates the
+	    	 * functionality in geometryToLayer: function (geojson, options)
+	    	 * in L.extend(L.GeoJSON, { in lib/external/mapbox/mapbox-lib.js
+	    	 * (aprox line 10529). At the very least the styles should be able
+	    	 * to rely on simplestyles as those defaults were fixed
+	    	 */
 	        options.pointToLayer = function (feature, latlng) {
 	            if (feature.properties.shape) {
 	                let shp = feature.properties.shape.toLowerCase()
@@ -1056,7 +1063,11 @@ KartographerMap = KartographerMap.extend({
         this.loadBaseMap(mapID);
 
         if (plane === undefined) {
-          plane = this._baseMaps[mapID].defaultPlane || 0
+          if (this._baseMaps[mapID]) {
+            plane = this._baseMaps[mapID].defaultPlane || 0
+          } else {
+          	plane = 0
+          }
         }
         if (this.fullscreen) {
           this._controllers.mapSelect._changeSelectedOption(mapID)
@@ -1069,8 +1080,13 @@ KartographerMap = KartographerMap.extend({
         }
         if (location === undefined) {
             // TODO: ???
-          location = [ this._baseMaps[mapID].center[1],
-              this._baseMaps[mapID].center[0] ]
+          if (this._baseMaps[mapID]) {
+          	location = [ this._baseMaps[mapID].center[1],
+              	this._baseMaps[mapID].center[0] ]
+          } else {
+          	location = [ 3200, 3200 ]
+          }
+
         }
         this.setView(location, zoom)
     },
