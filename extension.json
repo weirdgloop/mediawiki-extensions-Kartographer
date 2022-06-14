@@ -526,7 +526,7 @@
 				"kartographer-drawmapdialog-height",
 				"visualeditor-mwmapsdialog-geojson",
 				"kartographer-drawmapdialog-templatefield",
-				"kartographer-map-templates",
+				"kartographer-map-templates.json",
 				"kartographer-drawmapdialog-features",
 				"kartographer-drawmapdialog-features-help",
 				"kartographer-drawmapdialog-wikitext",

@@ -57,7 +57,7 @@
 	"kartographer-drawmap-copy-title": "Title for copy all wikitext button",
 	"kartographer-drawmapdialog-invalidjson": "The text displayed in the wikitext field if the GeoJSON is invalid",
 	"kartographer-drawmap-nofeatures": "The text displayed in the wikitext field if no features are found in the GeoJSON",
-	"kartographer-map-templates": "JSON of map templates and info for parsing them",
+	"kartographer-map-templates.json": "JSON of map templates and info for parsing them",
 	"kartographer-linktype-aerial": "Appears on the sidebar of the full screen map. A plural adjective, as in \"aerial (maps)\".\n\n{{Identical|Aerial}}",
 	"kartographer-linktype-map": "Appears on the sidebar of the full screen map.",
 	"kartographer-linktype-other": "Appears on the sidebar of the full screen map. A plural adjective, as in \"Other (maps)\".\n\n{{Identical|Other}}",

@@ -240,13 +240,13 @@ MapDialog = {
 		// Get base maps data and use
 		this.tempInfo = { 'Plain coordinates': this.defTempInfo };
 		var tempList = [ {data:'Plain coordinates', label:'Plain coordinates'} ],
-			mesTemps = mw.message('kartographer-map-templates');
+			mesTemps = mw.message('kartographer-map-templates.json');
 		if (mesTemps.exists()) {
 			mesTemps = mesTemps.plain();
 			try {
 				mesTemps = JSON.parse( mesTemps );
 			} catch (er) {
-				console.warn('Error parsing "kartographer-map-templates":', er);
+				console.warn('Error parsing "kartographer-map-templates.json":', er);
 				mesTemps = {};
 			}
 			if ( mesTemps && typeof mesTemps == 'object' && mesTemps !== null ) {
@@ -258,7 +258,7 @@ MapDialog = {
 				}
 			}
 		} else {
-			console.warn('Kartographer-map-templates does not exist, no templates loaded.');
+			console.warn('Kartographer-map-templates.json does not exist, no templates loaded.');
 		}
 		this.template.setOptions( tempList );
 
