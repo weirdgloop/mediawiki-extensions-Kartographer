@@ -1,0 +1,31 @@
+{
+"__Descriptions__": {
+	"_notes": "The only required value is feature, all the result will fall back to defaults",
+	"_combinefeatures": "[boolean] Whether the template allows multiple of the same feature to be combined",
+	"_singlefeature": "[boolean] If the template only works with a single feature",
+	"_template": "Base template format, available substitutions: ${params} (template params), ${mtype} (last feature type), ${features} (features)",
+	"_params": "Format for template params, available substitutions: ${name}, ${value} (pairs for mapID, plane and zoom)",
+	"_paramsSeperator": "Separator for template params",
+	"_feature": "Base feature format, available substitutions: ${coords} (feature coordinates), ${properties} (feature properties), ${type} (feature type), ${n} (feature number, starting at 1)",
+	"_featSeparator": "Speparator between features",
+	"_coords": "Format for coordinates, available substitutions: ${x}/${lon} (x coordinate), ${y}/${lat} (y coordinate), ${p}/${plane} (plane, if available)",
+	"_coordsSeparator": "Separator between coordinates",
+	"_coordsSeparator2": "Separator between coordinate groups (eg polygons with holes or combined features)",
+	"_featProps": "Base format for feature properties, available substitutions: ${name} (name of property/simple style), ${value}, ${n} (feature number)",
+	"_featPropsSeperator": "Separator between feature properties"
+},
+"Defaults": {
+	"combinefeatures": false,
+	"singlefeature": false,
+	"template": "Map params:\n${params}\nMap type: ${mtype}\nFeatures:\n${features}",
+	"params": "${name} = ${value}",
+	"paramsSeperator": "\n",
+	"feature": "\nFeature #${n}\nType/shape: ${type}\nProperties:\n${properties}\nCoords:\n${coords}",
+	"featSeparator": "\n\n---\n",
+	"coords": "${x},${y}",
+	"coordsSeparator": "\n",
+	"coordsSeparator2": "\n-\n",
+	"featProps": "${name} = ${value}",
+	"featPropsSeperator": "\n"
+}
+}

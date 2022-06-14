@@ -1,0 +1,40 @@
+#mw-specialDrawMap-container {
+	max-width: 1000px;
+	min-width: 300px;
+}
+
+#mw-specialDrawMap-container .drawmap-mapWidget {
+	min-height: 300px;
+	min-width: 300px;
+	transition: height 0.2s ease-in-out;
+}
+
+/* Help button */
+.drawmap-dialog-help {
+	position: absolute;
+	top: -2.8em;
+	right: 0;
+}
+
+/* Form elements */
+.drawmap-dialog-mapFieldLayout.oo-ui-horizontalLayout > .oo-ui-widget {
+	margin-right: 0;
+	margin-bottom: 0;
+	padding-right: 8px;
+}
+.drawmap-dialog-mapFieldLayout.oo-ui-horizontalLayout > .oo-ui-widget:last-child {
+	padding-right: 0;
+}
+.drawmap-dialog-mapFieldLayout.oo-ui-horizontalLayout > label {
+	width: 40%;
+}
+.drawmap-dialog-mapFieldLayout.oo-ui-horizontalLayout > .drawmap-dialog-mapName {
+	width: 50%;
+}
+.drawmap-dialog-mapFieldLayout.oo-ui-horizontalLayout > .drawmap-dialog-mapID {
+	width: 10%;
+}
+
+.drawmap-dialog-wikibuttons {
+	margin-top: 12px;
+}
