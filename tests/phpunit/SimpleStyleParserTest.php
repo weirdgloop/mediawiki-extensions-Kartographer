@@ -170,6 +170,10 @@ class SimpleStyleParserTest extends MediaWikiIntegrationTestCase {
 
 			// Test cases specifically for SimpleStyleParser::sanitize()
 			[
+				'{ "": "…" }',
+				'{ "": "…" }',
+			],
+			[
 				'{ "_a": "…", "b": { "_c": "…", "d": "…" } }',
 				'{ "b": { "d": "…" } }',
 			],
