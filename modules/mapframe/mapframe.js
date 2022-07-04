@@ -168,8 +168,9 @@ mw.hook( 'wikipage.content' ).add( function ( $content ) {
 			initMapBox( data, $container );
 		} );
 
-	// Allow customizations of interactive maps in article.
-	mw.hook( 'wikipage.maps' ).fire( maps, false /* isFullScreen */ );
+		// Allow customizations of interactive maps in article.
+		mw.hook( 'wikipage.maps' ).fire( maps, false /* isFullScreen */ );
+	} );
 } );
 
 module.exports = {
