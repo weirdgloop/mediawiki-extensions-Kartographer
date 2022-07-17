@@ -214,7 +214,6 @@
 				"mediawiki.api",
 				"mediawiki.Uri",
 				"oojs-ui.styles.icons-media",
-				"jquery.throttle-debounce",
 				"mapbox",
 				"ext.kartographer",
 				"ext.kartographer.style",
