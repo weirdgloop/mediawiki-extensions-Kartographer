@@ -71,7 +71,6 @@ MapDialog.prototype.setMap = function ( map ) {
 	);
 
 	dialog.$captionContainer
-		.attr( 'title', dialog.map.captionText )
 		.text( dialog.map.captionText );
 
 	// The button exists, the sidebar was not open, simply run `offsetMap`
@@ -97,8 +96,7 @@ MapDialog.prototype.addFooterButton = function () {
 	if ( !dialog.mapDetailsButton ) {
 		dialog.mapDetailsButton = new OO.ui.ToggleButtonWidget( {
 			label: mw.msg( 'kartographer-sidebar-togglebutton' ),
-			icon: 'newWindow',
-			title: mw.msg( 'kartographer-sidebar-togglebutton' )
+			icon: 'newWindow'
 		} );
 		dialog.mapDetailsButton.connect( dialog, { change: 'openURL' } );
 	}
@@ -127,7 +125,6 @@ MapDialog.prototype.addFooterButton = function () {
 
 	if ( dialog.map ) {
 		dialog.$captionContainer
-			.attr( 'title', dialog.map.captionText )
 			.text( dialog.map.captionText );
 	}
 };
