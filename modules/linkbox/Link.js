@@ -102,12 +102,6 @@ Link.prototype.openFullScreen = function ( position ) {
 	position.mapVersion = position.mapVersion || link.mapVersion || null;
 	position.plainTiles = position.plainTiles || link.plainTiles || false;
 	/* eslint-disable no-underscore-dangle */
-	if ( map && map._updatingHash ) {
-		// Skip - there is nothing to do.
-		delete map._updatingHash;
-		return;
-	}
-
 	if ( map && map._container._leaflet_id ) {
 		map.setView(
 			position.center,
