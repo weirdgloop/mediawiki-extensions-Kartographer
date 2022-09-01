@@ -57,9 +57,9 @@ class RsStaticMap {
 				// Default to no baseMaps incase of errors fetching or decoding basemaps.json.
 				$baseMaps = false;
 
-				$json = file_get_contents($url);
+				$json = MediaWikiServices::getInstance()->getHttpRequestFactory()->get( $url, [], __METHOD__ );
 
-				if ( $json !== false ) {
+				if ( $json ) {
 					$obj = json_decode($json, true);
 
 					if ( $obj !== null ) {
