@@ -176,7 +176,7 @@ class SimpleStyleParser {
 				}
 			}
 
-			if ( property_exists( $json, 'properties' ) && is_object( $json->properties ) ) {
+			if ( isset( $json->properties ) && is_object( $json->properties ) ) {
 				$this->sanitizeProperties( $json->properties );
 			}
 		}
