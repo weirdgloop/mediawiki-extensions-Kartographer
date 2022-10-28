@@ -13,7 +13,7 @@ L.Control.extend( {
     buttonText: '<i class="fa fa-question">?</i>', // The text set on the 'options' button.
     buttonTitle: 'Help', // The title set on the 'options' button.
 
-    linkURL: 'https://oldschool.runescape.wiki/w/RuneScape:Map',
+    linkURL: mw.message( 'kartographer-help-link' ).plain(),
   },
 
   onAdd: function(map) {

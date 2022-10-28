@@ -230,7 +230,8 @@
 				"modules/controls/style.css"
 			],
 			"messages": [
-				"kartographer-attribution"
+				"kartographer-attribution",
+				"kartographer-help-link"
 			],
 			"targets": [
 				"mobile",

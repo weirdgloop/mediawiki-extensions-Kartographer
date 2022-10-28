@@ -37,6 +37,7 @@
 	"kartographer-specialmap-invalid-coordinates": "Displayed by Special:Map when no valid coordinates are supplied",
 	"kartographer.css": "{{optional}}",
 	"kartographer.js": "{{optional}}",
+	"kartographer-help-link": "A link to the map help page (? help button on maps).",
 	"kartographer-linktype-aerial": "Appears on the sidebar of the full screen map. A plural adjective, as in \"aerial (maps)\".\n\n{{Identical|Aerial}}",
 	"kartographer-linktype-map": "Appears on the sidebar of the full screen map.",
 	"kartographer-linktype-other": "Appears on the sidebar of the full screen map. A plural adjective, as in \"Other (maps)\".\n\n{{Identical|Other}}",
