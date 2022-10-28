@@ -56,8 +56,20 @@ class RsStaticMap {
 			function () use ( $url ) {
 				// Default to no baseMaps incase of errors fetching or decoding basemaps.json.
 				$baseMaps = false;
+				$json = false;
 
-				$json = file_get_contents($url);
+				set_error_handler(function ($severity, $message, $file, $line) {
+					throw new \ErrorException($message, $severity, $severity, $file, $line);
+				});
+				try {
+					$json = file_get_contents($url);
+				} catch (\Exception $e) {
+					\MediaWiki\Logger\LoggerFactory::getInstance('Kartographer')->warning(
+						$e->getMessage(), ['exception' => $e,]
+					);
+					return $baseMaps;
+				}
+				restore_error_handler();
 
 				if ( $json !== false ) {
 					$obj = json_decode($json, true);
