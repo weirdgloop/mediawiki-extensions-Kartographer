@@ -1,0 +1,48 @@
+@mapWidth: 256px;
+@mapHeight: 256px;
+
+/* stylelint-disable selector-max-id */
+
+#mw-specialDrawMap-container {
+	position: relative;
+
+	.thumbinner {
+		display: inline-block;
+		position: relative;
+		width: @mapWidth;
+	}
+}
+
+#mw-specialDrawMap-inner {
+	height: @mapHeight;
+	position: relative;
+	background: #000;
+}
+
+#mw-specialDrawMap-map {
+	position: absolute;
+	width: @mapWidth;
+	height: @mapHeight;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: @mapWidth @mapHeight;
+}
+
+#mw-specialDrawMap-caption {
+	display: block;
+	padding-top: 0.5em;
+}
+
+p#mw-specialDrawMap-addinfo {
+	margin: 0;
+}
+
+#mw-specialDrawMap-attributions {
+	position: absolute;
+	bottom: 0;
+	font-size: 9px;
+	right: 0;
+	text-align: right;
+	padding: 0 3px;
+	background:rgba(255,255,255,0.6);
+}

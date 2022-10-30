@@ -26,7 +26,8 @@
 		"KartographerAliases": "Kartographer.alias.php"
 	},
 	"SpecialPages": {
-		"Map": "Kartographer\\SpecialMap"
+		"Map": "Kartographer\\SpecialMap",
+		"DrawMap": "Kartographer\\SpecialDrawMap"
 	},
 	"AutoloadNamespaces": {
 		"Kartographer\\": "includes/"
@@ -407,6 +408,82 @@
 		"ext.kartographer.specialMap": {
 			"styles": [
 				"styles/specialMap.less"
+			],
+			"targets": [
+				"mobile",
+				"desktop"
+			]
+		},
+		"ext.kartographer.specialDrawMap": {
+			"styles": [
+				"styles/specialDrawMap.less"
+			],
+			"targets": [
+				"mobile",
+				"desktop"
+			]
+		},
+		"ext.kartographer.acewidget": {
+			"scripts": [
+				"modules/acewidget/OO.ui.MWAceEditorWidget.js"
+			],
+			"styles": [
+				"modules/acewidget/OO.ui.MWAceEditorWidget.css"
+			],
+			"dependencies": [
+				"oojs-ui-core",
+				"oojs-ui-widgets"
+			],
+			"targets": [
+				"mobile",
+				"desktop"
+			]
+		},
+		"ext.kartographer.drawmap": {
+			"scripts": [
+				"modules/drawmap/drawmap.js"
+			],
+			"styles": [
+				"modules/drawmap/drawmap.css"
+			],
+			"messages": [
+				"kartographer-map-version",
+				"kartographer-drawmap-help-title",
+				"kartographer-drawmap-help-url",
+				"kartographer-drawmapdialog-settings",
+				"kartographer-drawmapdialog-geojson",
+				"kartographer-drawmapdialog-template",
+				"visualeditor-mwmapsdialog-mapselect",
+				"visualeditor-mwmapsdialog-position-plane",
+				"visualeditor-mwmapsdialog-position-lat",
+				"visualeditor-mwmapsdialog-position-lon",
+				"kartographer-drawmapdialog-height",
+				"visualeditor-mwmapsdialog-geojson",
+				"kartographer-drawmapdialog-templatefield",
+				"kartographer-map-templates.json",
+				"kartographer-drawmapdialog-features",
+				"kartographer-drawmapdialog-features-help",
+				"kartographer-drawmapdialog-wikitext",
+				"kartographer-drawmapdialog-wikitext-help",
+				"kartographer-drawmap-refresh-label",
+				"kartographer-drawmap-refresh-title",
+				"kartographer-drawmap-select-label",
+				"kartographer-drawmap-select-title",
+				"kartographer-drawmap-copy-label",
+				"kartographer-drawmap-copy-title",
+				"kartographer-drawmapdialog-invalidjson",
+				"kartographer-drawmap-nofeatures"
+			],
+			"dependencies": [
+				"oojs-ui-core",
+				"oojs-ui-widgets",
+				"oojs-ui.styles.icons-editing-advanced",
+				"oojs-ui.styles.icons-interactions",
+				"ext.kartographer",
+				"ext.kartographer.util",
+				"ext.kartographer.editing",
+				"ext.kartographer.editor",
+				"ext.kartographer.acewidget"
 			],
 			"targets": [
 				"mobile",
