@@ -36,7 +36,7 @@
 		"sanitize-mapdata": {
 			"class": "Kartographer\\ApiSanitizeMapData",
 			"services": [
-				"Parser"
+				"ParserFactory"
 			]
 		}
 	},
