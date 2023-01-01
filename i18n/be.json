@@ -5,7 +5,10 @@
 			"Maksim L.",
 			"Chadyka",
 			"No Sleep till Krupki",
-			"Amire80"
+			"Amire80",
+			"Plaga med",
+			"Tomato Cream",
+			"Tīgelika"
 		]
 	},
 	"apierror-kartographer-conflicting-revids": "Запыт дадзеных мапы з некалькіх версій адной і той жа старонкі ў адным запыце пакуль не падтрымліваецца.",
@@ -19,7 +22,7 @@
 	"kartographer-error-bad_attr": "Атрыбут «$1» мае няслушная значэнне",
 	"kartographer-error-bad_data": "Змест JSON — няслушны GeoJSON+simplestyle. Першая памылка праверкі на элеменце «$1»: «$2».",
 	"kartographer-error-latlon": "Павінны быць пададзены абодва параметры «latitude» і «longitude», або ні адзін з іх",
-	"kartographer-error-title": "Загаловак «$1» ­— не слушная старонка дадзеных мапы",
+	"kartographer-error-title": "Загаловак «$1» ­— не слушная старонка даных карты",
 	"kartographer-tracking-category": "Старонкі з картамі",
 	"kartographer-tracking-category-desc": "Старонка змяшчае карты.",
 	"kartographer-specialmap-invalid-coordinates": "Уведзены няслушныя каардынаты",
@@ -33,7 +36,7 @@
 	"kartographer-sidebar-filterdropdown": "Выберыце тып мапы",
 	"kartographer-sidebar-externalservices": "Сэрвісы мапаў",
 	"kartographer-sidebar-externalservices-show-featured": "Паказваць толькі выдатныя",
-	"kartographer-sidebar-externalservices-show-all": "Глядзець больш",
+	"kartographer-sidebar-externalservices-show-all": "Праглядзець больш",
 	"kartographer-sidebar-latitude": "Шырата",
 	"kartographer-sidebar-longitude": "Даўгата",
 	"kartographer-sidebar-mapdetails": "Вонкавыя мапы",
