@@ -13,7 +13,9 @@ jobs:
     - run: |
         echo repo_name=$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}') >> $GITHUB_ENV
         echo upstream_branch=$(echo "$GITHUB_REF_NAME" | awk -F / '{print $2}') >> $GITHUB_ENV
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - uses: repo-sync/github-sync@v2
       name: Sync repo to branch
       with:
@@ -21,8 +23,14 @@ jobs:
         source_branch: ${{ env.upstream_branch }}
         destination_branch: weirdgloop/repo-sync
         github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check for changes
+      run: |
+        if [ "$(git rev-parse --revs-only origin/weirdgloop/repo-sync)" != "$(git merge-base $GITHUB_REF_NAME origin/weirdgloop/repo-sync)" ]; then
+          echo changes_exist=true >> $GITHUB_ENV
+        fi
     - uses: repo-sync/pull-request@v2
       name: Create pull request
+      if: env.changes_exist == 'true'
       with:
         source_branch: weirdgloop/repo-sync
         destination_branch: ${{ github.ref_name }}
