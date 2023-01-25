@@ -29,6 +29,7 @@
 	"kartographer-coord-lon-negative": "$1W",
 	"kartographer-coord-lat-decimal": "Y: $1",
 	"kartographer-coord-lon-decimal": "X: $1",
+	"kartographer-help-link": "https://oldschool.runescape.wiki/w/RuneScape:Map",
 	"kartographer-map-addinfo": "$2 (mapID: $1)<br />Zoom: $3  Plane: $4",
 	"kartographer-specialmap-note": "Url uses the format: Special:Map/''mapID''/''zoom''/''plane''/''x''/''y''",
 	"kartographer-specialmap-invalid-coordinates": "Invalid coordinates supplied",
