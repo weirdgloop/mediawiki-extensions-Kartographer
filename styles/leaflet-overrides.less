@@ -1,4 +1,3 @@
-@import 'mediawiki.mixins';
 @import '../lib/external/wikimedia-ui-base';
 
 /* stylelint-disable no-descending-specificity */
@@ -96,7 +95,8 @@
 		border: @border-base;
 		border-radius: @border-radius-base;
 		border-bottom-width: 0;
-		.transition( ~'background-color @transition-duration-base, color @transition-duration-base, border-color @transition-duration-base, box-shadow @transition-duration-base' );
+		transition-property: background-color, color, border-color, box-shadow;
+		transition-duration: @transition-duration-base;
 
 		&:hover {
 			background-color: @background-color-framed--hover;
