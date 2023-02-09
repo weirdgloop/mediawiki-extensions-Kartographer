@@ -88,17 +88,14 @@
 }
 
 .leaflet-draw-actions li:last-child a {
-	-webkit-border-radius: 0 4px 4px 0;
 	border-radius: 0 4px 4px 0;
 }
 
 .leaflet-right .leaflet-draw-actions li:last-child a {
-	-webkit-border-radius: 0;
 	border-radius: 0;
 }
 
 .leaflet-right .leaflet-draw-actions li:first-child a {
-	-webkit-border-radius: 4px 0 0 4px;
 	border-radius: 4px 0 0 4px;
 }
 
@@ -244,7 +241,6 @@
 	background: rgb(54, 54, 54);
 	background: rgba(0, 0, 0, 0.5);
 	border: 1px solid transparent;
-	-webkit-border-radius: 4px;
 	border-radius: 4px;
 	color: #fff;
 	font: 12px/18px "Helvetica Neue", Arial, Helvetica, sans-serif;
@@ -301,7 +297,6 @@
 .leaflet-edit-marker-selected {
 	background-color: rgba(254, 87, 161, 0.1);
 	border: 4px dashed rgba(254, 87, 161, 0.6);
-	-webkit-border-radius: 4px;
 	border-radius: 4px;
 	box-sizing: content-box;
 }
