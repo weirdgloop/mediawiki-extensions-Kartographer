@@ -54,8 +54,8 @@ class RsStaticMap {
 			),
 			3600, // 1 hour cache time since this shouldn't change often.
 			function () use ( $url ) {
-				// Default to no baseMaps incase of errors fetching or decoding basemaps.json.
-				$baseMaps = false;
+				// Default to empty baseMaps in case of errors fetching or decoding basemaps.json.
+				$baseMaps = [];
 
 				$json = MediaWikiServices::getInstance()->getHttpRequestFactory()->get( $url, [], __METHOD__ );
 
