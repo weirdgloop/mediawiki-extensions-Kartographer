@@ -114,27 +114,27 @@ class SpecialMap extends SpecialPage {
 	 * Parses subpage parameter to this special page into zoom / lat /lon
 	 *
 	 * @param string $par
-	 * @return array|false
+	 * @return array|null
 	 */
 	private function parseSubpage( $par ) {
-		if ( !preg_match(
+		if ( !$par || !preg_match(
 				'#^(?<mapid>-*\d+)/(?<zoom>-*\d+)/(?<plane>-*\d+)/(?<lon>-?\d+(\.\d+)?)/(?<lat>-?\d+(\.\d+)?)$#',
 				$par,
 				$matches
 			)
 		) {
-			return false;
+			return null;
 		}
 
 		// Max bounds for RS are in RsStaticMap
 		if ( $matches['lon'] > RsStaticMap::MAX_BOUNDS[0][1] || $matches['lon'] < RsStaticMap::MAX_BOUNDS[0][0]
 			|| $matches['lat'] > RsStaticMap::MAX_BOUNDS[1][1] || $matches['lat'] < RsStaticMap::MAX_BOUNDS[1][0] ) {
-			return false;
+			return null;
 		}
 
 		// Zoom also defined in RsStaticMap
 		if ( $matches['zoom'] > RsStaticMap::ZOOM_RANGE[1] || $matches['zoom'] < RsStaticMap::ZOOM_RANGE[0] ) {
-			return false;
+			return null;
 		}
 
 		return [ (int)$matches['mapid'], (int)$matches['zoom'], (int)$matches['plane'], (float)$matches['lon'], (float)$matches['lat'] ];
