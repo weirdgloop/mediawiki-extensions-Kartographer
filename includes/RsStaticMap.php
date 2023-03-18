@@ -4,7 +4,6 @@ namespace Kartographer;
 
 use MediaWiki\MediaWikiServices;
 use Kartographer\Projection\Simple;
-use RequestContext;
 
 /**
  * Handles static versions of maps for Runescape
@@ -89,19 +88,15 @@ class RsStaticMap {
 	}
 
 	public function getMap( $mapid, $zoom, $plane, $center, $size ) {
-		wfDebugLog("wgl-kart", RequestContext::getMain()->getRequest()->getFullRequestURL() . ": checking for invalid: ");
 		if ( !isset($this->baseMaps[$mapid]) ) {
-			wfDebugLog("wgl-kart", RequestContext::getMain()->getRequest()->getFullRequestURL() . ": invalid mapID: " . $mapid);
 			$mapid = '-1';
 		}
 		$mapData = $this->baseMaps[$mapid] ?? [];
 
 		if ( !is_array($center) || !$this->coordinatesAreValid( $center[0], $center[1], $mapid ) ) {
-			wfDebugLog("wgl-kart", RequestContext::getMain()->getRequest()->getFullRequestURL() . ": invalid center");
 			$center = $mapData['center'] ?? [3200, 3200]; // Lumbridge
 		}
 		if ( !isset($plane) || $plane < 0 ) {
-			wfDebugLog("wgl-kart", RequestContext::getMain()->getRequest()->getFullRequestURL() . ": invalid plane, deafault to: " . $mapData['defaultPlane']);
 			$plane = $mapData['defaultPlane'] ?? 0;
 		}
 		if ( !isset($zoom) || $zoom < self::ZOOM_RANGE[0] || $zoom > self::ZOOM_RANGE[1] ) {
@@ -152,20 +147,17 @@ class RsStaticMap {
 	public function coordinatesAreValid( $lon, $lat, $mapid = null ) {
 		if ( $this->baseMaps && $mapid != null ) {
 			if ( !isset($this->baseMaps[$mapid]) ) {
-				wfDebugLog("wgl-kart", RequestContext::getMain()->getRequest()->getFullRequestURL() . ": CAV: invalid mapID: " . $mapid);
 				return false;
 			}
 
 			$map = $this->baseMaps[$mapid];
 			if ( $lon > $map['bounds'][1][0] || $lon < $map['bounds'][0][0] || $lat > $map['bounds'][1][1] || $lat < $map['bounds'][0][1] ) {
-				wfDebugLog("wgl-kart", RequestContext::getMain()->getRequest()->getFullRequestURL() . ": CAV: invalid bounds: ");
 				return false;
 			}
 		}
 
 		// Fall back too absolute RS map bounds
 		if ( $lon > self::MAX_BOUNDS[0][1] || $lon < self::MAX_BOUNDS[0][0] || $lat > self::MAX_BOUNDS[1][1] || $lat < self::MAX_BOUNDS[1][0] ) {
-			wfDebugLog("wgl-kart", RequestContext::getMain()->getRequest()->getFullRequestURL() . ": CAV: invalid bounds2: ");
 			return false;
 		}
 
@@ -176,7 +168,6 @@ class RsStaticMap {
 		if ( isset($this->baseMaps[$mapid]) ) {
 			return true;
 		}
-		wfDebugLog("wgl-kart", RequestContext::getMain()->getRequest()->getFullRequestURL() . ": MIIV: invalid mapID: " . $mapid);
 		return false;
 	}
 
