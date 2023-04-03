@@ -1,4 +1,4 @@
-@import '../../lib/external/wikimedia-ui-base';
+@import 'mediawiki.skin.variables.less';
 
 // Anyone who changes the width of the sidebar should update Kartographer.Dialog.DialogClass
 // `SIDEBAR_WIDTH` accordingly
@@ -14,7 +14,7 @@
 	height: 4.5em;
 	font-size: 14px; // same as font-size of .mw-kartographer-interactive.leaflet-container
 	background-color: @background-color-base;
-	border-top: @border-base;
+	border-top: @border-width-base @border-style-base @border-color-base;
 }
 
 .mw-kartographer-captionfoot {
@@ -37,14 +37,14 @@
 	top: 0;
 	bottom: 4.5em;
 	z-index: 2;
-	border-left: @border-base;
-	width: @width-kartographer-sidebar + @border-width-base; /* 320+1 so border is hidden on common 320px wide mobile devices */
+	border-left: @border-width-base @border-style-base @border-color-base;
+	width: @sidebarWidth + @border-width-base; /* 320+1 so border is hidden on common 320px wide mobile devices */
 	max-width: 100vw;
 	box-sizing: border-box;
 	background-color: #fff;
 	overflow-y: auto;
 	transform: translateX( 100% );
-	transition: transform 100ms ease-out;
+	transition: transform @transition-duration-base @transition-timing-function-user;
 	/* don't use padding on this object, because then it will retain height after being pushed off screen */
 
 	/* For MobileFrontend */
@@ -63,11 +63,11 @@
 
 	.leaflet-right.leaflet-top,
 	.leaflet-right.leaflet-bottom {
-		transition: right 100ms ease-out;
+		transition: right @transition-duration-base @transition-timing-function-user;
 	}
 
 	.leaflet-right.leaflet-top .leaflet-bar.leaflet-control {
-		transition: margin 100ms ease-out;
+		transition: margin @transition-duration-base @transition-timing-function-user;
 	}
 }
 
@@ -89,7 +89,7 @@
 
 .mw-kartographer-mapdetails {
 	margin: 1.5em 0;
-	padding: 0 16px;
+	padding: 0 @spacing-100;
 
 	.geo {
 		white-space: nowrap;
@@ -114,7 +114,7 @@
 
 		&-latlon {
 			display: block;
-			color: #54595d; // Base20
+			color: @color-subtle;
 			margin-top: 0.5em;
 		}
 	}
@@ -122,7 +122,7 @@
 
 .mw-kartographer-filterservices {
 	margin: 1em 0;
-	padding: 0 16px;
+	padding: 0 @spacing-100;
 
 	&-title {
 		margin-bottom: 1em;
@@ -130,7 +130,7 @@
 	}
 
 	&-toggleButton {
-		margin-left: 16px;
+		margin-left: @spacing-100;
 	}
 
 	&-list {
