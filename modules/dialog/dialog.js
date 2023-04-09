@@ -38,8 +38,6 @@ MapDialog.prototype.initialize = function () {
 	// Parent method
 	MapDialog.super.prototype.initialize.apply( this, arguments );
 
-	this.$body
-		.append( $( '<div>' ).addClass( 'kartographer-mapDialog-loading' ) );
 	this.$foot
 		.addClass( 'mw-kartographer-mapDialog-foot' );
 
