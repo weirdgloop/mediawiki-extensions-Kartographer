@@ -1,10 +1,8 @@
 @import '../../lib/external/wikimedia-ui-base';
 
-/*
-	Anyone who changes the width of the sidebar should
-	update Kartographer.Dialog.DialogClass `SIDEBAR_WIDTH` accordingly
-*/
-@sidebarWidth: 320px;
+// Anyone who changes the width of the sidebar should update Kartographer.Dialog.DialogClass
+// `SIDEBAR_WIDTH` accordingly
+@width-kartographer-sidebar: 320px;
 
 /* Dialog footer */
 .mw-kartographer-mapDialog-foot {
@@ -40,11 +38,7 @@
 	bottom: 4.5em;
 	z-index: 2;
 	border-left: @border-base;
-	/*
-		Anyone who changes the width of the sidebar should
-		update Kartographer.Dialog.DialogClass `SIDEBAR_WIDTH` accordingly
-	*/
-	width: @sidebarWidth + 1px; /* 320+1 so border is hidden on common 320px wide mobile devices */
+	width: @width-kartographer-sidebar + @border-width-base; /* 320+1 so border is hidden on common 320px wide mobile devices */
 	max-width: 100vw;
 	box-sizing: border-box;
 	background-color: #fff;
@@ -89,7 +83,7 @@
 
 	.leaflet-right.leaflet-top,
 	.leaflet-right.leaflet-bottom {
-		right: @sidebarWidth;
+		right: @width-kartographer-sidebar;
 	}
 }
 
