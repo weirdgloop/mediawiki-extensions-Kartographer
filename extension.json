@@ -420,7 +420,6 @@
 		"remoteExtPath": "Kartographer"
 	},
 	"Hooks": {
-		"PageSaveComplete": "KartographerHooks",
 		"ParserTestGlobals": "KartographerHooks",
 		"ParserFirstCallInit": "KartographerHooks",
 		"ParserAfterParse": "KartographerHooks"

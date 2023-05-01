@@ -22,7 +22,6 @@ use Parser;
 use StripState;
 
 class Hooks implements
-	PageSaveCompleteHook,
 	ParserFirstCallInitHook,
 	ParserAfterParseHook,
 	ParserTestGlobalsHook
@@ -38,22 +37,6 @@ class Hooks implements
 		Config $config
 	) {
 		$this->config = $config;
-	}
-
-	// When [[MediaWiki:Kartographer-map-version]] is edited, clear the basemaps cache.
-	public function onPageSaveComplete( $wikiPage, $user, $summary, $flags, $revisionRecord, $editResult ) {
-		if ( $wikiPage->getTitle()->getPrefixedDBkey() === 'MediaWiki:Kartographer-map-version' ) {
-			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-
-			$cache->delete(
-				$cache->makeKey(
-					'Kartographer',
-					'basemaps'
-				)
-			);
-		}
-
-		return true;
 	}
 
 	/**
