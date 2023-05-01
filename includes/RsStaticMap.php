@@ -100,7 +100,7 @@ class RsStaticMap {
 			$plane = $mapData['defaultPlane'] ?? 0;
 		}
 		if ( !isset($zoom) || $zoom < self::ZOOM_RANGE[0] || $zoom > self::ZOOM_RANGE[1] ) {
-			$zoom = 2;
+			$zoom = 1;
 		}
 
 		// Map dimension in game tiles
