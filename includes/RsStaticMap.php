@@ -17,9 +17,6 @@ class RsStaticMap {
 	/** @var array */
 	protected $mapsConfig;
 
-	/** @var array */
-	protected $baseMaps;
-
 	/** @var string */
 	protected $mapVersion;
 
@@ -37,45 +34,8 @@ class RsStaticMap {
 		}
 		$this->mapVersion = $vers;
 
-		$this->getMapData();
 		$tileUrl = $this->mapsConfig['baseTileURL'] . $this->mapsConfig['tileURLFormat'];
 		$this->tileURL = str_replace('{mapVersion}', $this->mapVersion, $tileUrl);
-	}
-
-	private function getMapData() {
-		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$url = $this->mapsConfig['baseMapsFile'];
-		$url = str_replace('{mapVersion}', $this->mapVersion, $url);
-
-		$this->baseMaps = $cache->getWithSetCallback(
-			$cache->makeKey(
-				'Kartographer',
-				'basemaps'
-			),
-			3600, // 1 hour cache time since this shouldn't change often.
-			function () use ( $url ) {
-				// Default to empty baseMaps in case of errors fetching or decoding basemaps.json.
-				$baseMaps = [];
-
-				$json = MediaWikiServices::getInstance()->getHttpRequestFactory()->get( $url, [], __METHOD__ );
-
-				if ( $json ) {
-					$obj = json_decode($json, true);
-
-					if ( $obj !== null ) {
-						$data = [];
-						foreach ( $obj as $map ) {
-							$data[ (string)$map['mapId'] ] = $map;
-						}
-
-						if ( !empty($data) ) {
-							$baseMaps = $data;
-						}
-					}
-				}
-				return $baseMaps;
-			}
-		);
 	}
 
 	private function getTileUrl( $mapid, $zoom, $plane, $x, $y ) {
@@ -88,16 +48,11 @@ class RsStaticMap {
 	}
 
 	public function getMap( $mapid, $zoom, $plane, $center, $size ) {
-		if ( !isset($this->baseMaps[$mapid]) ) {
-			$mapid = '-1';
-		}
-		$mapData = $this->baseMaps[$mapid] ?? [];
+		$mapid = $mapid ?? '-1';
+		$plane = $plane ?? 0;
 
-		if ( !is_array($center) || !$this->coordinatesAreValid( $center[0], $center[1], $mapid ) ) {
-			$center = $mapData['center'] ?? [3200, 3200]; // Lumbridge
-		}
-		if ( !isset($plane) || $plane < 0 ) {
-			$plane = $mapData['defaultPlane'] ?? 0;
+		if ( !is_array($center) || !is_numeric($center[0]) || !is_numeric($center[1]) ) {
+			$center = [3200, 3200]; // Lumbridge
 		}
 		if ( !isset($zoom) || $zoom < self::ZOOM_RANGE[0] || $zoom > self::ZOOM_RANGE[1] ) {
 			$zoom = 1;
@@ -142,62 +97,5 @@ class RsStaticMap {
 			"background-position" => implode(", ", $bg_pos),
 			"background-repeat" => "no-repeat",
 		);
-	}
-
-	public function coordinatesAreValid( $lon, $lat, $mapid = null ) {
-		if ( $this->baseMaps && $mapid != null ) {
-			if ( !isset($this->baseMaps[$mapid]) ) {
-				return false;
-			}
-
-			$map = $this->baseMaps[$mapid];
-			if ( $lon > $map['bounds'][1][0] || $lon < $map['bounds'][0][0] || $lat > $map['bounds'][1][1] || $lat < $map['bounds'][0][1] ) {
-				return false;
-			}
-		}
-
-		// Fall back too absolute RS map bounds
-		if ( $lon > self::MAX_BOUNDS[0][1] || $lon < self::MAX_BOUNDS[0][0] || $lat > self::MAX_BOUNDS[1][1] || $lat < self::MAX_BOUNDS[1][0] ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	public function mapIdIsValid( $mapid ) {
-		if ( isset($this->baseMaps[$mapid]) ) {
-			return true;
-		}
-		return false;
-	}
-
-	public function getDefaultPlane( $mapid = '-1' ) {
-		if ( isset($this->baseMaps[$mapid]) ) {
-			$map = $this->baseMaps[$mapid];
-			if ( isset($map['defaultPlane']) ) {
-				return $map['defaultPlane'];
-			}
-		}
-		return 0;
-	}
-
-	public function getName( $mapid = '-1' ) {
-		if ( isset($this->baseMaps[$mapid]) ) {
-			$map = $this->baseMaps[$mapid];
-			if ( isset($map['name']) ) {
-				return $map['name'];
-			}
-		}
-		return 'unknown';
-	}
-
-	public function getCenter( $mapid = '-1' ) {
-		if ( isset($this->baseMaps[$mapid]) ) {
-			$map = $this->baseMaps[$mapid];
-			if ( isset($map['center']) ) {
-				return $map['center'];
-			}
-		}
-		return [3200, 3200];
 	}
 }
