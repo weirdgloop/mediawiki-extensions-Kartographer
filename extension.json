@@ -25,9 +25,6 @@
 	"ExtensionMessagesFiles": {
 		"KartographerAliases": "Kartographer.alias.php"
 	},
-	"SpecialPages": {
-		"Map": "Kartographer\\SpecialMap"
-	},
 	"AutoloadNamespaces": {
 		"Kartographer\\": "includes/"
 	},
