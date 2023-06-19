@@ -11,7 +11,6 @@ use Kartographer\Projection\Simple;
 class RsStaticMap {
 
 	const TILE_SIZE = 256;
-	const MAX_BOUNDS = [[0, 12800], [0, 12800]];
 	const ZOOM_RANGE = [-3, 5];
 
 	/** @var array */

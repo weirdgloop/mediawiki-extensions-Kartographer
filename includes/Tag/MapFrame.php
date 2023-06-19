@@ -4,7 +4,6 @@ namespace Kartographer\Tag;
 
 use FormatJson;
 use Html;
-use Kartographer\SpecialMap;
 use Kartographer\RsStaticMap;
 
 
@@ -168,7 +167,6 @@ class MapFrame extends TagHandler {
 		}
 
 		$attrs['style'] .= implode(' ', $bgStyle);
-		$attrs['href'] = SpecialMap::link( $staticLon, $staticLat, $staticZoom, (string)$staticMapID, $staticPlane )->getLocalURL();
 
 		if ( !$framed ) {
 			wfDebugLog("grs", "frame");

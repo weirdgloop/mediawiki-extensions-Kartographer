@@ -5,7 +5,6 @@ namespace Kartographer\Tag;
 use FormatJson;
 use Html;
 use Kartographer\CoordFormatter;
-use Kartographer\SpecialMap;
 
 /**
  * The <maplink> tag creates a link that, when clicked,
@@ -50,7 +49,6 @@ class MapLink extends TagHandler {
 		$attrs = [
 			'class' => 'mw-kartographer-maplink',
 			'data-mw' => 'interface',
-			'href' => SpecialMap::link( $this->lon, $this->lat, $this->zoom, $this->mapid, $this->plane )->getLocalURL()
 		];
 
 		if ( $this->zoom !== null ) {
