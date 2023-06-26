@@ -361,11 +361,7 @@ KartographerMap = L.Map.extend( {
 			center: center,
 			zoom: zoom
 		};
-		let location = center;
-		if (center != undefined) {
-			location = [center.lat, center.lng];
-		}
-		this.setMapID(mapID, plane, zoom, location);
+		this.setMapID(mapID, plane, zoom, [center.lat, center.lng]);
 		return this;
 	},
 
@@ -994,11 +990,7 @@ KartographerMap = KartographerMap.extend({
             this._mapVersion = options.parentMap._mapVersion;
             this._plainTiles = options.parentMap._plainTiles;
         } else {
-            if (this._baseMaps[0]) {
-                this.ready.dataloader = true;
-            } else {
-                this.ldl_load();
-            }
+            this.ready.dataloader = true;
             this._plane = 0;
             this._mapID = -1;
             this._mapVersion = mapVers;
