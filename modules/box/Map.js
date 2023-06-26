@@ -361,7 +361,7 @@ KartographerMap = L.Map.extend( {
 			center: center,
 			zoom: zoom
 		};
-		this.setMapID(mapID, plane, zoom, [center.lat, center.lng]);
+		this.setMapID(mapID, plane, zoom, center);
 		return this;
 	},
 
