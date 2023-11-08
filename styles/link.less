@@ -60,16 +60,14 @@ a.mw-kartographer-link,
 		// vendor-specific rules, so this adds the proper fallbacks as well
 		&.mw-kartographer-interactive {
 			cursor: move;
-			cursor: url( ./images/grab.cur ), default;
-			cursor: -webkit-grab;
-			cursor: -moz-grab;
 			cursor: grab;
+			cursor: -moz-grab;
+			cursor: -webkit-grab;
 
 			&:active {
-				cursor: url( ./images/grabbing.cur ), default;
-				cursor: -webkit-grabbing;
-				cursor: -moz-grabbing;
 				cursor: grabbing;
+				cursor: -moz-grabbing;
+				cursor: -webkit-grabbing;
 			}
 		}
 	}
