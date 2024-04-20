@@ -49,6 +49,18 @@ abstract class TagHandler {
 	protected $lon;
 
 	/** @var int|null */
+	protected $mapid;
+
+	/** @var int|null */
+	protected $plane;
+
+	/** @var string|null */
+	protected $mapVersion;
+
+	/** @var string|null */
+	protected $plainTiles;
+
+	/** @var int|null */
 	protected $zoom;
 
 	/** @var string|null */
