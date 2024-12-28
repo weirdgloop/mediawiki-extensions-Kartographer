@@ -8,9 +8,9 @@
 
 namespace Kartographer;
 
-use ResourceLoader;
-use ResourceLoaderContext;
-use ResourceLoaderModule;
+use MediaWiki\ResourceLoader\ResourceLoader;
+use MediaWiki\ResourceLoader\Context as ResourceLoaderContext;
+use MediaWiki\ResourceLoader\Module as ResourceLoaderModule;
 
 class DataModule extends ResourceLoaderModule {
 
