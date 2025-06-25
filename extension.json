@@ -72,7 +72,7 @@
 			]
 		},
 		"ext.kartographer.site": {
-			"class": "ResourceLoaderWikiModule",
+			"class": "MediaWiki\\ResourceLoader\\WikiModule",
 			"scripts": [
 				"MediaWiki:Kartographer.js"
 			],
