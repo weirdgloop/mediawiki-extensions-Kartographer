@@ -9,7 +9,7 @@
 
 namespace Kartographer;
 
-use Config;
+use MediaWiki\Config\Config;
 use Kartographer\Tag\MapFrame;
 use Kartographer\Tag\MapLink;
 use Kartographer\Tag\TagHandler;
@@ -18,8 +18,8 @@ use MediaWiki\Hook\ParserFirstCallInitHook;
 use MediaWiki\Hook\ParserTestGlobalsHook;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Storage\Hook\PageSaveCompleteHook;
-use Parser;
-use StripState;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\StripState;
 
 class Hooks implements
 	ParserFirstCallInitHook,

@@ -9,8 +9,8 @@
 namespace Kartographer;
 
 use Exception;
-use FormatJson;
-use ResourceLoaderContext;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\ResourceLoader\Context;
 use RuntimeException;
 use stdClass;
 

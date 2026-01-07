@@ -10,12 +10,12 @@
 
 namespace Kartographer;
 
-use ApiBase;
-use ApiMain;
-use FormatJson;
-use Parser;
-use ParserOptions;
-use Title;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**

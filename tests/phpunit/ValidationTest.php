@@ -8,7 +8,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWikiIntegrationTestCase;
 use Parser;
 use ParserOptions;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * @covers \Kartographer\SimpleStyleParser

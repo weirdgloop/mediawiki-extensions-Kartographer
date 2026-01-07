@@ -6,7 +6,7 @@ use ApiUsageException;
 use DerivativeContext;
 use FauxRequest;
 use MediaWikiIntegrationTestCase;
-use RequestContext;
+use MediaWiki\Context\RequestContext;
 
 /**
  * @covers \Kartographer\ApiSanitizeMapData

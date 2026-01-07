@@ -9,22 +9,22 @@
 
 namespace Kartographer\Tag;
 
-use Config;
+use MediaWiki\Config\Config;
 use Exception;
-use ExtensionRegistry;
-use FormatJson;
-use Html;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Html\Html;
 use Kartographer\MediaWikiWikitextParser;
 use Kartographer\SimpleStyleParser;
 use Kartographer\State;
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
-use Parser;
-use ParserOutput;
-use PPFrame;
-use Status;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Parser\PPFrame;
+use MediaWiki\Status\Status;
 use stdClass;
-use StubUserLang;
+use MediaWiki\StubObject\StubUserLang;
 
 /**
  * Base class for all <map...> tags

@@ -3,7 +3,7 @@
 namespace Kartographer;
 
 use JsonSerializable;
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * Stores information about map tags on page in ParserOutput

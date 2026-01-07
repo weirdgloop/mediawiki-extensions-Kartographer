@@ -2,7 +2,7 @@
 
 namespace Kartographer;
 
-use Language;
+use MediaWiki\Language\Language;
 
 /**
  * Formats coordinates into human-readable strings

@@ -7,7 +7,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWikiLangTestCase;
 use ParserOptions;
 use ParserOutput;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * @group Kartographer

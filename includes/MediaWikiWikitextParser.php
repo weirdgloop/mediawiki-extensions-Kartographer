@@ -2,8 +2,8 @@
 
 namespace Kartographer;
 
-use Parser;
-use PPFrame;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\PPFrame;
 
 class MediaWikiWikitextParser implements WikitextParser {
 

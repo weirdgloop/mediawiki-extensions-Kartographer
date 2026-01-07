@@ -6,7 +6,7 @@ use ApiTestCase;
 use ApiUsageException;
 use CommentStoreComment;
 use MediaWiki\Revision\SlotRecord;
-use WikiPage;
+use MediaWiki\Page\WikiPage;
 use WikitextContent;
 
 /**

@@ -2,8 +2,8 @@
 
 namespace Kartographer\Tag;
 
-use FormatJson;
-use Html;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Html\Html;
 use Kartographer\RsStaticMap;
 
 

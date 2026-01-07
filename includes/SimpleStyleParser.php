@@ -2,12 +2,12 @@
 
 namespace Kartographer;
 
-use FormatJson;
+use MediaWiki\Json\FormatJson;
 use JsonSchema\Validator;
 use LogicException;
 use MediaWiki\MediaWikiServices;
-use Parser;
-use Status;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Status\Status;
 use stdClass;
 
 /**
