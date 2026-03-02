@@ -53,7 +53,7 @@ function Link( options ) {
 	link.mapVersion = options.mapVersion || null;
 	link.plainTiles = options.plainTiles || false;
 	link.center = options.center || 'auto';
-	link.zoom = options.zoom || 'auto';
+	link.zoom = typeof options.zoom === 'number' ? options.zoom : 'auto';
 	link.lang = options.lang || require( 'ext.kartographer.util' ).getDefaultLanguage();
 
 	link.opened = false;
