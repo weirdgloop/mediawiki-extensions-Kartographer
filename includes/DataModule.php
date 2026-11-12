@@ -8,7 +8,6 @@
 
 namespace Kartographer;
 
-use MediaWiki\ResourceLoader\ResourceLoader;
 use MediaWiki\ResourceLoader\Context as ResourceLoaderContext;
 use MediaWiki\ResourceLoader\Module as ResourceLoaderModule;
 
@@ -22,9 +21,11 @@ class DataModule extends ResourceLoaderModule {
 	 */
 	public function getScript( ResourceLoaderContext $context ) {
 		$config = $this->getConfig();
-		return ResourceLoader::makeConfigSetScript( [
-			'wgKartographerDataConfig' => $config->get( 'KartographerDataConfig' )
-		] );
+		return 'mw.config.set('
+			. $context->encodeJson( [
+				'wgKartographerDataConfig' => $config->get( 'KartographerDataConfig' )
+			] )
+			. ');';
 	}
 
 	/**
